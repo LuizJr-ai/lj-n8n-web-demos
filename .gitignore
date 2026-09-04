@@ -35,3 +35,16 @@ Desktop.ini
 *.log
 *.tmp
 tmp/
+
+# === Cérebro do projeto (LOCAL — NÃO é o produto) ===
+# O repo publicado é a VITRINE: só README + pastas demo-*/ + LICENSE.
+# Toda a estrutura de trabalho/conhecimento fica no disco, fora do repo.
+AGENTS.md
+CLAUDE.md
+PROJECT_MEMORY.md
+STATUS.md
+INTEGRATIONS.md
+SEEDnovoprojeton8nwebdemos.md
+/docs/
+/tasks/
+/templates/
