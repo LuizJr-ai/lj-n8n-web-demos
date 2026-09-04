@@ -11,10 +11,10 @@ o estado narrativo da sessão vai para `_handoff/`.
 - [ ] Conectar remote do repo privado (aguarda URL do Luiz) → 1º commit
 - [ ] Confirmar `n8n_health_check` verde antes de qualquer build
 
-## Fase 1 · Coleta do módulo 1 (Udemy)
-- [ ] Luiz confirma login na Udemy + passa link da 1ª aula do módulo 1
-- [ ] Navegar aula a aula (Claude in Chrome), abrir Transcript, gravar `docs/curso-<tema>/aula-NN.md`
-- [ ] Produzir `docs/curso-<tema>-notas.md` (ordem de build · conceitos · gotchas · checklist por demo)
+## Fase 1 · Coleta do módulo 11 (Udemy) — CONCLUÍDA
+- [x] Login Udemy confirmado + módulo 11 (aulas 72–86, Lovable+n8n)
+- [x] 15 transcrições gravadas em `docs/curso-lovable-n8n/aula-72..86.md` (gitignored)
+- [x] Notas de direcionamento em `docs/curso-lovable-n8n-notas.md`
 
 ## Fase 2 · Brainstorm + trava do Demo 1
 - [ ] Definir tema/entrada/saída do Demo 1 em `SPEC.md` §2

@@ -4,7 +4,8 @@
 
 ## Fase
 - [x] Fase 0 · Bootstrap (scaffold pronto)
-- [ ] Fase 1 · Coleta do módulo 1 (Udemy)
+- [x] Fase 1 · Coleta do módulo 11 (Udemy) — 15 transcrições + notas de direcionamento
+- [ ] Fase 2 · Brainstorm + trava do Demo 1
 
 ## Pronto
 - [x] Scaffold SDD Tier M com conteúdo real
@@ -12,8 +13,9 @@
 - [x] Decisões travadas: monorepo · tier M · repo privado · reuso de credenciais do irmão
 
 ## Bloqueante (próximo passo)
-- [ ] Luiz passa URL/remote do repo privado já criado → 1º commit
-- [ ] Luiz passa link do módulo 1 da Udemy
+- [x] Repo conectado + 1º commit + push (main)
+- [x] Coleta do módulo 11 concluída
+- [ ] Brainstorm: escolher os temas dos 3 demos (base: `docs/curso-lovable-n8n-notas.md`)
 - [ ] `n8n_health_check` verde antes do 1º build
 
 ## Aberto
