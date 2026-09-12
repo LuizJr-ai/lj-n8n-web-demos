@@ -5,6 +5,9 @@ _handoff/
 # === Segredos / ambiente (proteção dupla: pasta + name-glob) ===
 .env
 .env.*
+!.env.example
+!**/.env.example
+**/config.local.js
 *.secret
 *.key
 *.pem
@@ -18,8 +21,11 @@ docs/curso-*-notas.md
 
 # === Node / build (quando um front usar build) ===
 node_modules/
+**/.tools/
 dist/
 build/
+**/.output/
+**/.wrangler/
 .vite/
 .next/
 .turbo/
@@ -30,11 +36,21 @@ Desktop.ini
 .DS_Store
 .vscode/
 .idea/
+.claude/
 
 # === Temporários ===
 *.log
 *.tmp
 tmp/
+
+# === Evidências locais de QA (pesadas, pessoais ou ligadas a execuções reais) ===
+demo-*/tests/fixtures/*
+!demo-*/tests/fixtures/qa-*.txt
+demo-*/tests/results/
+
+# === Prompts internos para agentes externos; não são parte do produto ===
+demo-*/docs/prompts/
+demo-*/docs/RELATORIO-*
 
 # === Cérebro do projeto (LOCAL — NÃO é o produto) ===
 # O repo publicado é a VITRINE: só README + pastas demo-*/ + LICENSE.
@@ -46,5 +62,6 @@ STATUS.md
 INTEGRATIONS.md
 SEEDnovoprojeton8nwebdemos.md
 /docs/
+/tests/
 /tasks/
 /templates/

@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alanna Doces — Peça seu orçamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Epilogue:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf7f1; --card:#ffffff; --ink:#3b2a20; --muted:#8a7a6d;
+    --accent:#6b3f27; --accent-2:#b0764f; --soft:#faf3ec; --line:#ece0d2;
+    --rose:#e8b4c4; --gold:#c9a24b;
+    --font-display:'Fraunces',Georgia,serif; --font-body:'Epilogue',system-ui,sans-serif;
+    --maxw:1320px; --pad:clamp(24px,5vw,72px);
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}  /* atributo hidden vence qualquer display de classe (.field/.fgrid/.modal) */
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding-inline:var(--pad)}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:600;
+    font-family:var(--font-body);border:0;padding:14px 26px;border-radius:40px;cursor:pointer;font-size:15px;
+    box-shadow:0 10px 22px rgba(107,63,39,.26);transition:transform .2s,background .2s}
+  .btn:hover{background:var(--accent-2);transform:translateY(-2px)}
+  .btn.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--rose);box-shadow:none}
+
+  .note{background:var(--soft);border-bottom:1px solid var(--line);color:#8a5a2b;font-size:12px;padding:7px 14px;text-align:center}
+
+  /* ===== PRIMEIRA DOBRA: hero compacto + galeria inteira em 100vh ===== */
+  .fold{height:calc(100vh - 30px);min-height:560px;display:flex;flex-direction:column;
+    background:radial-gradient(ellipse at 78% 12%,rgba(232,180,196,.28) 0%,transparent 55%),
+               radial-gradient(ellipse at 15% 20%,rgba(201,162,75,.16) 0%,transparent 50%),
+               linear-gradient(180deg,#f7ead9,#fbf7f1 60%)}
+  .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(20px,4vw,56px);align-items:center;
+    padding:clamp(14px,2.2vh,28px) 0 clamp(10px,1.4vh,18px)}
+  .brand{font-weight:700;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:8px;animation:fadeUp .6s ease forwards}
+  .hero h1{font-family:var(--font-display);font-weight:600;font-size:clamp(2.1rem,4.4vw,3.5rem);
+    line-height:1.02;letter-spacing:-.01em;margin:.28em 0 .18em;color:var(--ink);
+    animation:fadeUp .6s ease .1s forwards;opacity:0}
+  .hero p{color:var(--muted);max-width:44ch;margin:0 0 1.3em;font-size:clamp(1rem,1.4vw,1.12rem);
+    animation:fadeUp .6s ease .2s forwards;opacity:0}
+  .hero .cta{animation:fadeUp .6s ease .3s forwards;opacity:0}
+  .hero-media{height:clamp(190px,27vh,300px);border-radius:24px;overflow:hidden;
+    box-shadow:0 26px 50px rgba(107,63,39,.24);animation:fadeUp .7s ease .25s forwards;opacity:0}
+  .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .gallery-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px;flex:0 0 auto}
+  .gallery-head h2{font-family:var(--font-display);font-weight:600;font-size:clamp(1.3rem,2vw,1.7rem);margin:0}
+  .gallery-head p{color:var(--muted);margin:0;font-size:.92rem}
+  .gallery{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+    gap:clamp(12px,1.2vw,18px);padding-bottom:clamp(18px,3vh,30px)}
+  .tile{position:relative;border-radius:18px;overflow:hidden;background:#eee;min-height:0;
+    box-shadow:0 8px 20px rgba(59,42,32,.13);animation:fadeUp .5s ease forwards;opacity:0}
+  .tile:nth-child(1){animation-delay:.30s}.tile:nth-child(2){animation-delay:.36s}
+  .tile:nth-child(3){animation-delay:.42s}.tile:nth-child(4){animation-delay:.48s}
+  .tile:nth-child(5){animation-delay:.54s}.tile:nth-child(6){animation-delay:.60s}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+  .tile:hover img{transform:scale(1.07)}
+  .tile::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(43,26,16,.55),transparent 42%)}
+  .tile span{position:absolute;left:14px;bottom:12px;z-index:1;color:#fff;font-weight:600;font-size:15px;
+    font-family:var(--font-display);display:flex;align-items:center;gap:7px;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+
+  /* ===== SEÇÕES ABAIXO DA DOBRA ===== */
+  section.blk{padding:clamp(48px,7vh,84px) 0}
+  .eyebrow{color:var(--accent);font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+  h2.title{font-family:var(--font-display);font-weight:600;font-size:clamp(1.6rem,2.6vw,2.2rem);margin:.2em 0 .1em}
+  .sub{color:var(--muted);margin:0 0 26px}
+
+  .chat-wrap{background:var(--soft);border:1px solid var(--line);border-radius:22px;padding:24px;max-width:620px}
+  .bubble{max-width:80%;padding:11px 15px;border-radius:16px;margin:9px 0;font-size:14.5px;
+    line-height:1.5;white-space:pre-line}
+  /* agrupa o par pergunta→resposta: a resposta "cola" na pergunta; novo turno respira mais */
+  .me + .bot{margin-top:4px}
+  .bot + .me{margin-top:16px}
+  .bot{background:#efe4d6;color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .me{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+  .chat-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+
+  .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .faq-col{display:flex;flex-direction:column;gap:14px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  summary{cursor:pointer;padding:15px 18px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--accent);font-weight:700;font-size:18px;line-height:1}
+  details[open] summary::after{content:"–"}
+  details p{margin:0;padding:0 18px 16px;color:var(--muted)}
+
+  .proof{display:flex;gap:26px;flex-wrap:wrap;align-items:center;background:var(--soft);
+    border:1px solid var(--line);border-radius:20px;padding:30px}
+  .proof .num{font-family:var(--font-display);font-size:2.1rem;font-weight:700;color:var(--gold);line-height:1}
+  .proof .quote{flex:1;min-width:240px;color:var(--ink);font-family:var(--font-display);font-size:1.15rem;font-style:italic}
+
+  footer{background:var(--ink);color:#e8d8c8;padding:30px 0;font-size:14px}
+  footer .wrap{display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+
+  .fab{position:fixed;right:20px;bottom:20px;z-index:30;padding:10px 17px;font-size:13.5px;
+    box-shadow:0 8px 20px rgba(107,63,39,.34);opacity:0;transform:translateY(20px) scale(.95);
+    pointer-events:none;transition:opacity .3s ease,transform .3s ease}
+  .fab.fab-show{opacity:1;transform:none;pointer-events:auto}
+
+  /* ===== Formulário de orçamento ===== */
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-size:13.5px;font-weight:600;color:var(--accent)}
+  .fgrid .field{margin-bottom:0}  /* evita respiro duplicado: o grid já tem gap */
+  .field span{font-weight:600}
+  .field input,.field select,.field textarea{font-family:var(--font-body);font-size:14.5px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:9px 13px;font-weight:400;width:100%}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent-2);
+    box-shadow:0 0 0 3px rgba(176,118,79,.15)}
+  .field textarea{resize:vertical}
+  .form-hint{color:var(--muted);font-size:12px;margin:12px 0 0}
+  .inline-group{display:flex;gap:8px}
+  .inline-group input{flex:1;min-width:0}
+  .inline-group select{width:auto;flex:0 0 auto}
+  .cep-status{font-size:12px;margin-top:2px;min-height:14px;color:var(--muted)}
+  .cep-status.ok{color:#33502a}.cep-status.err{color:#8a3a22}
+  .field input[type=file]{padding:9px 10px;font-size:13px;background:var(--soft);cursor:pointer}
+  .field input[type=file]::file-selector-button{font-family:var(--font-body);font-weight:600;font-size:13px;
+    color:var(--accent);background:#fff;border:1.5px solid var(--rose);border-radius:20px;padding:6px 14px;
+    margin-right:10px;cursor:pointer}
+  .btn[disabled]{opacity:.6;cursor:default;transform:none!important}
+  .qresult{margin-top:20px;border-radius:16px;padding:18px 20px;font-size:14.5px;line-height:1.5}
+  .qresult h3{font-family:var(--font-display);margin:0 0 6px;font-size:1.15rem}
+  .qresult.ok{background:#f1f6ee;border:1px solid #cfe0c3;color:#33502a}
+  .qresult.hot{background:#fbeef0;border:1px solid #e8b4c4;color:#7a2a3d}
+  .qresult.err{background:#fdeeea;border:1px solid #e5b7a6;color:#8a3a22}
+  .qresult .tierpill{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    padding:3px 10px;border-radius:20px;margin-bottom:8px}
+  .qresult.hot .tierpill{background:#e8b4c4;color:#5a1f2e}
+  .qresult.ok .tierpill{background:#cfe0c3;color:#33502a}
+  /* Ações do form: par harmônico (larguras iguais, centralizado, altura proporcional) */
+  #quote-form .chat-actions{gap:12px;margin-top:18px;flex-wrap:nowrap}
+  #quote-form .chat-actions .btn{flex:1;justify-content:center;padding:13px 20px;font-size:14.5px}
+
+  /* ===== Modal de orçamento ===== */
+  .modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+    padding:14px 20px;background:rgba(43,26,16,.62);animation:fadeIn .2s ease}
+  .modal[hidden]{display:none}  /* garante que o atributo hidden vença o display:flex */
+  .modal-card{position:relative;background:var(--card);border-radius:22px;padding:18px clamp(20px,4vw,32px);
+    width:100%;max-width:600px;max-height:96vh;overflow:auto;box-shadow:0 30px 70px rgba(43,26,16,.4);
+    animation:popIn .22s ease}
+  .modal .sub{margin-bottom:16px}
+  .modal-card > form{margin-top:2px}
+  .modal-close{position:absolute;top:14px;right:16px;width:34px;height:34px;border:0;border-radius:50%;
+    background:var(--soft);color:var(--accent);font-size:22px;line-height:1;cursor:pointer;transition:background .2s}
+  .modal-close:hover{background:var(--line)}
+  .modal .eyebrow{margin-top:4px}
+  .modal .title{margin:.1em 0 .1em}
+  body.modal-open{overflow:hidden}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .hero h1,.hero p,.hero .cta,.hero-media,.tile{opacity:1!important}
+  }
+
+  @media (max-width:900px){
+    .fold{min-height:0}
+    .hero{grid-template-columns:1fr;padding-top:28px}
+    .hero-media{max-width:360px;order:-1}
+    .gallery{grid-template-columns:1fr 1fr;grid-template-rows:none}
+    .tile{aspect-ratio:4/3}
+    .faq-grid{grid-template-columns:1fr}
+    .fgrid{grid-template-columns:1fr}
+  }
+
+  /* ===== Chat ao vivo na seção "Fale com a gente" ===== */
+  .chat-log{display:flex;flex-direction:column;max-height:360px;overflow-y:auto;padding-right:4px}
+  .bubble.pre{opacity:.6;font-style:italic}
+  /* balão-exemplo (mockup): some no 1º envio real */
+  .bubble.mock{opacity:.85}
+  /* indicador "digitando…" estilo WhatsApp — 3 pontos intermitentes */
+  .typing{display:inline-flex;gap:5px;align-items:center;padding:2px 0}
+  .typing span{width:8px;height:8px;border-radius:50%;background:var(--muted);
+    animation:typing-blink 1.3s infinite ease-in-out}
+  .typing span:nth-child(2){animation-delay:.18s}
+  .typing span:nth-child(3){animation-delay:.36s}
+  @keyframes typing-blink{0%,70%,100%{opacity:.25;transform:translateY(0)}
+    35%{opacity:1;transform:translateY(-3px)}}
+  .chat-form{display:flex;gap:8px;margin-top:14px}
+  .chat-form input{flex:1;border:1px solid var(--line);border-radius:26px;padding:12px 16px;
+    font-family:var(--font-body);font-size:14.5px;background:#fff;outline:none}
+  .chat-form input:focus{border-color:var(--accent-2)}
+  .chat-form .btn{padding:12px 22px}
+</style>
+</head>
+<body>
+<div class="note">Modelo/protótipo de portfólio (dados de exemplo). Fotos: banco livre Pexels (imagens públicas autorizadas).</div>
+
+<!-- PRIMEIRA DOBRA -->
+<div class="fold">
+  <div class="wrap hero">
+    <div class="hero-txt">
+      <div class="brand">🧁 Alanna Doces Artesanais</div>
+      <h1>Brigadeiros e doces sob encomenda, do seu jeito.</h1>
+      <p>Do aniversário infantil ao casamento — conte o que você imagina e a gente faz. Orçamento em 1 minuto, sem complicação.</p>
+      <div class="cta"><a class="btn" href="#assistente">Peça seu orçamento →</a></div>
+    </div>
+    <div class="hero-media"><img src="../assets/fotos-ref/brigadeiro-gourmet_pexels-33158039_jonathanborba.jpg" alt="Bandeja de brigadeiros artesanais"></div>
+  </div>
+
+  <div class="wrap" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="gallery-head">
+      <h2>Escolha pela ocasião</h2>
+      <p>Cada tema é personalizável — envie sua foto de referência no orçamento.</p>
+    </div>
+    <div class="gallery">
+      <div class="tile"><img src="../assets/fotos-ref/brigadeiro-infantil-colorido_pexels-36571072_caioniceas.jpg" alt="Infantil"><span>🎈 Infantil</span></div>
+      <div class="tile"><img src="../assets/fotos-ref/casamento-mesa-dourada_pexels-26774583_jonathanborba.jpg" alt="Casamento"><span>💍 Casamento</span></div>
+      <div class="tile"><img src="../assets/fotos-ref/corporativo-trufas-elegantes_pexels-6487798_mths.jpg" alt="Corporativo"><span>🏢 Corporativo</span></div>
+      <div class="tile"><img src="../assets/fotos-ref/datas-mesa-festa_pexels-19976278_karinabenfica.jpg" alt="Datas comemorativas"><span>🎉 Datas</span></div>
+      <div class="tile"><img src="../assets/fotos-ref/donuts-coloridos_pexels-4686960_cottonbro.jpg" alt="Mini cake donuts"><span>🍩 Mini cake donuts</span></div>
+      <div class="tile"><img src="../assets/fotos-ref/brigadeiro-azul-closeup_pexels-38441749_rrodriguesim.jpg" alt="Brigadeiro gourmet"><span>🍫 Brigadeiro gourmet</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSISTENTE -->
+<section class="blk" id="assistente">
+  <div class="wrap">
+    <span class="eyebrow">Atendimento</span>
+    <h2 class="title">Fale com a gente</h2>
+    <p class="sub">Tire uma dúvida rápida (sem cadastro) ou peça seu orçamento — respondemos na hora.</p>
+    <div class="chat-wrap">
+      <div id="chat-log" class="chat-log">
+        <div class="bubble bot">Oi! 😊 Sou a atendente da Doce Aurora. Tire dúvidas (preços, prazos, entrega) ou peça seu orçamento por aqui — é só escrever abaixo.</div>
+        <div class="bubble me mock">Ex.: Quero 100 do tema Mickey pra dia 20/12</div>
+      </div>
+      <form id="chat-form" class="chat-form" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="Escreva sua mensagem…" aria-label="Mensagem">
+        <button class="btn" type="submit">Enviar</button>
+      </form>
+      <div class="chat-actions">
+        <a class="btn ghost" href="#faq">💬 Dúvida rápida (FAQ)</a>
+        <button class="btn" type="button" data-open-quote>🧁 Peça seu orçamento</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="blk" id="faq" style="background:#fff">
+  <div class="wrap">
+    <span class="eyebrow">Dúvidas</span>
+    <h2 class="title">Perguntas frequentes</h2>
+    <p class="sub">Clique para abrir a resposta.</p>
+    <div class="faq-grid">
+      <div class="faq-col">
+        <details><summary>Qual o prazo mínimo de encomenda?</summary><p>Em geral pedimos alguns dias de antecedência; datas especiais e grandes volumes precisam de mais prazo. Confirmamos ao fechar o pedido.</p></details>
+        <details><summary>Precisa de sinal para reservar a data?</summary><p>Sim. O padrão é 50% para confirmar e reservar a data; o restante na retirada/envio.</p></details>
+        <details><summary>Qual o pedido mínimo?</summary><p>Fechamos por cento ou por unidade, dependendo do doce. Diga a quantidade no orçamento que já te passamos o valor.</p></details>
+      </div>
+      <div class="faq-col">
+        <details><summary>Fazem o tema que eu quiser?</summary><p>Fazemos! Personalizamos por tema e cor. Você pode enviar uma foto de referência (Pinterest/Instagram) junto ao orçamento.</p></details>
+        <details><summary>Como recebo o pedido?</summary><p>Retirada combinada ou envio — confirme a sua região no orçamento que informamos a melhor opção.</p></details>
+        <details><summary>Tem restrição alimentar/alérgenos?</summary><p>Nossos doces podem conter glúten, leite, ovos e traços de castanhas. Não é um ambiente livre de alérgenos — avise no pedido qualquer restrição.</p></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVA -->
+<section class="blk">
+  <div class="wrap">
+    <div class="proof">
+      <div><div class="num">32,3K</div><div style="color:var(--muted)">seguidores no Instagram</div></div>
+      <div class="quote">“Ficou lindo e igual à foto que mandei — todo mundo elogiou!”</div>
+      <a class="btn" href="#assistente">Quero o meu →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>🧁 Alanna Doces Artesanais · sob encomenda</span>
+    <span>📷 Instagram · 💬 WhatsApp · atende todo o Brasil</span>
+  </div>
+</footer>
+
+<a class="btn fab" href="#assistente">🧁 Peça agora</a>
+
+<!-- MODAL DE ORÇAMENTO (sob demanda) — atendimento é a prioridade; o form só abre no clique -->
+<div class="modal" id="quote-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+  <div class="modal-card" role="document">
+    <button class="modal-close" type="button" data-close-quote aria-label="Fechar">×</button>
+    <span class="eyebrow">Orçamento</span>
+    <h2 class="title" id="quote-modal-title">Peça seu orçamento</h2>
+    <p class="sub">Conte o que você imagina — respondemos rapidinho.</p>
+    <!-- Contrato R8: nome, contato, tipo, quantidade, data, tema, retirada, mensagem.
+         POST JSON ao webhook demo2-lead-doces; resposta renderizada aqui (R1/R5). -->
+    <form id="quote-form" novalidate>
+      <div class="fgrid">
+        <label class="field">
+          <span>Seu nome *</span>
+          <input name="nome" type="text" required placeholder="Como podemos te chamar?">
+        </label>
+        <label class="field">
+          <span>Contato (WhatsApp ou e-mail) *</span>
+          <input name="contato" type="text" required placeholder="(11) 90000-0000 ou nome@email.com">
+        </label>
+
+        <!-- Tipo: opções da KB + "Outros" (revela texto) -->
+        <label class="field">
+          <span>Tipo de doce *</span>
+          <select name="tipo" id="f-tipo" required>
+            <option value="">Selecione…</option>
+            <option>Docinhos / brigadeiros gourmet</option>
+            <option>Bem-casados</option>
+            <option>Bolo decorado</option>
+            <option>Mesa de doces (por tema)</option>
+            <option>Kit lembrança</option>
+            <option value="__outro">Outros…</option>
+          </select>
+        </label>
+        <label class="field" id="f-tipo-outro-wrap" hidden>
+          <span>Qual doce? *</span>
+          <input name="tipo_outro" id="f-tipo-outro" type="text" placeholder="Descreva o doce">
+        </label>
+
+        <!-- Quantidade: número + unidade padrão de mercado (un / cento / kg) -->
+        <label class="field">
+          <span>Quantidade</span>
+          <div class="inline-group">
+            <input name="qtd_num" id="f-qtd-num" type="number" min="1" inputmode="numeric" placeholder="Ex.: 300">
+            <select name="qtd_unidade" id="f-qtd-unidade" aria-label="Unidade">
+              <option value="unidades">unidade(s)</option>
+              <option value="cento">cento</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Data do evento</span>
+          <input name="data" id="f-data" type="date">
+        </label>
+
+        <!-- Tema: opções + "Outros" -->
+        <label class="field">
+          <span>Tema / ocasião</span>
+          <select name="tema" id="f-tema">
+            <option value="">Selecione…</option>
+            <option>Infantil</option>
+            <option>Aniversário</option>
+            <option>Casamento</option>
+            <option>Corporativo</option>
+            <option>Datas comemorativas</option>
+            <option value="__outro">Outros…</option>
+          </select>
+        </label>
+        <label class="field" id="f-tema-outro-wrap" hidden>
+          <span>Qual tema?</span>
+          <input name="tema_outro" id="f-tema-outro" type="text" placeholder="Descreva o tema">
+        </label>
+
+        <!-- Retirada/entrega: define se o bloco de endereço aparece -->
+        <label class="field">
+          <span>Retirada ou entrega *</span>
+          <select name="retirada_tipo" id="f-retirada" required>
+            <option value="">Selecione…</option>
+            <option value="Retirada">Retirada</option>
+            <option value="Entrega">Entrega</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Endereço (só quando "Entrega") — padrão BR: CEP → autofill Cidade/UF via ViaCEP -->
+      <div class="fgrid" id="f-endereco" hidden>
+        <label class="field">
+          <span>CEP</span>
+          <input name="cep" id="f-cep" type="text" inputmode="numeric" maxlength="9" placeholder="00000-000">
+          <small class="cep-status" id="f-cep-status"></small>
+        </label>
+        <label class="field">
+          <span>Cidade</span>
+          <input name="cidade" id="f-cidade" type="text" placeholder="Preenchido pelo CEP">
+        </label>
+        <label class="field">
+          <span>Estado (UF)</span>
+          <select name="uf" id="f-uf">
+            <option value="">—</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+            <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+            <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+            <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+            <option>SE</option><option>TO</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Mensagem</span>
+        <textarea name="mensagem" rows="3" placeholder="Conte mais — cor, sabor, referências, detalhes do evento…"></textarea>
+      </label>
+
+      <!-- Imagem de referência: saída já pronta (base64 no payload). n8n trata depois (IF texto/imagem). -->
+      <label class="field">
+        <span>Imagem de referência (opcional)</span>
+        <input name="imagem_file" id="f-imagem" type="file" accept="image/*">
+        <small class="form-hint" id="f-imagem-name">Envie uma foto do que você imagina (Pinterest, print…).</small>
+      </label>
+
+      <div class="chat-actions">
+        <button class="btn ghost" type="button" data-close-quote>Cancelar</button>
+        <button class="btn" type="submit" id="quote-submit">🧁 Enviar orçamento</button>
+      </div>
+      <p class="form-hint">Protótipo com dados de exemplo — nenhum pedido real é processado.</p>
+    </form>
+    <!-- Resposta do n8n (R1) e estado de erro (R5) -->
+    <div id="quote-result" class="qresult" hidden></div>
+  </div>
+</div>
+
+<script src="./config.local.js"></script>
+<script>
+  // Sticky CTA "scroll-aware": some na 1a dobra (o hero já tem CTA) e no rodapé;
+  // aparece só no miolo, onde nao ha outro botao competindo.
+  (function(){
+    var fab=document.querySelector('.fab'),
+        fold=document.querySelector('.fold'),
+        footer=document.querySelector('footer');
+    if(!fab || !('IntersectionObserver' in window)) return;
+    var foldVis=true, footVis=false;
+    function update(){ fab.classList.toggle('fab-show', !foldVis && !footVis); }
+    if(fold) new IntersectionObserver(function(e){ foldVis=e[0].isIntersecting; update(); },{threshold:0.12}).observe(fold);
+    if(footer) new IntersectionObserver(function(e){ footVis=e[0].isIntersecting; update(); },{threshold:0.01}).observe(footer);
+    update();
+  })();
+
+  // ===== Modal de orçamento: abre sob demanda, atendimento continua a prioridade =====
+  (function(){
+    var modal = document.getElementById('quote-modal');
+    if(!modal) return;
+    var lastFocus = null;
+    function open(){
+      lastFocus = document.activeElement;
+      modal.hidden = false; modal.setAttribute('aria-hidden','false');
+      document.body.classList.add('modal-open');
+      var first = modal.querySelector('input,select,textarea,button');
+      if(first) first.focus();
+    }
+    function close(){
+      modal.hidden = true; modal.setAttribute('aria-hidden','true');
+      document.body.classList.remove('modal-open');
+      if(lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    // Qualquer botão marcado abre; qualquer [data-close-quote] ou clique no fundo fecha.
+    document.querySelectorAll('[data-open-quote]').forEach(function(b){ b.addEventListener('click', open); });
+    modal.addEventListener('click', function(e){
+      if(e.target === modal || e.target.closest('[data-close-quote]')) close();
+    });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !modal.hidden) close(); });
+    // Exposto para o handler de sucesso do POST fechar/So manter aberto conforme o caso.
+    window.__quoteModalClose = close;
+  })();
+
+  // ===== Lógica dos campos: "Outros", endereço, CEP autofill, data mín, arquivo =====
+  (function(){
+    var form = document.getElementById('quote-form');
+    if(!form) return;
+
+    // "Outros…" revela um campo de texto (tipo e tema)
+    function bindOutro(selId, wrapId){
+      var sel = document.getElementById(selId), wrap = document.getElementById(wrapId);
+      if(!sel || !wrap) return;
+      sel.addEventListener('change', function(){
+        var on = sel.value === '__outro'; wrap.hidden = !on;
+        var inp = wrap.querySelector('input');
+        if(on){ inp.focus(); } else { inp.value = ''; }
+      });
+    }
+    bindOutro('f-tipo','f-tipo-outro-wrap');
+    bindOutro('f-tema','f-tema-outro-wrap');
+
+    // Retirada/entrega → bloco de endereço só em "Entrega"
+    var ret = document.getElementById('f-retirada'), end = document.getElementById('f-endereco');
+    if(ret && end) ret.addEventListener('change', function(){ end.hidden = ret.value !== 'Entrega'; });
+
+    // Data mínima = hoje (sem evento no passado)
+    var dt = document.getElementById('f-data');
+    if(dt) dt.min = new Date().toISOString().slice(0,10);
+
+    // CEP: máscara + autofill Cidade/UF via ViaCEP (padrão BR; API pública, sem chave)
+    var cep = document.getElementById('f-cep'), cidade = document.getElementById('f-cidade'),
+        uf = document.getElementById('f-uf'), status = document.getElementById('f-cep-status');
+    if(cep){
+      cep.addEventListener('input', function(){
+        var d = cep.value.replace(/\D/g,'').slice(0,8);
+        cep.value = d.length > 5 ? d.slice(0,5)+'-'+d.slice(5) : d;
+        if(d.length === 8){
+          status.textContent = 'Buscando endereço…'; status.className = 'cep-status';
+          fetch('https://viacep.com.br/ws/'+d+'/json/')
+            .then(function(r){ return r.json(); })
+            .then(function(j){
+              if(j.erro){ status.textContent = 'CEP não encontrado'; status.className='cep-status err'; return; }
+              cidade.value = j.localidade || ''; uf.value = j.uf || '';
+              status.textContent = '✓ '+(j.localidade||'')+'/'+(j.uf||''); status.className='cep-status ok';
+            })
+            .catch(function(){ status.textContent='Não deu para buscar — preencha manualmente'; status.className='cep-status err'; });
+        }
+      });
+    }
+
+    // Nome do arquivo de imagem escolhido
+    var img = document.getElementById('f-imagem'), imgName = document.getElementById('f-imagem-name');
+    if(img) img.addEventListener('change', function(){
+      imgName.textContent = (img.files && img.files[0]) ? '📎 '+img.files[0].name
+        : 'Envie uma foto do que você imagina (Pinterest, print…).';
+    });
+  })();
+
+  // ===== Orçamento → webhook do motor n8n (contrato R8 + imagem opcional) =====
+  (function(){
+    // Endpoint do motor de qualificação (Demo 2). Path fixo demo2-lead-doces.
+    var WEBHOOK_URL = window.DEMO2_CONFIG?.WEBHOOK_URL || '';
+    var form = document.getElementById('quote-form');
+    var result = document.getElementById('quote-result');
+    var btn = document.getElementById('quote-submit');
+    if(!form) return;
+
+    function val(n){ var el = form.elements[n]; return el ? String(el.value||'').trim() : ''; }
+
+    // Renderiza o retorno do n8n (R1) e o estado de erro (R5). Nunca tela branca.
+    function render(state, payload){
+      result.hidden = false; result.className = 'qresult ' + state;
+      if(state === 'err'){
+        result.innerHTML = '<h3>Não deu para enviar agora 😕</h3>' +
+          '<p>Tente novamente em instantes ou nos chame pelo Instagram/WhatsApp.</p>';
+        return;
+      }
+      var tier = (payload && (payload.tier || payload.classificacao)) || '';
+      // O nó "Respond to Website" devolve {status,id,tier,score,message}. Ler message primeiro.
+      var resumo = (payload && (payload.message || payload.resumo || payload.mensagem)) || '';
+      var isHot = String(tier).toLowerCase() === 'hot';
+      result.className = 'qresult ' + (isHot ? 'hot' : 'ok');
+      var pill = tier ? '<span class="tierpill">'+(isHot ? '⭐ prioridade' : 'recebido')+'</span><br>' : '';
+      result.innerHTML = pill +
+        '<h3>'+(isHot ? 'Recebemos e já priorizamos seu pedido! 🎉' : 'Orçamento recebido! 🧁')+'</h3>' +
+        '<p>'+(resumo ? resumo : 'Vamos analisar e retornar em breve com os detalhes.')+'</p>';
+    }
+
+    // Lê a imagem como base64 (data URL) — saída já pronta; o n8n trata depois (IF texto/imagem).
+    function readImage(){
+      return new Promise(function(resolve){
+        var f = form.elements['imagem_file'], file = f && f.files && f.files[0];
+        if(!file) return resolve(null);
+        var reader = new FileReader();
+        reader.onload = function(){ resolve({ nome:file.name, tipo:file.type, dataUrl:reader.result }); };
+        reader.onerror = function(){ resolve(null); };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Monta o contrato R8 combinando os campos compostos (unidade, endereço, Outros).
+    function buildPayload(imagem){
+      var tipo = val('tipo') === '__outro' ? val('tipo_outro') : val('tipo');
+      var tema = val('tema') === '__outro' ? val('tema_outro') : val('tema');
+      var qtdNum = val('qtd_num');
+      var quantidade = qtdNum ? (qtdNum + ' ' + val('qtd_unidade')) : '';
+      var retirada = val('retirada_tipo');
+      if(retirada === 'Entrega'){
+        var loc = [val('cidade'), val('uf')].filter(Boolean).join('/'), cepv = val('cep');
+        retirada = 'Entrega' + (loc ? ' — '+loc : '') + (cepv ? ' (CEP '+cepv+')' : '');
+      }
+      return {
+        nome:val('nome'), contato:val('contato'), tipo:tipo, quantidade:quantidade,
+        data:val('data'), tema:tema, retirada:retirada, mensagem:val('mensagem'),
+        imagem:imagem // {nome,tipo,dataUrl} ou null
+      };
+    }
+
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var tipo = val('tipo') === '__outro' ? val('tipo_outro') : val('tipo');
+      if(!val('nome') || !val('contato') || !tipo){
+        render('err', null);
+        result.querySelector('h3').textContent = 'Preencha nome, contato e tipo de doce 🙂';
+        var p = result.querySelector('p'); if(p) p.remove();
+        return;
+      }
+      btn.disabled = true; var label = btn.textContent; btn.textContent = 'Enviando…';
+      readImage().then(function(imagem){
+        return fetch(WEBHOOK_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(buildPayload(imagem))
+        });
+      })
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json().catch(function(){return {};}); })
+      .then(function(payload){
+        render('ok', payload); form.reset();
+        ['f-endereco','f-tipo-outro-wrap','f-tema-outro-wrap'].forEach(function(id){
+          var e = document.getElementById(id); if(e) e.hidden = true;
+        });
+      })
+      .catch(function(){ render('err', null); })
+      .finally(function(){ btn.disabled = false; btn.textContent = label; });
+    });
+  })();
+
+  // ===== Chat ao vivo (seção "Fale com a gente") → agente conversacional + RAG =====
+  (function(){
+    var CHAT_URL = window.DEMO2_CONFIG?.CHAT_URL || '';
+    var log = document.getElementById('chat-log');
+    var form = document.getElementById('chat-form');
+    var input = document.getElementById('chat-input');
+    if(!log || !form || !input) return;
+
+    // sessionId estável por visitante (a memória do agente é por sessão).
+    var sid = '';
+    try { sid = localStorage.getItem('doce_chat_sid') || ''; } catch(e){}
+    if(!sid){ sid = 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+      try { localStorage.setItem('doce_chat_sid', sid); } catch(e){} }
+
+    // Acrescenta um balão no estilo já existente (.bubble .bot / .me).
+    function add(role, text){
+      var b = document.createElement('div');
+      b.className = 'bubble ' + (role === 'me' ? 'me' : 'bot');
+      b.textContent = text;
+      log.appendChild(b); log.scrollTop = log.scrollHeight;
+      return b;
+    }
+
+    // Balão "digitando…" com 3 pontos animados (estilo WhatsApp).
+    function addTyping(){
+      var b = document.createElement('div');
+      b.className = 'bubble bot';
+      b.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
+      log.appendChild(b); log.scrollTop = log.scrollHeight;
+      return b;
+    }
+
+    // Divide a resposta em blocos legíveis: primeiro por parágrafos (linha em branco),
+    // depois quebrando parágrafos longos (>220 chars) em frases.
+    function splitBlocks(text){
+      var parts = String(text||'').split(/\n\s*\n/).map(function(s){return s.trim();}).filter(Boolean);
+      var blocks = [];
+      parts.forEach(function(p){
+        if(p.length <= 220){ blocks.push(p); return; }
+        var sentences = p.match(/[^.!?…]+[.!?…]*\s*/g) || [p];
+        var buf = '';
+        sentences.forEach(function(s){
+          if((buf + s).length > 220 && buf){ blocks.push(buf.trim()); buf = s; }
+          else { buf += s; }
+        });
+        if(buf.trim()){ blocks.push(buf.trim()); }
+      });
+      return blocks.length ? blocks : [String(text||'')];
+    }
+
+    // ===== Ritmo humano de conversa (pesquisa validada 2 camadas) =====
+    // Fontes: taxa de digitação 40–52 wpm e leitura ~238 wpm (Brysbaert 2019, meta de
+    // 190 estudos); técnica de devs sêniores de AI = "token streaming" (Vercel AI SDK
+    // streamText/useChat): o texto NÃO é despejado pronto — surge PROGRESSIVAMENTE no
+    // balão (efeito ChatGPT). Simular os ~2 min de digitação real é inviável; o que
+    // torna realista é (1) streaming progressivo + (2) pausa de LEITURA-COM-
+    // PROCESSAMENTO entre blocos (compreender custa mais que ler cru).
+    // Números abaixo são tunáveis — ajustar após o teste real do Luiz.
+    var FIRST_TOKEN_MS = 600;   // "digitando…" antes do bloco começar a surgir (gap do 1º token)
+    var REVEAL_CPS     = 45;    // caracteres/seg revelados no streaming (~450 wpm de exibição)
+    var PROCESS_WPM    = 180;   // ritmo de leitura+compreensão p/ a pausa entre blocos (< leitura crua)
+    var PROCESS_MIN    = 1000;  // pausa mínima entre blocos (ms)
+    var PROCESS_MAX    = 5000;  // pausa máxima entre blocos (ms)
+
+    function wordCount(t){ return String(t||'').trim().split(/\s+/).filter(Boolean).length; }
+
+    // Pausa DEPOIS de um bloco, antes do próximo "digitando…": pareada ao tamanho do
+    // bloco recém-lido (leitura + processamento), com piso/teto humanos.
+    function processPause(text){
+      return Math.max(PROCESS_MIN, Math.min(wordCount(text) / PROCESS_WPM * 60000, PROCESS_MAX));
+    }
+
+    // Revela o texto progressivamente dentro do balão (streaming). Chama done() no fim.
+    function streamInto(bubble, text, done){
+      var i = 0, step = Math.max(1, Math.round(REVEAL_CPS / 20)); // ~20 quadros/seg
+      var timer = setInterval(function(){
+        i = Math.min(text.length, i + step);
+        bubble.textContent = text.slice(0, i);
+        log.scrollTop = log.scrollHeight;
+        if(i >= text.length){ clearInterval(timer); if(done) done(); }
+      }, 50);
+    }
+
+    // Entrega a resposta bloco a bloco: "digitando…" (1º token) → streaming do texto →
+    // pausa de leitura/processamento → próximo bloco.
+    function streamReply(blocks, i){
+      i = i || 0;
+      if(i >= blocks.length){ input.disabled=false; input.focus(); log.scrollTop = log.scrollHeight; return; }
+      var typing = addTyping();
+      setTimeout(function(){
+        if(typing.parentNode){ typing.parentNode.removeChild(typing); }
+        var bubble = add('bot', '');            // balão vazio, preenchido pelo streaming
+        streamInto(bubble, blocks[i], function(){
+          setTimeout(function(){ streamReply(blocks, i + 1); }, processPause(blocks[i]));
+        });
+      }, FIRST_TOKEN_MS);
+    }
+
+    var mocksCleared = false;
+
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var msg = String(input.value||'').trim();
+      if(!msg) return;
+      // 1º envio real: remove os balões-exemplo (mockup) para não poluir a conversa.
+      if(!mocksCleared){
+        var mocks = log.querySelectorAll('.mock');
+        for(var i=0;i<mocks.length;i++){ mocks[i].parentNode.removeChild(mocks[i]); }
+        mocksCleared = true;
+      }
+      add('me', msg); input.value=''; input.disabled=true;
+      var typing = addTyping();
+      fetch(CHAT_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ sessionId: sid, message: msg })
+      })
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json().catch(function(){return {};}); })
+      .then(function(p){
+        if(typing.parentNode){ typing.parentNode.removeChild(typing); }
+        var reply = (p && p.reply) ? p.reply : 'Desculpe, não consegui responder agora.';
+        streamReply(splitBlocks(reply), 0);
+      })
+      .catch(function(){
+        if(typing.parentNode){ typing.parentNode.removeChild(typing); }
+        add('bot', 'Tive um problema de conexão. Tente de novo em instantes 🙏');
+        input.disabled=false; input.focus(); log.scrollTop = log.scrollHeight;
+      });
+    });
+  })();
+</script>
+</body>
+</html>

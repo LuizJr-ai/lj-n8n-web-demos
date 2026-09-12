@@ -4,37 +4,45 @@
 ![Status](https://img.shields.io/badge/status-in%20progress-orange)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow)
 
-**n8n as the brain, a web UI for the end user.** A portfolio of **3 demos** where an n8n workflow
-handles the automation and AI, and a lightweight **web interface** lets the end user interact with
-the agent in real time and see the response — not just a flow running behind the scenes.
+**n8n as the brain, a web UI for the end user.** Three portfolio demos combining AI automation
+with interfaces that people can actually use.
 
-> 🚧 **Work in progress.** The three demos are being defined and built one at a time. This README
-> fills in as each demo ships, mirroring the quality bar of the sibling repo
-> [`n8n_Automation_Demos`](https://github.com/) (few nodes, clear purpose, fully sanitized).
+## Demos
 
-## 📦 Planned demos
-| Demo | What it will do | Status |
-|------|-----------------|--------|
-| Demo 1 — _to be defined_ | n8n webhook + web UI the user talks to | ⏳ planning |
-| Demo 2 — _to be defined_ | — | ⏳ planning |
-| Demo 3 — _to be defined_ | — | ⏳ planning |
+| Demo | Outcome | Status |
+|---|---|---|
+| [1 — Audio meeting summary](demo-1-audio-summary/) | Records meetings or transcribes audio; returns summary, decisions, actions and a recommendation | 🟡 Final semantic QA |
+| [2 — Custom-order sweets lead qualifier](demo-2-lead-qualify-doces/) | Conversational storefront, RAG assistance and AI lead routing | 🟡 Refinement |
+| 3 — FAQ/RAG assistant | Grounded answers from a controlled knowledge base | ⚪ Planned |
 
-## 🧭 Design principles
-- **n8n is the brain, the UI is the deliverable** — each demo ships a flow *and* an interface the end user operates.
-- **Few nodes, clear purpose** — over node soup.
-- **No secrets committed** — credentials ship as empty references + placeholders.
-- **Real input first** — every field mapped against the actual payload, never an assumed shape.
-- **Inactive until proven** — each workflow ships after at least one clean end-to-end run.
+## Architecture
 
-## 📂 Repository layout
-```
-demo-1-<topic>/   workflow.json · web/ · README.md · demo.gif
-demo-2-<topic>/   workflow.json · web/ · README.md · demo.gif
-demo-3-<topic>/   workflow.json · web/ · README.md · demo.gif
+```text
+Web interface → n8n webhook → transcription / AI / database → structured response → interface
 ```
 
-## 📄 License
-MIT — see [`LICENSE`](LICENSE).
+Each demo keeps its own UI, sanitized workflow export, documentation and visual evidence. Runtime
+URLs and credentials stay outside Git in local environment files.
 
-## 👤 Author
-Built by **Luiz Jr** as part of a hands-on portfolio in AI orchestration & n8n automation.
+## Repository layout
+
+```text
+demo-N-topic/
+├── workflow.json     # sanitized n8n export
+├── ui/               # end-user interface
+├── README.md          # problem, architecture and setup
+└── assets/            # screenshots, diagrams and demo media
+```
+
+## Principles
+
+- Real input before field mapping.
+- No secrets, personal hosts or credential IDs committed.
+- Offline QA plus a clean end-to-end execution before a demo is marked complete.
+- n8n owns orchestration; the UI remains a replaceable client.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+Built by **Luiz Jr** as a hands-on portfolio in AI orchestration and n8n automation.

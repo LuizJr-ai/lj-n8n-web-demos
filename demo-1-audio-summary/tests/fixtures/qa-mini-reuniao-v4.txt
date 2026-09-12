@@ -1,0 +1,13 @@
+Bom dia, equipe. Hoje é sábado, dia doze de setembro de dois mil e vinte e seis. Esta é a reunião de acompanhamento do lançamento do novo portal.
+
+A engenharia concluiu cerca de oitenta por cento das funcionalidades. A integração de pagamento e o painel de relatórios ainda estão pendentes. O principal risco é não termos estabilidade suficiente antes do início da campanha de marketing.
+
+Ficou decidido congelar novas funcionalidades no dia vinte e cinco. Também decidimos dedicar a última semana exclusivamente a testes e correção de erros.
+
+Precisamos concluir a integração de pagamento até sexta-feira, dia vinte. O responsável ainda não foi definido. Depois, o painel de relatórios deverá ser concluído uma semana após a integração de pagamento, também sem responsável definido.
+
+Carlos vai corrigir a lentidão no login antes do congelamento de funcionalidades. Maria vai finalizar o primeiro rascunho dos documentos de integração de novos clientes até o dia vinte e dois. A equipe de Suporte vai revisar esses documentos depois que Maria concluir o primeiro rascunho.
+
+Eu vou preparar uma proposta para contratar apoio adicional em testes até quarta-feira. Também vou enviar as notas desta reunião para todos, sem prazo definido. Por fim, vou agendar a reunião de acompanhamento para a próxima segunda-feira.
+
+Encerramos sabendo que a integração de pagamento condiciona o painel de relatórios e que ambos afetam a estabilidade necessária para iniciar a campanha.

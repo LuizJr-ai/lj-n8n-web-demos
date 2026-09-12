@@ -1,0 +1,108 @@
+<!-- Purpose: diagrama logico dos nodes da Demo 2 (workflow de qualificação) apos S10 — Fluxo A (por lead, hot imediato) + Fluxo B (digest morno/frio 30min). Padrao docs/references/padrao-diagramas-visuais.md -->
+<svg viewBox="0 0 1080 860" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+  <rect x="0" y="0" width="1080" height="860" fill="#fbf7f1"/>
+  <text x="30" y="40" font-size="19" font-weight="700" fill="#3b2a20">Demo 2 · Motor de qualificação — 2 fluxos de entrega</text>
+  <text x="30" y="60" font-size="12" fill="#8a7a6d">workflow de qualificação · medido ao vivo · 2026-09-11 · ✓ = provado · ⏳ = falta 1 run manual</text>
+
+  <!-- ===== FLUXO A ===== -->
+  <text x="30" y="90" font-size="14" font-weight="700" fill="#6b3f27">FLUXO A · por lead (síncrono) — hot vai imediato, lead a lead</text>
+
+  <!-- Lane 1 Intake -->
+  <rect x="30" y="100" width="250" height="300" rx="12" fill="#faf3ec" stroke="#6b3f27" stroke-width="1.5"/>
+  <text x="46" y="124" font-size="13" font-weight="700" fill="#6b3f27">📥 1 · Entrada</text>
+  <rect x="48" y="138" width="214" height="52" rx="8" fill="#fff" stroke="#6b3f27" stroke-width="1.5"/>
+  <text x="60" y="160" font-size="12" font-weight="700" fill="#3b2a20">✓ Webhook (POST)</text>
+  <text x="60" y="177" font-size="10.5" fill="#8a7a6d">recebe o formulário</text>
+  <rect x="48" y="206" width="214" height="66" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.8"/>
+  <text x="60" y="228" font-size="12" font-weight="700" fill="#2f6b2f">✓ Normalize + tem_imagem</text>
+  <text x="60" y="245" font-size="10.5" fill="#8a7a6d">arruma campos e deriva a flag</text>
+  <text x="60" y="261" font-size="10.5" fill="#2f6b2f">tem_imagem = !!body.imagem (base64 fora)</text>
+
+  <!-- Lane 2 AI -->
+  <rect x="300" y="100" width="250" height="300" rx="12" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.5"/>
+  <text x="316" y="124" font-size="13" font-weight="700" fill="#5a3f7a">🤖 2 · IA + blindagem</text>
+  <rect x="318" y="138" width="214" height="66" rx="8" fill="#fff" stroke="#7a5a9f" stroke-width="1.5"/>
+  <text x="330" y="160" font-size="12" font-weight="700" fill="#3b2a20">✓ Qualify Lead (AI)</text>
+  <text x="330" y="177" font-size="10.5" fill="#8a7a6d">nota + tier (hot/warm/cold)</text>
+  <text x="330" y="193" font-size="10" fill="#7a5a9f">↳ Groq · Lead Score Schema</text>
+  <rect x="318" y="220" width="214" height="52" rx="8" fill="#fff" stroke="#7a5a9f" stroke-width="1.5"/>
+  <text x="330" y="242" font-size="12" font-weight="700" fill="#3b2a20">✓ Validate &amp; Guard</text>
+  <text x="330" y="259" font-size="10.5" fill="#8a7a6d">blinda a saída da IA</text>
+
+  <!-- Lane 3 persist/route -->
+  <rect x="570" y="100" width="480" height="300" rx="12" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.5"/>
+  <text x="586" y="124" font-size="13" font-weight="700" fill="#2f6b2f">💾 3 · Grava, responde, roteia</text>
+  <rect x="588" y="138" width="214" height="52" rx="8" fill="#fff" stroke="#c9a24b" stroke-width="1.8"/>
+  <text x="600" y="160" font-size="12" font-weight="700" fill="#3b2a20">✓ Save Neon (+tem_imagem)</text>
+  <text x="600" y="177" font-size="10.5" fill="#8a7a6d">grava lead; morno/frio = pendente</text>
+  <rect x="588" y="206" width="214" height="46" rx="8" fill="#fff" stroke="#4a8f4a" stroke-width="1.5"/>
+  <text x="600" y="227" font-size="12" font-weight="700" fill="#3b2a20">✓ Attach ID → Respond UI</text>
+  <text x="600" y="243" font-size="10.5" fill="#8a7a6d">devolve id + confirmação</text>
+  <rect x="588" y="268" width="214" height="58" rx="8" fill="#fff" stroke="#4a8f4a" stroke-width="1.5"/>
+  <text x="600" y="290" font-size="12" font-weight="700" fill="#3b2a20">✓ Route: Hot vs Rest</text>
+  <text x="600" y="307" font-size="10.5" fill="#8a7a6d">hot → alerta; morno/frio → espera</text>
+  <text x="600" y="321" font-size="10.5" fill="#8a7a6d">o digest (Fluxo B)</text>
+
+  <rect x="824" y="138" width="210" height="72" rx="8" fill="#fff" stroke="#4a8f4a" stroke-width="1.8"/>
+  <text x="836" y="160" font-size="12" font-weight="700" fill="#3b2a20">✓ Alert Baker (Telegram)</text>
+  <text x="836" y="178" font-size="10.5" fill="#8a7a6d">HOT: mensagem individual,</text>
+  <text x="836" y="192" font-size="10.5" fill="#8a7a6d">layout único (📎 se tem foto)</text>
+  <rect x="824" y="226" width="210" height="58" rx="8" fill="#fff" stroke="#c9a24b" stroke-width="1.8"/>
+  <text x="836" y="248" font-size="12" font-weight="700" fill="#3b2a20">✓ Mark Hot Notified</text>
+  <text x="836" y="265" font-size="10.5" fill="#8a7a6d">notified_at = now (sai do digest)</text>
+
+  <!-- ===== FLUXO B ===== -->
+  <text x="30" y="470" font-size="14" font-weight="700" fill="#5a3f7a">FLUXO B · digest morno/frio (Schedule a cada 30 min · ajustável)</text>
+  <rect x="30" y="484" width="1020" height="150" rx="12" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.5"/>
+
+  <rect x="48" y="520" width="180" height="66" rx="8" fill="#fff" stroke="#7a5a9f" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="60" y="544" font-size="12" font-weight="700" fill="#5a3f7a">⏳ Every 30 min</text>
+  <text x="60" y="561" font-size="10.5" fill="#8a7a6d">Schedule Trigger</text>
+  <text x="60" y="576" font-size="10" fill="#8a7a6d">(roda manual p/ provar)</text>
+
+  <rect x="252" y="520" width="180" height="66" rx="8" fill="#fff" stroke="#c9a24b" stroke-width="1.8"/>
+  <text x="264" y="544" font-size="12" font-weight="700" fill="#3b2a20">✓ Select Pending</text>
+  <text x="264" y="561" font-size="10.5" fill="#8a7a6d">warm/cold + notified NULL</text>
+  <text x="264" y="576" font-size="10" fill="#8a7a6d">ordena morno→frio, score, data</text>
+
+  <rect x="456" y="520" width="180" height="66" rx="8" fill="#fff" stroke="#7a5a9f" stroke-width="1.5"/>
+  <text x="468" y="544" font-size="12" font-weight="700" fill="#3b2a20">✓ Build Digest Table</text>
+  <text x="468" y="561" font-size="10.5" fill="#8a7a6d">1 tabela; vazio→não envia</text>
+  <text x="468" y="576" font-size="10" fill="#2f6b2f">QA offline 12/12 ✓</text>
+
+  <rect x="660" y="520" width="180" height="66" rx="8" fill="#fff" stroke="#4a8f4a" stroke-width="1.8"/>
+  <text x="672" y="544" font-size="12" font-weight="700" fill="#3b2a20">⏳ Send Digest (TG)</text>
+  <text x="672" y="561" font-size="10.5" fill="#8a7a6d">uma mensagem ao dono</text>
+
+  <rect x="864" y="520" width="170" height="66" rx="8" fill="#fff" stroke="#c9a24b" stroke-width="1.8"/>
+  <text x="876" y="544" font-size="12" font-weight="700" fill="#3b2a20">✓ Mark Digest</text>
+  <text x="876" y="561" font-size="10.5" fill="#8a7a6d">notified_at = now</text>
+  <text x="876" y="576" font-size="10" fill="#8a7a6d">id = ANY($1::bigint[])</text>
+
+  <!-- arrows -->
+  <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#6b3f27"/></marker></defs>
+  <g stroke="#6b3f27" stroke-width="1.5" fill="none" marker-end="url(#ar)">
+    <line x1="155" y1="190" x2="155" y2="204"/>
+    <line x1="262" y1="239" x2="316" y2="171"/>
+    <line x1="425" y1="171" x2="425" y2="218"/>
+    <line x1="532" y1="246" x2="586" y2="164"/>
+    <line x1="695" y1="190" x2="695" y2="204"/>
+    <line x1="695" y1="252" x2="695" y2="268"/>
+    <path d="M802 290 C 815 290, 820 174, 822 174"/>
+    <line x1="929" y1="210" x2="929" y2="224"/>
+  </g>
+  <g stroke="#7a5a9f" stroke-width="1.5" fill="none" marker-end="url(#ar)">
+    <line x1="228" y1="553" x2="250" y2="553"/>
+    <line x1="432" y1="553" x2="454" y2="553"/>
+    <line x1="636" y1="553" x2="658" y2="553"/>
+    <line x1="840" y1="553" x2="862" y2="553"/>
+  </g>
+
+  <text x="30" y="700" font-size="12" font-weight="700" fill="#6b3f27">O que mudou nesta sessão:</text>
+  <text x="30" y="720" font-size="11" fill="#3b2a20">• Normalize deriva tem_imagem · Save Neon grava a flag · colunas novas: notified_at, tem_imagem</text>
+  <text x="30" y="738" font-size="11" fill="#3b2a20">• Hot: mensagem individual imediata + marca notificado (fora do digest)</text>
+  <text x="30" y="756" font-size="11" fill="#3b2a20">• Morno/frio: acumulam pendentes → Fluxo B agrupa numa tabela a cada 30 min e marca enviados</text>
+
+  <text x="30" y="800" font-size="11.5" fill="#8a7a6d">Analogia: hot é o cliente que entra querendo fechar — você atende na hora. Morno/frio é a lista</text>
+  <text x="30" y="816" font-size="11.5" fill="#8a7a6d">de recados que você revisa de meia em meia hora, do mais quente pro mais frio, sem perder ninguém.</text>
+</svg>

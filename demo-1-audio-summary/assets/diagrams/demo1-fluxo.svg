@@ -1,0 +1,108 @@
+<!-- Purpose: diagrama duravel do Demo 1 aprovado (sessao 04). Dois modos de entrada: reuniao ao vivo (->resumo+acoes) e upload de arquivo (->transcricao integral). Switch por 'mode' apos o Whisper. Fonte de verdade visual antes do build. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 940" font-family="Segoe UI, system-ui, sans-serif">
+  <rect width="980" height="940" fill="#0f172a"/>
+  <text x="490" y="34" fill="#e2e8f0" font-size="22" font-weight="700" text-anchor="middle">Demo 1 · Áudio → Resumo (reunião) ou Transcrição (arquivo)</text>
+  <text x="490" y="56" fill="#94a3b8" font-size="13" text-anchor="middle">Um só webhook; o campo "mode" divide o fluxo após a transcrição. Arquitetura A.</text>
+
+  <defs>
+    <marker id="arw" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- FRONT com 2 areas -->
+  <rect x="40" y="90" width="330" height="230" rx="14" fill="#0c2a45" stroke="#38bdf8" stroke-width="2"/>
+  <text x="58" y="114" fill="#7dd3fc" font-size="13" font-weight="700">🖥️ APP (front) — 2 modos de entrada</text>
+
+  <rect x="58" y="126" width="294" height="86" rx="10" fill="#0f3556" stroke="#38bdf8" stroke-width="1"/>
+  <text x="72" y="147" fill="#e2e8f0" font-size="13" font-weight="600">A) Gravar reunião (ao vivo)</text>
+  <text x="72" y="167" fill="#94a3b8" font-size="11">▶ Iniciar / ⏹ Finalizar · microfone</text>
+  <text x="72" y="184" fill="#94a3b8" font-size="11">MediaRecorder (webm) · guarda cópia local</text>
+  <text x="72" y="203" fill="#7dd3fc" font-size="11">envia mode = "reuniao"</text>
+
+  <rect x="58" y="218" width="294" height="90" rx="10" fill="#0f3556" stroke="#38bdf8" stroke-width="1"/>
+  <text x="72" y="239" fill="#e2e8f0" font-size="13" font-weight="600">B) Anexar arquivo de áudio</text>
+  <text x="72" y="259" fill="#94a3b8" font-size="11">clicar ou arrastar p/ a caixa (drag &amp; drop)</text>
+  <text x="72" y="277" fill="#94a3b8" font-size="11">campo de texto exibe a transcrição</text>
+  <text x="72" y="296" fill="#7dd3fc" font-size="11">envia mode = "arquivo"</text>
+
+  <line x1="370" y1="205" x2="440" y2="205" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arw)"/>
+  <text x="374" y="195" fill="#7dd3fc" font-size="11">POST áudio + mode</text>
+
+  <!-- n8n -->
+  <rect x="440" y="82" width="500" height="470" rx="14" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <text x="458" y="106" fill="#64748b" font-size="13" font-weight="700">n8n (o cérebro) — começo compartilhado</text>
+
+  <rect x="470" y="118" width="230" height="46" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="488" y="139" fill="#e2e8f0" font-size="14" font-weight="600">1 · Webhook</text>
+  <text x="488" y="156" fill="#94a3b8" font-size="11">recebe áudio + mode</text>
+  <line x1="585" y1="164" x2="585" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+
+  <rect x="470" y="184" width="230" height="46" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="488" y="205" fill="#e2e8f0" font-size="14" font-weight="600">2 · Validação (IF)</text>
+  <text x="488" y="222" fill="#94a3b8" font-size="11">tem áudio? ≤25MB? formato ok?</text>
+  <line x1="700" y1="207" x2="760" y2="207" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <text x="704" y="199" fill="#f87171" font-size="10">inválido → erro (R5)</text>
+  <line x1="585" y1="230" x2="585" y2="248" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+
+  <rect x="470" y="250" width="230" height="48" rx="10" fill="#173a2e" stroke="#10b981" stroke-width="1.5"/>
+  <text x="488" y="271" fill="#e2e8f0" font-size="14" font-weight="600">3 · Groq Whisper</text>
+  <text x="488" y="289" fill="#94a3b8" font-size="11">áudio → texto (comum aos 2 modos)</text>
+  <line x1="585" y1="298" x2="585" y2="316" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+
+  <!-- SWITCH -->
+  <rect x="470" y="318" width="230" height="46" rx="10" fill="#3a2f10" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="488" y="339" fill="#fde68a" font-size="14" font-weight="600">⌥ Switch (mode)</text>
+  <text x="488" y="356" fill="#fbbf24" font-size="11">reuniao ↓esq · arquivo ↓dir</text>
+
+  <!-- branch left: reuniao -->
+  <line x1="520" y1="364" x2="520" y2="388" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <text x="452" y="380" fill="#94a3b8" font-size="10">reuniao</text>
+  <rect x="452" y="390" width="200" height="44" rx="10" fill="#173a2e" stroke="#10b981" stroke-width="1.5"/>
+  <text x="468" y="417" fill="#e2e8f0" font-size="13" font-weight="600">4 · LLM (resumo + ações)</text>
+  <line x1="552" y1="434" x2="552" y2="452" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="452" y="454" width="200" height="44" rx="10" fill="#2e2440" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="468" y="481" fill="#e2e8f0" font-size="13" font-weight="600">5 · Postgres (Neon) → id</text>
+  <line x1="552" y1="498" x2="552" y2="516" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="452" y="518" width="200" height="26" rx="8" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="468" y="536" fill="#e2e8f0" font-size="12" font-weight="600">6 · Respond: resumo+ações+id</text>
+
+  <!-- branch right: arquivo -->
+  <line x1="660" y1="364" x2="660" y2="452" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <text x="668" y="410" fill="#94a3b8" font-size="10">arquivo</text>
+  <rect x="700" y="454" width="220" height="44" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="716" y="475" fill="#e2e8f0" font-size="13" font-weight="600">6b · Respond (direto)</text>
+  <text x="716" y="491" fill="#94a3b8" font-size="11">transcrição na íntegra (sem LLM)</text>
+
+  <!-- returns -->
+  <path d="M452,531 L410,531 L410,205 L370,205" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arw)"/>
+  <path d="M700,476 L688,476 L688,600 L390,600 L390,262 L370,262" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arw)"/>
+  <text x="44" y="360" fill="#38bdf8" font-size="11">reunião → resumo na tela (guarda id)</text>
+  <text x="44" y="620" fill="#38bdf8" font-size="11">arquivo → transcrição no campo de texto</text>
+
+  <!-- FLUXO B -->
+  <line x1="40" y1="660" x2="940" y2="660" stroke="#1e293b" stroke-width="1"/>
+  <text x="40" y="694" fill="#fbbf24" font-size="14" font-weight="700">FLUXO B — baixar transcrição completa (só modo reunião, sob demanda)</text>
+
+  <rect x="40" y="710" width="330" height="96" rx="14" fill="#0c2a45" stroke="#38bdf8" stroke-width="2"/>
+  <text x="58" y="734" fill="#7dd3fc" font-size="13" font-weight="700">🖥️ APP — botão</text>
+  <text x="58" y="757" fill="#e2e8f0" font-size="13">⬇ "Baixar transcrição completa"</text>
+  <text x="58" y="779" fill="#94a3b8" font-size="11">chama o 2º webhook enviando o id</text>
+  <text x="58" y="797" fill="#94a3b8" font-size="11">recebe o texto → download no navegador</text>
+
+  <line x1="370" y1="750" x2="440" y2="750" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arw)"/>
+  <text x="374" y="740" fill="#7dd3fc" font-size="11">GET id</text>
+
+  <rect x="440" y="710" width="500" height="130" rx="14" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <rect x="470" y="726" width="230" height="42" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="488" y="752" fill="#e2e8f0" font-size="14" font-weight="600">7 · Webhook (download)</text>
+  <line x1="585" y1="768" x2="585" y2="784" stroke="#64748b" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="470" y="786" width="290" height="42" rx="10" fill="#2e2440" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="488" y="812" fill="#e2e8f0" font-size="13" font-weight="600">8 · Postgres SELECT by id → Respond</text>
+  <path d="M470,807 L410,807 L410,750 L370,750" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arw)"/>
+
+  <!-- notas -->
+  <rect x="40" y="856" width="900" height="66" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="56" y="878" fill="#cbd5e1" font-size="11">Reunião: transcrição+resumo gravados no Neon (só texto); áudio fica no cliente. Arquivo: retorna a transcrição direto, sem gravar. Node de escrita por último; inativo até 1 run limpo.</text>
+  <text x="56" y="898" fill="#94a3b8" font-size="11">Groq aceita webm/mp3/wav/m4a/ogg (doc oficial). Free = 25MB (~100min). Evolução: reunião online (captura de aba) e transcrição longa assíncrona.</text>
+</svg>
