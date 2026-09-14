@@ -1,16 +1,16 @@
-# Áudio em Ata — interface local
+# Audio to Minutes — local interface
 
-Fonte do front do Demo 1, recuperada pelo Git Sync oficial do Lovable e mantida localmente.
+The Demo 1 frontend is maintained locally as a React/TanStack application.
 
-## Configuração
+## Configuration
 
-1. Copie `.env.example` para `.env.local` e preencha as duas URLs públicas dos webhooks.
-2. Execute `PowerShell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`.
-3. Inicie com `PowerShell -ExecutionPolicy Bypass -File .\scripts\dev.ps1`.
+1. Copy `.env.example` to `.env.local` and enter the two public webhook URLs.
+2. Run `PowerShell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`.
+3. Start the app with `PowerShell -ExecutionPolicy Bypass -File .\scripts\dev.ps1`.
 
-`.env.local`, dependências, builds e o Bun portátil ficam fora do Git.
+`.env.local`, dependencies, builds, and portable Bun files stay outside Git.
 
-## Qualidade
+## Quality
 
 - `PowerShell -ExecutionPolicy Bypass -File .\scripts\qa.ps1`
-- Critério visual principal: 1920×1080, zoom 100%, dois cards completos e sem rolagem da página.
+- Primary visual criterion: 1920×1080 at 100% zoom, with both panels fully visible and no page scroll.

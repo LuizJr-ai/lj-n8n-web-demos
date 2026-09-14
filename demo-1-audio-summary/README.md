@@ -38,11 +38,12 @@ Open `http://127.0.0.1:8080/`.
 
 - Frontend lint and production build: passed.
 - File transcription and physical microphone transport to n8n: passed.
-- Semantic v4 fixture: still under refinement; the demo is not marked final until the quality gate passes.
+- Semantic QA: three distinct offline regression fixtures pass (base executive recap, execution 3813, and execution 3897).
+- Live workflow execution and final sanitized export remain owner-authorized release checks; they are not simulated by the offline suite.
 
 ## Files
 
 - `ui/` — React/TanStack source.
 - `assets/` — final screenshot and workflow diagram.
 - `tests/` — reusable offline and live QA utilities; private audio/results remain ignored.
-- `workflow.json` — sanitized n8n export, added only after the final semantic gate.
+- `workflow/demo1.json` — sanitized n8n export, refreshed only after the final workflow review.

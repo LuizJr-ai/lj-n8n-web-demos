@@ -1,0 +1,541 @@
+{
+  "name": "Demo 1 · Transcrição de reunião e de arquivo (áudio → resumo/ações)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Turn meeting audio into executive minutes with Groq Whisper + OpenAI\n\n**How it works**\n\nThe app calls the webhook with `audio` + `mode` (`reuniao` | `arquivo`). Validate → Groq Whisper transcribes (shared by both modes). Then Switch by mode:\n\n- `reuniao` → OpenAI LLM → summary + decisions + actions + insight → Neon → response with `id`.\n- `arquivo` → full transcription, no LLM and no persistence.\n\nA second webhook fetches the transcript by `id` for download.\n\n**Setup steps**\n\n1. Add Groq credentials (Whisper `whisper-large-v3-turbo`).\n2. Add OpenAI credentials (`gpt-4o-mini`, temperature 0, JSON output).\n3. Create Neon / Postgres credentials and the minutes table.\n4. Point the front-end at the audio and download webhook URLs.\n5. Publish, then POST a test audio.",
+        "height": 504,
+        "width": 640
+      },
+      "id": "sticky_overview",
+      "name": "Overview · Audio minutes & transcription",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo1-transcrever",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh_main",
+      "name": "Webhook - Receber áudio + mode",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        176
+      ],
+      "notes": "Recebe multipart: áudio (binário) + campo mode. PROVISÓRIO: confirmar body.mode e o nome da propriedade binária na 1ª chamada real (Estágio 1)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.body.mode }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if_valid",
+      "name": "IF - Validar áudio",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        176
+      ],
+      "notes": "true=segue / false=erro. PROVISÓRIO: adicionar checagem de binário presente e tamanho <=25MB após ver o payload real."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-large-v3-turbo"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http_whisper",
+      "name": "HTTP - Groq Whisper (transcrever)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        16
+      ],
+      "notes": "Groq transcreve áudio->texto (resposta: { text }). Credencial: Groq Header Auth. PROVISÓRIO: inputDataFieldName ('file') = nome da propriedade binária do webhook; confirmar na 1ª chamada."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ erro: 'Envie um áudio válido e o campo mode (reuniao|arquivo).' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "resp_err",
+      "name": "Respond - Erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        192
+      ],
+      "notes": "Estado de erro amigável para a UI (R5). Nunca tela branca."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook - Receber áudio + mode').item.json.body.mode }}",
+                    "rightValue": "reuniao",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "d1ae0a3b-c4e3-43d9-b917-b69eb4c801fb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reuniao"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook - Receber áudio + mode').item.json.body.mode }}",
+                    "rightValue": "arquivo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0f9112e6-002b-4c97-8052-7e51b152eeac"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "arquivo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch_mode",
+      "name": "Switch - Rotear por mode",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        336
+      ],
+      "notes": "Lê o mode DIRETO do Webhook (após o Whisper o $json vira a transcrição). Saída 0=reuniao, 1=arquivo."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO transcricoes (transcricao, resumo) VALUES ($1, $2) RETURNING id",
+        "options": {
+          "queryReplacement": "={{ [$('HTTP - Groq Whisper (transcrever)').item.json.text, JSON.stringify($json.output)] }}"
+        }
+      },
+      "id": "pg_insert",
+      "name": "Postgres - Salvar no Neon",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1248,
+        16
+      ],
+      "notes": "Grava só TEXTO e devolve o id. Credencial: Neon (Postgres). PROVISÓRIO: criar a tabela 'transcricoes' no Neon (schema pendente) e conferir as colunas antes de ativar."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { id: $json.id, resumo: $('Parse ata (JSON seguro)').item.json.output.resumo, decisoes: $('Parse ata (JSON seguro)').item.json.output.decisoes, acoes: $('Parse ata (JSON seguro)').item.json.output.acoes, insight: $('Parse ata (JSON seguro)').item.json.output.insight } }}",
+        "options": {}
+      },
+      "id": "resp_reuniao",
+      "name": "Respond - Reunião",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        16
+      ],
+      "notes": "Devolve à UI as quatro seções normalizadas pelo Parse ata, além do id do Postgres."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ transcricao: $json.text }) }}",
+        "options": {}
+      },
+      "id": "resp_arquivo",
+      "name": "Respond - Arquivo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        352
+      ],
+      "notes": "Modo arquivo: devolve a transcrição na íntegra ($json.text do Whisper). Não grava no Neon."
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "demo1-download",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh_dl",
+      "name": "Webhook - Download transcrição",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -64,
+        576
+      ],
+      "notes": "2º endpoint: recebe { id } e devolve a transcrição salva (só reunião). PROVISÓRIO: confirmar onde o id chega no payload."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT transcricao FROM transcricoes WHERE id = $1",
+        "options": {
+          "queryReplacement": "={{ $json.query?.id ?? $json.body?.id }}"
+        }
+      },
+      "id": "pg_select",
+      "name": "Postgres - Buscar por id",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1248,
+        560
+      ],
+      "notes": "Busca a transcrição pelo id. Credencial: Neon. PROVISÓRIO: schema da tabela."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ transcricao: $json.transcricao }) }}",
+        "options": {}
+      },
+      "id": "resp_dl",
+      "name": "Respond - Download",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        560
+      ],
+      "notes": "Devolve o texto para a UI gerar o download."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Extraia uma ata factual da transcrição e retorne somente JSON válido. Não invente nem calcule datas.\n\nCada informação pertence a uma única categoria:\n- acoes: todo trabalho futuro atribuído a pessoa, equipe ou departamento, mesmo sem prazo; inclui “precisamos definir/decidir/confirmar” quando o resultado ainda não existe.\n- decisoes: escolhas e regras já estabelecidas, inclusive regras condicionais como “se X, Y será interrompido”. Previsão ou status sem escolha explícita pertence ao resumo.\n- resumo: 1 a 3 sínteses de contexto, estado e riscos. Exclua trabalhos futuros e decisões.\n- insight: um controle novo para reduzir o principal risco. Não recomende nenhum trabalho futuro já mencionado na transcrição.\n\nEm acoes, separe:\n- tarefa: verbo no infinitivo + objeto;\n- responsavel: preserve o sujeito do verbo futuro, mesmo sem artigo ou maiúscula. Termos como treinamento, operações, financeiro e TI são equipes responsáveis quando aparecem antes do verbo. Se o falante se identificou e depois disse “eu”, use o nome identificado; sem identificação, use “Responsável não identificado” — nunca devolva “eu” como responsável; sem sujeito, use “Responsável não informado”;\n- prazo_condicao: preserve literalmente toda expressão temporal ou condicional, inclusive fragmentos ambíguos como “até depois disso”; use “Prazo não informado” somente quando não houver nenhuma.\n\nAntes de responder, confira cada verbo futuro: ele deve aparecer uma vez em acoes ou decisoes.\n\nJSON:\n{\"acoes\":[{\"tarefa\":\"string\",\"responsavel\":\"string\",\"prazo_condicao\":\"string\"}],\"decisoes\":[\"string\"],\"resumo\":[\"string\"],\"insight\":\"Sugestão: string\"}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "bf292453-509d-4366-8161-35b99c59648e",
+      "name": "LLM Chain - Resumo + ações",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        608,
+        16
+      ],
+      "notes": "Prompt executivo v5: extrai ações primeiro com inventário contável, preserva equipes, separa decisões independentes e registra critérios condicionais antes de sintetizar o resumo."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Aceita os dois contratos reais do Basic LLM Chain:\n// execution 3650: objeto JSON direto; execution 3646: JSON serializado em text.\nconst expectedKeys = ['resumo', 'decisoes', 'acoes', 'insight'];\nconst isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);\n\n// Converte uma data explícita ou falada para a referência usada na conferência do calendário.\nconst getReferenceDate = (meetingDate, transcript, fallbackDate = new Date()) => {\n  const months = {\n    janeiro: 0, fevereiro: 1, marco: 2, março: 2, abril: 3, maio: 4, junho: 5,\n    julho: 6, agosto: 7, setembro: 8, outubro: 9, novembro: 10, dezembro: 11,\n  };\n\n  const explicit = String(meetingDate || '').match(/\\b(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\b/);\n  const spoken = String(transcript || '').match(\n    /\\b(?:dia\\s+)?(\\d{1,2})\\s+de\\s+(janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\\s+de\\s+(\\d{4})\\b/i,\n  );\n\n  let day;\n  let month;\n  let year;\n  if (explicit) {\n    [, day, month, year] = explicit;\n    month = Number(month) - 1;\n  } else if (spoken) {\n    [, day] = spoken;\n    month = months[spoken[2].toLowerCase()];\n    year = spoken[3];\n  } else {\n    return new Date(Date.UTC(fallbackDate.getUTCFullYear(), fallbackDate.getUTCMonth(), fallbackDate.getUTCDate()));\n  }\n\n  const reference = new Date(Date.UTC(Number(year), Number(month), Number(day)));\n  if (reference.getUTCFullYear() !== Number(year) || reference.getUTCMonth() !== Number(month)\n    || reference.getUTCDate() !== Number(day)) return null;\n  return reference;\n};\n\n// Marca combinações impossíveis de dia da semana + dia do mês sem inventar uma data substituta.\nconst normalizeContradictoryDeadlines = (actions, referenceDate) => {\n  if (!(referenceDate instanceof Date) || Number.isNaN(referenceDate.getTime())) return actions;\n\n  const weekdays = {\n    domingo: 0, segunda: 1, 'segunda-feira': 1, terca: 2, terça: 2, 'terca-feira': 2,\n    'terça-feira': 2, quarta: 3, 'quarta-feira': 3, quinta: 4, 'quinta-feira': 4,\n    sexta: 5, 'sexta-feira': 5, sabado: 6, sábado: 6,\n  };\n  const pattern = /\\b(domingo|segunda(?:-feira)?|ter[cç]a(?:-feira)?|quarta(?:-feira)?|quinta(?:-feira)?|sexta(?:-feira)?|s[aá]bado)\\b\\s*,?\\s*(?:dia\\s+)?(\\d{1,2})\\b/i;\n\n  return actions.map((action) => {\n    const parts = String(action).split(' — ');\n    if (parts.length !== 3 || /prazo amb[ií]guo/i.test(parts[2])) return action;\n\n    const match = parts[2].match(pattern);\n    if (!match) return action;\n\n    const expectedWeekday = weekdays[match[1].toLowerCase()];\n    const candidate = new Date(Date.UTC(\n      referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), Number(match[2]),\n    ));\n    if (expectedWeekday === undefined || candidate.getUTCMonth() !== referenceDate.getUTCMonth()\n      || candidate.getUTCDay() === expectedWeekday) return action;\n\n    const literal = match[0].replace(/[.,;:]+$/, '');\n    parts[2] = 'Prazo ambíguo na transcrição: \"' + literal + '\".';\n    return parts.join(' — ');\n  });\n};\n\nconst parseText = (value) => {\n  if (typeof value !== 'string') return null;\n  let s = value.trim();\n  if (!s) return null;\n  const start = s.indexOf('{');\n  const end = s.lastIndexOf('}');\n  if (start === -1 || end === -1 || end < start) return null;\n  s = s.slice(start, end + 1);\n  try { return JSON.parse(s); }\n  catch (e) { throw new Error('Falha no JSON.parse da ata: ' + e.message); }\n};\n\nconst data = isObject($json) ? $json : {};\nlet obj = expectedKeys.some((key) => Object.prototype.hasOwnProperty.call(data, key)) ? data : null;\n\nif (!obj) {\n  for (const candidate of [data.output, data.text, data.response]) {\n    if (isObject(candidate)) { obj = candidate; break; }\n    const parsed = parseText(candidate);\n    if (parsed !== null) { obj = parsed; break; }\n  }\n}\n\nif (!isObject(obj)) {\n  const fields = Object.keys(data).join(', ') || '(sem campos)';\n  throw new Error('Ata JSON ausente. Campos recebidos: ' + fields);\n}\n\nconst missing = expectedKeys.filter((key) => !Object.prototype.hasOwnProperty.call(obj, key));\nif (missing.length) throw new Error('Contrato da ata incompleto. Campos ausentes: ' + missing.join(', '));\n\nconst invalid = [];\nif (!Array.isArray(obj.resumo)) invalid.push('resumo deve ser array');\nif (!Array.isArray(obj.decisoes)) invalid.push('decisoes deve ser array');\nif (!Array.isArray(obj.acoes)) invalid.push('acoes deve ser array');\nif (typeof obj.insight !== 'string') invalid.push('insight deve ser string');\nif (invalid.length) throw new Error('Contrato da ata invalido: ' + invalid.join('; '));\n\n// Recupera a transcrição do ramo real para validar o calendário.\nlet source = {};\ntry { source = $('Switch - Rotear por mode').item.json; } catch {}\n\n// Converte o contrato estruturado do modelo no formato de texto que a interface já exibe.\nconst formattedActions = obj.acoes.map((action, index) => {\n  if (typeof action === 'string') return action;\n  if (!isObject(action)) throw new Error(`Ação ${index + 1} deve ser string ou objeto`);\n\n  const tarefa = String(action.tarefa || '').trim();\n  let responsavel = String(action.responsavel || '').trim();\n  const prazo = String(action.prazo_condicao || '').trim();\n  if (!tarefa) throw new Error(`Ação ${index + 1} sem tarefa`);\n  if (!responsavel || /^eu$/i.test(responsavel)) responsavel = 'Responsável não identificado';\n  if (/^respons[aá]vel não definido$/i.test(responsavel)) responsavel = 'Responsável não informado';\n\n  const texto = tarefa.charAt(0).toUpperCase() + tarefa.slice(1);\n  return `${texto} — ${responsavel} — ${prazo || 'Prazo não informado'}`;\n});\n\n// Confere os prazos depois da conversão, sem calcular datas nem inventar responsáveis.\nconst referenceDate = getReferenceDate(source.meeting_date, source.text);\nconst actionsWithSafeDeadlines = normalizeContradictoryDeadlines(formattedActions, referenceDate);\nconst normalizedActions = actionsWithSafeDeadlines.map((action) => String(action)\n  .replace(/\\bParticipante não identificado\\b/gi, 'Responsável não identificado')\n  .replace(/\\bResponsável não definido\\b/gi, 'Responsável não informado'));\n\n// Entrega somente o contrato validado e normalizado ao restante do workflow.\nconst output = {\n  resumo: obj.resumo,\n  decisoes: obj.decisoes,\n  acoes: normalizedActions,\n  insight: obj.insight\n};\nreturn { output };"
+      },
+      "id": "parse_ata",
+      "name": "Parse ata (JSON seguro)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        16
+      ],
+      "notes": "Aceita e valida os dois formatos reais observados do Basic LLM Chain: objeto JSON direto (execution 3650) e JSON serializado em text/output/response (execution 3646). Exige as quatro chaves e os tipos corretos."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        128
+      ],
+      "id": "3aea46e5-7f11-462d-996e-27bfcfd20488",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "content": "## Intake\nThe 3 entry points: audio webhook, download webhook and the QA test trigger.",
+        "height": 896,
+        "width": 236
+      },
+      "id": "fd76cb54-9da8-4edd-9bba-516ced8ef961",
+      "name": "Acquisition · Webhooks & QA",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intelligence\nValidates the audio, transcribes (Groq Whisper), routes by mode, summarizes + extracts actions (LLM) and safely parses the minutes.",
+        "height": 896,
+        "width": 1032,
+        "color": 6
+      },
+      "id": "bd109b6f-d867-48db-822e-6c82cf1af3fa",
+      "name": "Intelligence · Transcription & minutes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Persistence\nSaves the minutes to Neon and fetches the transcript by id.",
+        "height": 896,
+        "width": 220,
+        "color": 4
+      },
+      "id": "71be923e-24e9-4372-b242-7b479d048191",
+      "name": "Persistence · Neon",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Delivery\nResponds to the client: meeting, file, error, download and QA result.",
+        "height": 896,
+        "width": 288,
+        "color": 5
+      },
+      "id": "2baf6f2a-7f29-4f41-9c42-50ec5d033f7f",
+      "name": "Delivery · API responses",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -144
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Receber áudio + mode": {
+      "main": [
+        [
+          {
+            "node": "IF - Validar áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Validar áudio": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Groq Whisper (transcrever)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Groq Whisper (transcrever)": {
+      "main": [
+        [
+          {
+            "node": "Switch - Rotear por mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Rotear por mode": {
+      "main": [
+        [
+          {
+            "node": "LLM Chain - Resumo + ações",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Salvar no Neon": {
+      "main": [
+        [
+          {
+            "node": "Respond - Reunião",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Download transcrição": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Buscar por id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Buscar por id": {
+      "main": [
+        [
+          {
+            "node": "Respond - Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chain - Resumo + ações": {
+      "main": [
+        [
+          {
+            "node": "Parse ata (JSON seguro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Chain - Resumo + ações",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse ata (JSON seguro)": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Salvar no Neon",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

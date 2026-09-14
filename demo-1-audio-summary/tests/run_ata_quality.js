@@ -42,7 +42,8 @@ function avaliarAta(ata, fixture = false) {
     .filter(Boolean)
     .filter((nome) => !/não informado|não identificado/i.test(nome));
   for (const responsavel of responsaveis) {
-    if (resumo.includes(responsavel.toLowerCase())) {
+    const nomeLiteral = responsavel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (new RegExp(`\\b${nomeLiteral}\\b`, 'i').test(resumo)) {
       erros.push(`responsável operacional repetido no resumo: ${responsavel}`);
     }
   }
@@ -94,6 +95,56 @@ function avaliarAta(ata, fixture = false) {
     }
   }
 
+  return erros;
+}
+
+// Prova o cenário real da execução 3813: cinco ações, três decisões independentes
+// e preservação de pessoas/equipes citadas na transcrição.
+function avaliarCenario3813(ata) {
+  const erros = avaliarAta(ata);
+  if (erros.length) return erros;
+
+  const acoes = ata.acoes.join(' ');
+  const decisoes = ata.decisoes.join(' ');
+  const resumo = ata.resumo.join(' ');
+
+  if (ata.acoes.length !== 5) erros.push('exec 3813 deve conter exatamente 5 ações');
+  if (!/Beatriz.*acompanhar|Acompanhar.*Beatriz/i.test(acoes)) erros.push('ação de Beatriz ausente');
+  if (!/Capacitar.*— Treinamento —/i.test(acoes)) erros.push('equipe de Treinamento não preservada');
+  if (!/Enviar.*— Luiz Martins —/i.test(acoes)) erros.push('primeira pessoa não associada a Luiz Martins');
+
+  if (ata.decisoes.length !== 3) erros.push('exec 3813 deve conter exatamente 3 decisões independentes');
+  if (!/turno da manhã/i.test(decisoes)) erros.push('decisão do turno da manhã ausente');
+  if (!/canal antigo.*sete dias/i.test(decisoes)) erros.push('decisão de manter o canal antigo ausente');
+  if (!/cinco minutos.*interromp|interromp.*cinco minutos/i.test(decisoes)) erros.push('regra de interrupção ausente');
+
+  if (!/instável|instabilidade|tempo de resposta/i.test(resumo)) erros.push('risco operacional ausente do resumo');
+  if (/monitorar.*resposta média|ponto de verificação.*lançamento/i.test(ata.insight)) {
+    erros.push('insight repete a regra de interrupção já informada');
+  }
+  return erros;
+}
+
+// Prova o cenário real da execução 3897: pedido de definição ainda pendente é ação,
+// não decisão, e não pode ser reciclado como sugestão.
+function avaliarCenario3897(ata) {
+  const erros = avaliarAta(ata);
+  if (erros.length) return erros;
+
+  const acoes = ata.acoes.join(' ');
+  const decisoes = ata.decisoes.join(' ');
+
+  if (ata.acoes.length !== 7) erros.push('exec 3897 deve conter exatamente 7 ações');
+  if (!/Definir.*autorizar.*retomada.*— Responsável não identificado —/i.test(acoes)) {
+    erros.push('pendência sobre autoridade de retomada não virou ação');
+  }
+  if (ata.decisoes.length !== 3) erros.push('exec 3897 deve conter exatamente 3 decisões');
+  if (/definir quem.*autorizar.*retomada/i.test(decisoes)) {
+    erros.push('pendência foi classificada incorretamente como decisão');
+  }
+  if (/definir|estabelecer.*autoriza.*retomada/i.test(ata.insight)) {
+    erros.push('insight repete a pendência sobre autoridade de retomada');
+  }
   return erros;
 }
 
@@ -174,6 +225,86 @@ const referenciaProfissional = {
   insight: 'Sugestão: Confirmar o prazo da integração de pagamento, pois ele condiciona o dashboard e a estabilidade necessária antes da campanha.',
 };
 
+// Saída real da execução 3813, mantida como regressão reproduzível.
+const outputReal3813 = {
+  resumo: [
+    'O treinamento de 40 agentes foi concluído, com 8 agentes necessitando de reforço, e o lançamento do novo atendimento está previsto para quarta-feira.',
+  ],
+  decisoes: [
+    'Lançar o novo atendimento no turno da manhã e manter o canal antigo por sete dias.',
+  ],
+  acoes: [
+    'Realizar o teste de carga — Diego — Até segunda-feira, dia 14.',
+    'Capacitar os oito agentes que precisam de reforço — Responsável não informado — Após o teste de carga.',
+    'Enviar o comunicado aos gestores — Luiz Martins — Até segunda-feira, dia 14.',
+    'Publicar o painel de incidentes — TI — Sem prazo definido.',
+  ],
+  insight: 'Sugestão: Monitorar a resposta média e estabelecer um ponto de verificação antes do lançamento para evitar interrupções.',
+};
+
+// Referência profissional que precisa passar depois da correção do prompt.
+const referencia3813 = {
+  resumo: [
+    'Quarenta agentes estão aptos, mas a necessidade de reforço para oito deles e a instabilidade do chat antigo elevam o risco operacional.',
+  ],
+  decisoes: [
+    'Lançar o novo atendimento primeiro no turno da manhã.',
+    'Manter o canal antigo disponível por sete dias.',
+    'Interromper o lançamento para revisão se a resposta média superar cinco minutos.',
+  ],
+  acoes: [
+    'Realizar o teste de carga — Diego — Até segunda-feira, dia 14.',
+    'Capacitar os oito agentes que precisam de reforço — Treinamento — Após o teste de carga.',
+    'Acompanhar o primeiro turno — Beatriz — Na terça-feira.',
+    'Enviar o comunicado aos gestores — Luiz Martins — Até segunda-feira, dia 14.',
+    'Publicar o painel de incidentes — TI — Prazo não informado.',
+  ],
+  insight: 'Sugestão: Definir quem autoriza a retomada após uma eventual interrupção do lançamento.',
+};
+
+// Saída real da execução 3897, preservada para provar a regressão observada.
+const outputReal3897 = {
+  resumo: [
+    'De 200 produtos cadastrados, 18 apresentam divergência entre o estoque físico e o sistema, representando o principal risco para a transferência do estoque.',
+  ],
+  decisoes: [
+    'Iniciar o piloto somente em Campinas.',
+    'Manter a operação antiga por cinco dias.',
+    'Interromper a migração caso a taxa de erro ultrapasse 2%.',
+    'Definir quem poderá autorizar a retomada caso a migração seja interrompida.',
+  ],
+  acoes: [
+    'Atualizar o inventário — Carla — Até terça-feira.',
+    'Negociar com a transportadora a nova janela de coleta — Marcos — Após a atualização do inventário.',
+    'Validar o orçamento — Equipe financeira — Até sexta-feira.',
+    'Configurar a integração — Equipe de TI — Antes do piloto.',
+    'Testar 20 pedidos — Operações — Após a configuração da integração.',
+    'Enviar o cronograma completo a todos — Responsável não identificado — Até amanhã.',
+  ],
+  insight: 'Sugestão: Estabelecer um critério claro para a autorização de retomada da migração após uma interrupção.',
+};
+
+const referencia3897 = {
+  resumo: [
+    'De 200 produtos cadastrados, 18 apresentam divergência entre o estoque físico e o sistema, representando o principal risco para a transferência do estoque.',
+  ],
+  decisoes: [
+    'Iniciar o piloto somente em Campinas.',
+    'Manter a operação antiga por cinco dias.',
+    'Interromper a migração caso a taxa de erro ultrapasse 2%.',
+  ],
+  acoes: [
+    'Atualizar o inventário — Carla — Até terça-feira.',
+    'Negociar com a transportadora a nova janela de coleta — Marcos — Após a atualização do inventário.',
+    'Validar o orçamento — Equipe financeira — Até sexta-feira.',
+    'Configurar a integração — Equipe de TI — Antes do piloto.',
+    'Testar 20 pedidos — Operações — Após a configuração da integração.',
+    'Enviar o cronograma completo a todos — Responsável não identificado — Até amanhã.',
+    'Definir quem poderá autorizar a retomada da migração — Responsável não identificado — Prazo não informado.',
+  ],
+  insight: 'Sugestão: Usar a conciliação entre estoque físico e sistema como critério de liberação do piloto.',
+};
+
 const erros3651 = avaliarAta(outputReal3651, true);
 if (erros3651.length === 0) {
   console.error('FAIL - execution 3651 deveria ser reprovada pelo gate semantico');
@@ -196,4 +327,34 @@ if (errosReferencia.length) {
   process.exit(1);
 }
 console.log('PASS - referencia profissional aprovada pelo gate semantico.');
+
+const erros3813 = avaliarCenario3813(outputReal3813);
+if (erros3813.length === 0) {
+  console.error('FAIL - execution 3813 deveria ser reprovada pelo gate semantico');
+  process.exit(1);
+}
+console.log('PASS - execution 3813 reprovada pelos motivos esperados:');
+for (const erro of erros3813) console.log('  -', erro);
+
+const errosReferencia3813 = avaliarCenario3813(referencia3813);
+if (errosReferencia3813.length) {
+  console.error('FAIL - referencia 3813 foi reprovada:', errosReferencia3813);
+  process.exit(1);
+}
+console.log('PASS - referencia 3813 aprovada pelo gate semantico.');
+
+const erros3897 = avaliarCenario3897(outputReal3897);
+if (erros3897.length === 0) {
+  console.error('FAIL - execution 3897 deveria ser reprovada pelo gate semantico');
+  process.exit(1);
+}
+console.log('PASS - execution 3897 reprovada pelos motivos esperados:');
+for (const erro of erros3897) console.log('  -', erro);
+
+const errosReferencia3897 = avaliarCenario3897(referencia3897);
+if (errosReferencia3897.length) {
+  console.error('FAIL - referencia 3897 foi reprovada:', errosReferencia3897);
+  process.exit(1);
+}
+console.log('PASS - referencia 3897 aprovada pelo gate semantico.');
 console.log('\nQA SEMANTICO OFFLINE OK.');

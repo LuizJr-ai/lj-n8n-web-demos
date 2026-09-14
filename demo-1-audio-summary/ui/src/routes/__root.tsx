@@ -41,10 +41,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Não foi possível abrir esta página
+          We could not open this page
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Ocorreu um erro inesperado. Atualize a página ou volte ao início.
+          An unexpected error occurred. Refresh the page or return home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -54,13 +54,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Tentar novamente
+            Try again
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Voltar ao início
+            Return home
           </a>
         </div>
       </div>
@@ -73,15 +73,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Áudio em Ata" },
+      { title: "Audio to Minutes" },
       {
         name: "description",
-        content: "Grave reuniões e transforme arquivos de áudio em texto organizado.",
+        content: "Record meetings and turn audio files into organized text.",
       },
-      { property: "og:title", content: "Áudio em Ata" },
+      { property: "og:title", content: "Audio to Minutes" },
       {
         property: "og:description",
-        content: "Grave reuniões e transforme arquivos de áudio em texto organizado.",
+        content: "Record meetings and turn audio files into organized text.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
