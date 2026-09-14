@@ -19,6 +19,6 @@ Fonte: https://www.pexels.com/license/ · baixadas em `assets/fotos-ref/`.
 |---|---|---|
 | ../galeria-referencia.svg | Mockup vetorial de mood (1ª tentativa) | **descartado** — reprovado pelo Luiz (não realista); mantido só como histórico |
 
-> Nota: as fotos Pexels são **placeholders de referência** para o Lovable. O ideal de produção é
-> substituir pelas **fotos reais da Alanna** (produto dela = maior conversão). Licença Pexels dispensa
+> Nota: as fotos Pexels são **referências de demonstração**. Em produção, substitua-as por fotos de
+> produto autorizadas pelo cliente (produto real = maior conversão). A licença Pexels dispensa
 > atribuição, mas registramos autor por transparência.

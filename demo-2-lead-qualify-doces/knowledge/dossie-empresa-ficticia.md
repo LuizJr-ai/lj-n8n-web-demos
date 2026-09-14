@@ -3,7 +3,7 @@
 Purpose: base de conhecimento robusta e FICTÍCIA (confeitaria de porte) para indexar no RAG e
 estressar a capacidade do agente. Preços/políticas são inspirados em práticas reais de mercado
 (fontes: casamentos.com.br, confeitaria lucrativa, políticas de cancelamento públicas) e depois
-**fictionalizados** — não são de nenhuma empresa real, nem da Alanna. Trocar pelos dados reais
+**fictionalizados** — não são de nenhuma empresa real. Trocar pelos dados reais
 antes de qualquer uso comercial.
 
 ## 1. Institucional

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alanna Doces — Peça seu orçamento</title>
+<title>Doce Aurora — Peça seu orçamento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Epilogue:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -198,7 +198,7 @@
 <div class="fold">
   <div class="wrap hero">
     <div class="hero-txt">
-      <div class="brand">🧁 Alanna Doces Artesanais</div>
+      <div class="brand">🧁 Doce Aurora</div>
       <h1>Brigadeiros e doces sob encomenda, do seu jeito.</h1>
       <p>Do aniversário infantil ao casamento — conte o que você imagina e a gente faz. Orçamento em 1 minuto, sem complicação.</p>
       <div class="cta"><a class="btn" href="#assistente">Peça seu orçamento →</a></div>
@@ -253,7 +253,7 @@
     <p class="sub">Clique para abrir a resposta.</p>
     <div class="faq-grid">
       <div class="faq-col">
-        <details><summary>Qual o prazo mínimo de encomenda?</summary><p>Em geral pedimos alguns dias de antecedência; datas especiais e grandes volumes precisam de mais prazo. Confirmamos ao fechar o pedido.</p></details>
+        <details><summary>Qual o prazo mínimo de encomenda?</summary><p>O ideal é pedir com 15 dias de antecedência. Pedidos expressos de 5 a 7 dias dependem da agenda.</p></details>
         <details><summary>Precisa de sinal para reservar a data?</summary><p>Sim. O padrão é 50% para confirmar e reservar a data; o restante na retirada/envio.</p></details>
         <details><summary>Qual o pedido mínimo?</summary><p>Fechamos por cento ou por unidade, dependendo do doce. Diga a quantidade no orçamento que já te passamos o valor.</p></details>
       </div>
@@ -279,7 +279,7 @@
 
 <footer>
   <div class="wrap">
-    <span>🧁 Alanna Doces Artesanais · sob encomenda</span>
+    <span>🧁 Doce Aurora · sob encomenda</span>
     <span>📷 Instagram · 💬 WhatsApp · atende todo o Brasil</span>
   </div>
 </footer>
@@ -412,7 +412,7 @@
         <button class="btn ghost" type="button" data-close-quote>Cancelar</button>
         <button class="btn" type="submit" id="quote-submit">🧁 Enviar orçamento</button>
       </div>
-      <p class="form-hint">Protótipo com dados de exemplo — nenhum pedido real é processado.</p>
+      <p class="form-hint">Use dados de exemplo — não envie informações pessoais reais.</p>
     </form>
     <!-- Resposta do n8n (R1) e estado de erro (R5) -->
     <div id="quote-result" class="qresult" hidden></div>
@@ -528,12 +528,16 @@
 
     function val(n){ var el = form.elements[n]; return el ? String(el.value||'').trim() : ''; }
 
-    // Renderiza o retorno do n8n (R1) e o estado de erro (R5). Nunca tela branca.
+    // Renderiza o retorno do n8n (R1) e o estado de erro (R5). Nunca usa HTML vindo do servidor.
     function render(state, payload){
       result.hidden = false; result.className = 'qresult ' + state;
+      result.replaceChildren();
+      var title = document.createElement('h3');
+      var text = document.createElement('p');
       if(state === 'err'){
-        result.innerHTML = '<h3>Não deu para enviar agora 😕</h3>' +
-          '<p>Tente novamente em instantes ou nos chame pelo Instagram/WhatsApp.</p>';
+        title.textContent = 'Não deu para enviar agora 😕';
+        text.textContent = 'Tente novamente em instantes ou nos chame pelo Instagram/WhatsApp.';
+        result.append(title, text);
         return;
       }
       var tier = (payload && (payload.tier || payload.classificacao)) || '';
@@ -541,10 +545,14 @@
       var resumo = (payload && (payload.message || payload.resumo || payload.mensagem)) || '';
       var isHot = String(tier).toLowerCase() === 'hot';
       result.className = 'qresult ' + (isHot ? 'hot' : 'ok');
-      var pill = tier ? '<span class="tierpill">'+(isHot ? '⭐ prioridade' : 'recebido')+'</span><br>' : '';
-      result.innerHTML = pill +
-        '<h3>'+(isHot ? 'Recebemos e já priorizamos seu pedido! 🎉' : 'Orçamento recebido! 🧁')+'</h3>' +
-        '<p>'+(resumo ? resumo : 'Vamos analisar e retornar em breve com os detalhes.')+'</p>';
+      if(tier){
+        var pill = document.createElement('span');
+        pill.className = 'tierpill'; pill.textContent = isHot ? '⭐ prioridade' : 'recebido';
+        result.append(pill, document.createElement('br'));
+      }
+      title.textContent = isHot ? 'Recebemos e já priorizamos seu pedido! 🎉' : 'Orçamento recebido! 🧁';
+      text.textContent = resumo || 'Vamos analisar e retornar em breve com os detalhes.';
+      result.append(title, text);
     }
 
     // Lê a imagem como base64 (data URL) — saída já pronta; o n8n trata depois (IF texto/imagem).
@@ -579,6 +587,12 @@
 
     form.addEventListener('submit', function(ev){
       ev.preventDefault();
+      if(!WEBHOOK_URL){
+        render('err', null);
+        result.querySelector('h3').textContent = 'Configure o webhook do orçamento para testar este demo.';
+        result.querySelector('p').textContent = 'Copie config.example.js para config.local.js e informe uma URL de webhook de teste.';
+        return;
+      }
       var tipo = val('tipo') === '__outro' ? val('tipo_outro') : val('tipo');
       if(!val('nome') || !val('contato') || !tipo){
         render('err', null);
@@ -709,6 +723,10 @@
       ev.preventDefault();
       var msg = String(input.value||'').trim();
       if(!msg) return;
+      if(!CHAT_URL){
+        add('bot', 'Configure o webhook do chat em config.local.js para testar esta conversa.');
+        return;
+      }
       // 1º envio real: remove os balões-exemplo (mockup) para não poluir a conversa.
       if(!mocksCleared){
         var mocks = log.querySelectorAll('.mock');
