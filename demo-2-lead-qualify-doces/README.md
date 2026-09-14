@@ -44,8 +44,6 @@ Open `http://127.0.0.1:5599/ui/`. `config.local.js` is ignored by Git.
 ## Repository contents
 
 - `ui/` — storefront, quote form and live chat.
-- `assets/` — licensed reference photos, credits and diagrams.
-- `knowledge/` — fictional business data used by RAG.
+- `assets/` — licensed reference photos, credits and workflow diagram.
 - `db/schema.sql` — database structure without credentials.
-- `tests/` — offline transformation tests.
-- `workflow/` — sanitized n8n exports, when generated without credentials.
+- `workflows/` — sanitized n8n exports.

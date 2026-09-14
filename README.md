@@ -1,7 +1,7 @@
 # 🌐 n8n Web Demos
 
 ![n8n compatible](https://img.shields.io/badge/n8n-compatible-EA4B71)
-![Status](https://img.shields.io/badge/status-in%20progress-orange)
+![Status](https://img.shields.io/badge/status-private%20portfolio-blue)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow)
 
 **n8n as the brain, a web UI for the end user.** Three portfolio demos combining AI automation
@@ -11,8 +11,8 @@ with interfaces that people can actually use.
 
 | Demo | Outcome | Status |
 |---|---|---|
-| [1 — Audio meeting summary](demo-1-audio-summary/) | Records meetings or transcribes audio; returns summary, decisions, actions and a recommendation | 🟡 Final semantic QA |
-| [2 — Custom-order sweets lead qualifier](demo-2-lead-qualify-doces/) | Conversational storefront, RAG assistance and AI lead routing | 🟡 Refinement |
+| [1 — Audio meeting summary](demo-1-audio-summary/) | Records meetings or transcribes audio; returns summary, decisions, actions and a recommendation | ✅ Complete |
+| [2 — Custom-order sweets lead qualifier](demo-2-lead-qualify-doces/) | Conversational storefront, RAG assistance and AI lead routing | ✅ Complete |
 | 3 — FAQ/RAG assistant | Grounded answers from a controlled knowledge base | ⚪ Planned |
 
 ## Architecture
@@ -21,17 +21,17 @@ with interfaces that people can actually use.
 Web interface → n8n webhook → transcription / AI / database → structured response → interface
 ```
 
-Each demo keeps its own UI, sanitized workflow export, documentation and visual evidence. Runtime
-URLs and credentials stay outside Git in local environment files.
+Each demo keeps only its UI, sanitized workflow export, minimum setup files and visual evidence.
+Runtime URLs and credentials stay outside Git in local environment files.
 
 ## Repository layout
 
 ```text
 demo-N-topic/
-├── workflow.json     # sanitized n8n export
-├── ui/               # end-user interface
-├── README.md          # problem, architecture and setup
-└── assets/            # screenshots, diagrams and demo media
+├── workflow.json or workflows/  # sanitized n8n export(s)
+├── ui/                         # end-user interface
+├── README.md                    # problem, architecture and setup
+└── assets/                      # visual evidence used by the demo
 ```
 
 ## Principles
