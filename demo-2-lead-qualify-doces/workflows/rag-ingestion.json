@@ -71,7 +71,7 @@
     },
     {
       "parameters": {
-        "content": "## Build the demo2_kb knowledge base for pgvector RAG\n\n**How it works**\n\nRuns manually. `Split KB into sections` emits the curated, versioned knowledge chunks embedded in its Code node; `knowledge/dossie-empresa-ficticia.md` is the readable companion source in the repository. The *Default Data Loader* + *Embeddings OpenAI (text-embedding-3-small)* turn each chunk into vectors; `Store in pgvector (demo2_kb)` writes them to the `demo2_kb` table — the same base queried by the agent and QA workflow.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials (same database as Demo 2).\n2. Add OpenAI credentials for embeddings.\n3. Edit the curated items in `Split KB into sections` and keep the readable companion file aligned.\n4. Run once; re-run whenever the knowledge base changes.",
+        "content": "## Build the demo2_kb knowledge base for pgvector RAG\n\n**How it works**\n\nRuns manually. `Split KB into sections` emits the curated knowledge chunks embedded in its Code node. The *Default Data Loader* + *Embeddings OpenAI (text-embedding-3-small)* turn each chunk into vectors; `Store in pgvector (demo2_kb)` writes them to the `demo2_kb` table — the same base queried by the agent.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials (same database as Demo 2).\n2. Add OpenAI credentials for embeddings.\n3. Edit the curated items in `Split KB into sections` when the knowledge changes.\n4. Run once; re-run whenever the knowledge base changes.",
         "height": 456,
         "width": 504
       },

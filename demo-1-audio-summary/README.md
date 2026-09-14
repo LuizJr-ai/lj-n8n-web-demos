@@ -28,22 +28,14 @@ contains placeholders in `ui/.env.example`.
 ```powershell
 Set-Location .\demo-1-audio-summary\ui
 Copy-Item .env.example .env.local
-PowerShell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
-PowerShell -ExecutionPolicy Bypass -File .\scripts\dev.ps1
+bun install
+bun run dev
 ```
 
 Open `http://127.0.0.1:8080/`.
-
-## QA status
-
-- Frontend lint and production build: passed.
-- File transcription and physical microphone transport to n8n: passed.
-- Semantic QA: three distinct offline regression fixtures pass (base executive recap, execution 3813, and execution 3897).
-- Live workflow execution and final sanitized export remain owner-authorized release checks; they are not simulated by the offline suite.
 
 ## Files
 
 - `ui/` — React/TanStack source.
 - `assets/` — final screenshot and workflow diagram.
-- `tests/` — reusable offline and live QA utilities; private audio/results remain ignored.
-- `workflow/demo1.json` — sanitized n8n export, refreshed only after the final workflow review.
+- `workflow.json` — sanitized n8n export.

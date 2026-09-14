@@ -14,11 +14,6 @@ Fonte: https://www.pexels.com/license/ · baixadas em `assets/fotos-ref/`.
 | casamento-mesa-dourada_pexels-26774583_jonathanborba.jpg | Casamento (mesa dourada) | Jonathan Borba | 26774583 |
 | datas-mesa-festa_pexels-19976278_karinabenfica.jpg | Datas comemorativas (mesa festa) | Karina Benfica | 19976278 |
 
-## Imagens criadas por IA (vetor, Claude)
-| Arquivo | Uso | Status |
-|---|---|---|
-| ../galeria-referencia.svg | Mockup vetorial de mood (1ª tentativa) | **descartado** — reprovado pelo Luiz (não realista); mantido só como histórico |
-
 > Nota: as fotos Pexels são **referências de demonstração**. Em produção, substitua-as por fotos de
 > produto autorizadas pelo cliente (produto real = maior conversão). A licença Pexels dispensa
 > atribuição, mas registramos autor por transparência.

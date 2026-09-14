@@ -52,6 +52,12 @@ demo-*/tests/results/
 demo-*/docs/prompts/
 demo-*/docs/RELATORIO-*
 
+# === Processo interno por demo; a vitrine mantém somente o produto ===
+demo-*/tests/
+demo-*/docs/
+demo-*/scripts/
+demo-*/ui/scripts/
+
 # === Cérebro do projeto (LOCAL — NÃO é o produto) ===
 # O repo publicado é a VITRINE: só README + pastas demo-*/ + LICENSE.
 # Toda a estrutura de trabalho/conhecimento fica no disco, fora do repo.
@@ -64,4 +70,5 @@ SEEDnovoprojeton8nwebdemos.md
 /docs/
 /tests/
 /tasks/
+/memory/
 /templates/
