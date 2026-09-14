@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ============================================================
- * CONFIGURAÇÃO DA INTEGRAÇÃO
- * As URLs públicas ficam em .env.local, que não é versionado.
+ * INTEGRATION CONFIGURATION
+ * Public URLs live in the untracked .env.local file.
  * ============================================================ */
 const WEBHOOK_PRINCIPAL = (import.meta.env.VITE_DEMO1_TRANSCRIBE_URL ?? "").trim();
 const WEBHOOK_DOWNLOAD = (import.meta.env.VITE_DEMO1_DOWNLOAD_URL ?? "").trim();
@@ -11,29 +11,29 @@ const AUDIO_FIELD_NAME = "file";
 const REQUEST_TIMEOUT_MS = 120000;
 /* ============================================================ */
 
-/* Direção visual:
- * "A paleta de papel e tinta aproxima o produto de atas e documentos de
- * trabalho; o terracota cria uma assinatura própria, e a IBM Plex Sans
- * mantém precisão e legibilidade."
+/* Visual direction:
+ * The paper-and-ink palette recalls meeting records and working documents;
+ * terracotta gives the product a distinct signature, while IBM Plex Sans
+ * preserves precision and readability.
  */
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Áudio em Ata — transcrever áudio em texto e resumir reuniões" },
+      { title: "Audio to Minutes — Transcribe audio and summarize meetings" },
       {
         name: "description",
         content:
-          "Grave uma reunião presencial e receba resumo em tópicos e ações, ou envie um arquivo de áudio e receba a transcrição integral.",
+          "Record an in-person meeting for a structured recap and action list, or upload audio for a full transcription.",
       },
       {
         property: "og:title",
-        content: "Áudio em Ata — transcrever áudio em texto e resumir reuniões",
+        content: "Audio to Minutes — Transcribe audio and summarize meetings",
       },
       {
         property: "og:description",
         content:
-          "Grave uma conversa presencial ou envie um arquivo de áudio e receba texto organizado.",
+          "Record an in-person conversation or upload an audio file for organized text.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-/* ---------- constantes de validação ---------- */
+/* ---------- validation constants ---------- */
 const MAX_BYTES = 25 * 1024 * 1024;
 const MIME_EXT: Record<string, string> = {
   "audio/webm": ".webm",
@@ -64,14 +64,14 @@ const MIME_EXT: Record<string, string> = {
 const EXT_FALLBACK = [".webm", ".mp3", ".wav", ".m4a", ".ogg"];
 
 const MSG = {
-  vazio: "Selecione ou grave um áudio antes de continuar.",
-  formato: "Use um arquivo de áudio válido: WEBM, MP3, WAV, M4A ou OGG.",
-  tamanho: "O áudio excede o limite de 25 MB. Escolha um arquivo menor.",
-  timeout: "A solicitação demorou mais que o esperado. Tente novamente.",
-  rede: "Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.",
-  http: "Não foi possível processar este áudio. Revise o arquivo e tente novamente.",
-  contrato: "Recebemos uma resposta inesperada. Tente novamente em instantes.",
-  naoConfig: "Integração ainda não configurada. Defina os webhooks e o campo de áudio do n8n.",
+  vazio: "Select or record audio before continuing.",
+  formato: "Use a valid audio file: WEBM, MP3, WAV, M4A, or OGG.",
+  tamanho: "The audio exceeds the 25 MB limit. Choose a smaller file.",
+  timeout: "The request took longer than expected. Please try again.",
+  rede: "We could not connect to the service. Check your connection and try again.",
+  http: "We could not process this audio. Review the file and try again.",
+  contrato: "We received an unexpected response. Please try again shortly.",
+  naoConfig: "The integration is not configured yet. Set the n8n webhooks and audio field.",
 };
 
 function baseMime(m: string) {
@@ -125,19 +125,51 @@ function escapeHtml(text: string) {
 }
 
 function printText(title: string, text: string) {
-  const popup = window.open("", "_blank", "width=900,height=700");
-  if (!popup) return false;
-  popup.document.write(`<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+  // Use an in-page temporary document so a secondary window never retains focus.
+  const frame = document.createElement("iframe");
+  frame.title = `Print — ${title}`;
+  frame.setAttribute("aria-hidden", "true");
+  Object.assign(frame.style, {
+    position: "fixed",
+    right: "0",
+    bottom: "0",
+    width: "0",
+    height: "0",
+    border: "0",
+  });
+  document.body.appendChild(frame);
+
+  const printWindow = frame.contentWindow;
+  const printDocument = frame.contentDocument;
+  if (!printWindow || !printDocument) {
+    frame.remove();
+    return false;
+  }
+
+  // Remove the document after printing or cancelling and return control to the page.
+  const cleanup = () => {
+    window.clearTimeout(cleanupTimer);
+    frame.remove();
+    window.focus();
+  };
+  printWindow.addEventListener("afterprint", cleanup, { once: true });
+
+  printDocument.open();
+  printDocument.write(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
 <style>body{font:16px/1.6 Arial,sans-serif;max-width:820px;margin:40px auto;padding:0 24px;color:#1f2933}pre{white-space:pre-wrap;font:inherit}</style>
 </head><body><h1>${escapeHtml(title)}</h1><pre>${escapeHtml(text)}</pre></body></html>`);
-  popup.document.close();
-  popup.focus();
-  popup.print();
+  printDocument.close();
+
+  const cleanupTimer = window.setTimeout(cleanup, 60000);
+  window.requestAnimationFrame(() => {
+    printWindow.focus();
+    printWindow.print();
+  });
   return true;
 }
 
-/** POST multipart com timeout; devolve JSON validado pelo caller. */
+/** Multipart POST with a timeout; the caller validates the returned JSON. */
 async function postAudio(
   payload: Blob | File,
   filename: string | null,
@@ -378,22 +410,24 @@ const S = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    padding: 0,
     zIndex: 50,
   },
   modal: {
-    width: "100%",
-    maxWidth: 820,
-    maxHeight: "85vh",
+    width: "100vw",
+    maxWidth: "none",
+    height: "100dvh",
+    maxHeight: "100dvh",
+    boxSizing: "border-box",
     overflowY: "auto",
     background: C.surface,
-    border: `1px solid ${C.rule}`,
-    borderRadius: 12,
+    border: "none",
+    borderRadius: 0,
     padding: 28,
     display: "flex",
     flexDirection: "column",
     gap: 20,
-    boxShadow: "0 12px 40px rgba(31, 41, 51, 0.18)",
+    boxShadow: "none",
   },
   spinner: {
     width: 16,
@@ -475,7 +509,7 @@ type Status = "empty" | "loading" | "success" | "error";
 function Index() {
   const configured = isConfigured();
 
-  /* ================= PAINEL 1 — REUNIÃO ================= */
+  /* ================= PANEL 1 — MEETING ================= */
   const [recState, setRecState] = useState<"idle" | "recording">("idle");
   const [seconds, setSeconds] = useState(0);
   const [mStatus, setMStatus] = useState<Status>("empty");
@@ -584,14 +618,14 @@ function Index() {
     if (typeof window === "undefined" || !window.isSecureContext) {
       setMStatus("error");
       setMError(
-        "A gravação exige uma conexão segura (HTTPS). Abra a página em HTTPS e tente novamente.",
+        "Recording requires a secure HTTPS connection. Open this page over HTTPS and try again.",
       );
       return;
     }
     if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setMStatus("error");
       setMError(
-        "Este navegador não permite gravar áudio. Use outro navegador ou envie um arquivo no painel ao lado.",
+        "This browser cannot record audio. Use another browser or upload a file in the adjacent panel.",
       );
       return;
     }
@@ -602,7 +636,7 @@ function Index() {
     } catch {
       setMStatus("error");
       setMError(
-        "Não foi possível usar o microfone. Autorize o acesso no navegador e tente novamente.",
+        "We could not access the microphone. Allow access in your browser and try again.",
       );
       return;
     }
@@ -634,7 +668,7 @@ function Index() {
       stopTracks();
       setMStatus("error");
       setMError(
-        "Não foi possível iniciar a gravação neste navegador. Tente novamente ou envie um arquivo.",
+        "We could not start recording in this browser. Try again or upload a file.",
       );
       return;
     }
@@ -674,7 +708,7 @@ function Index() {
         return;
       }
       meetingBlobRef.current = blob;
-      meetingNameRef.current = `reuniao${ext}`;
+      meetingNameRef.current = `meeting${ext}`;
       void sendMeeting();
     };
 
@@ -754,7 +788,7 @@ function Index() {
     revokeUrl();
   };
 
-  /* ================= PAINEL 2 — ARQUIVO ================= */
+  /* ================= PANEL 2 — FILE ================= */
   const [file, setFile] = useState<File | null>(null);
   const [fStatus, setFStatus] = useState<Status>("empty");
   const [fError, setFError] = useState<string | null>(null);
@@ -841,32 +875,37 @@ function Index() {
 
   useEffect(() => {
     if (!ataOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setAtaOpen(false);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
   }, [ataOpen]);
 
   const buildAtaText = () => {
-    const lines: string[] = ["# Ata da Reunião", ""];
-    lines.push("## Resumo", "");
+    const lines: string[] = ["# Meeting minutes", ""];
+    lines.push("## Summary", "");
     lines.push(
       ...(mResumo.length
         ? mResumo.map((t) => `- ${capFirst(t)}`)
-        : ["- Nenhum tópico identificado."]),
+        : ["- No topics were identified."]),
     );
     if (mDecisoes.length) {
-      lines.push("", "## Decisões", "", ...mDecisoes.map((t) => `- ${capFirst(t)}`));
+      lines.push("", "## Decisions", "", ...mDecisoes.map((t) => `- ${capFirst(t)}`));
     }
-    lines.push("", "## Ações", "");
+    lines.push("", "## Actions", "");
     lines.push(
-      ...(mAcoes.length ? mAcoes.map((t) => `- ${capFirst(t)}`) : ["- Nenhuma ação identificada."]),
+      ...(mAcoes.length ? mAcoes.map((t) => `- ${capFirst(t)}`) : ["- No actions were identified."]),
     );
     if (mInsight.trim()) {
       lines.push(
         "",
-        "## Sugestão do assistente (para análise e aprovação)",
+        "## Assistant recommendation (for review and approval)",
         "",
         capFirst(mInsight),
       );
@@ -881,15 +920,15 @@ function Index() {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => setCopiedDocument(null), 1800);
     } catch {
-      if (kind === "ata") setDlError("Não foi possível copiar o documento.");
-      else setFError("Não foi possível copiar o documento.");
+      if (kind === "ata") setDlError("We could not copy the document.");
+      else setFError("We could not copy the document.");
     }
   };
 
   const ataSections = (
     <>
       <div>
-        <h4 style={{ ...S.h3, marginBottom: 10 }}>Resumo</h4>
+        <h4 style={{ ...S.h3, marginBottom: 10 }}>Summary</h4>
         {mResumo.length > 0 ? (
           <ul style={S.list}>
             {mResumo.map((t, i) => (
@@ -897,13 +936,13 @@ function Index() {
             ))}
           </ul>
         ) : (
-          <p style={S.text}>Nenhum tópico foi identificado nesta reunião.</p>
+          <p style={S.text}>No topics were identified in this meeting.</p>
         )}
       </div>
 
       {mDecisoes.length > 0 && (
         <div>
-          <h4 style={{ ...S.h3, marginBottom: 10 }}>Decisões</h4>
+          <h4 style={{ ...S.h3, marginBottom: 10 }}>Decisions</h4>
           <ul style={S.list}>
             {mDecisoes.map((t, i) => (
               <li key={`d-${i}`}>{capFirst(t)}</li>
@@ -913,7 +952,7 @@ function Index() {
       )}
 
       <div>
-        <h4 style={{ ...S.h3, marginBottom: 10 }}>Ações</h4>
+        <h4 style={{ ...S.h3, marginBottom: 10 }}>Actions</h4>
         {mAcoes.length > 0 ? (
           <ul style={S.list}>
             {mAcoes.map((t, i) => (
@@ -921,13 +960,13 @@ function Index() {
             ))}
           </ul>
         ) : (
-          <p style={S.text}>Nenhuma ação foi identificada nesta reunião.</p>
+          <p style={S.text}>No actions were identified in this meeting.</p>
         )}
       </div>
 
       {mInsight.trim() && (
         <div>
-          <h4 style={{ ...S.h3, marginBottom: 10 }}>Sugestão do assistente</h4>
+          <h4 style={{ ...S.h3, marginBottom: 10 }}>Assistant recommendation</h4>
           <div style={S.callout}>
             <p style={{ margin: 0, display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span aria-hidden="true">💡</span>
@@ -985,25 +1024,25 @@ function Index() {
                 <path d="M12 18v3" />
               </svg>
             </span>
-            Áudio em Ata
+            Audio to Minutes
           </div>
-          <h1 style={S.h1}>Da reunião à ata — e do áudio ao texto.</h1>
-          <p style={S.sub}>Grave uma conversa presencial ou envie um arquivo de áudio.</p>
+          <h1 style={S.h1}>From meeting to minutes — and from audio to text.</h1>
+          <p style={S.sub}>Record an in-person conversation or upload an audio file.</p>
         </header>
 
         <hr style={S.rule} />
 
         <main className="aa-grid" style={S.grid}>
-          {/* ---------------- PAINEL 1 ---------------- */}
+          {/* ---------------- PANEL 1 ---------------- */}
           <section style={S.panel} aria-labelledby="t-reuniao">
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <h2 id="t-reuniao" style={S.h2}>
-                Resumir reunião
+                Summarize a meeting
               </h2>
               <p style={S.text}>
-                Use o microfone deste dispositivo para registrar uma reunião presencial.
+                Use this device's microphone to record an in-person meeting.
               </p>
-              <p style={S.hint}>(gravação de até 90 minutos)</p>
+              <p style={S.hint}>(record up to 90 minutes)</p>
             </div>
 
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14 }}>
@@ -1016,11 +1055,11 @@ function Index() {
                   disabled={meetingBusy}
                 >
                   <Icon name="mic" />
-                  Iniciar gravação
+                  Start recording
                 </button>
               ) : (
                 <>
-                  <span style={{ fontWeight: 600 }}>Gravando</span>
+                  <span style={{ fontWeight: 600 }}>Recording</span>
                   <span style={S.timer} aria-hidden="true">
                     {fmtTime(seconds)}
                   </span>
@@ -1032,7 +1071,7 @@ function Index() {
                     disabled={meetingBusy}
                   >
                     <Icon name="stop" />
-                    Finalizar gravação
+                    Stop recording
                   </button>
                 </>
               )}
@@ -1048,7 +1087,7 @@ function Index() {
                   }}
                 >
                   <span style={S.spinner} aria-hidden="true" />
-                  Processando…
+                  Processing…
                 </span>
               )}
             </div>
@@ -1062,7 +1101,7 @@ function Index() {
                   gap: 12,
                 }}
               >
-                <h3 style={S.h3}>Ata da Reunião</h3>
+                <h3 style={S.h3}>Meeting minutes</h3>
                 {mStatus === "success" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                     {copiedDocument === "ata" && (
@@ -1070,7 +1109,7 @@ function Index() {
                         aria-live="polite"
                         style={{ color: C.ink2, fontSize: 13, marginRight: 4 }}
                       >
-                        Copiado
+                        Copied
                       </span>
                     )}
                     <button
@@ -1078,8 +1117,8 @@ function Index() {
                       className="aa-ghost"
                       style={S.ghost}
                       onClick={() => void copyDocument("ata", buildAtaText())}
-                      aria-label="Copiar ata da reunião"
-                      title="Copiar"
+                      aria-label="Copy meeting minutes"
+                      title="Copy"
                     >
                       <Icon name="copy" />
                     </button>
@@ -1087,9 +1126,9 @@ function Index() {
                       type="button"
                       className="aa-ghost"
                       style={S.ghost}
-                      onClick={() => downloadText(buildAtaText(), "ata-reuniao.md")}
-                      aria-label="Baixar ata da reunião"
-                      title="Baixar"
+                      onClick={() => downloadText(buildAtaText(), "meeting-minutes.md")}
+                      aria-label="Download meeting minutes"
+                      title="Download"
                     >
                       <Icon name="download" />
                     </button>
@@ -1097,9 +1136,9 @@ function Index() {
                       type="button"
                       className="aa-ghost"
                       style={S.ghost}
-                      onClick={() => printText("Ata da Reunião", buildAtaText())}
-                      aria-label="Imprimir ata da reunião"
-                      title="Imprimir"
+                      onClick={() => printText("Meeting minutes", buildAtaText())}
+                      aria-label="Print meeting minutes"
+                      title="Print"
                     >
                       <Icon name="print" />
                     </button>
@@ -1108,8 +1147,8 @@ function Index() {
                       className="aa-ghost"
                       style={S.ghost}
                       onClick={() => setAtaOpen(true)}
-                      aria-label="Expandir ata da reunião"
-                      title="Expandir"
+                      aria-label="Expand meeting minutes"
+                      title="Expand"
                     >
                       ⤢
                     </button>
@@ -1118,15 +1157,15 @@ function Index() {
               </div>
 
               <div aria-live="polite">
-                {mStatus === "empty" && <p style={S.text}>A ata aparecerá aqui após a gravação.</p>}
+                {mStatus === "empty" && <p style={S.text}>Your meeting minutes will appear here after recording.</p>}
                 {mStatus === "loading" && (
-                  <p style={S.text}>Transcrevendo e organizando a reunião…</p>
+                  <p style={S.text}>Transcribing and organizing the meeting…</p>
                 )}
               </div>
 
               {mStatus === "error" && mError && (
                 <div role="alert" style={S.err}>
-                  <strong>Erro:</strong> {mError}
+                  <strong>Error:</strong> {mError}
                 </div>
               )}
 
@@ -1139,7 +1178,7 @@ function Index() {
                     onClick={() => void sendMeeting()}
                     disabled={meetingBusy}
                   >
-                    Tentar novamente
+                    Try again
                   </button>
                 </div>
               )}
@@ -1157,16 +1196,16 @@ function Index() {
                       disabled={dlLoading}
                     >
                       <Icon name="download" />
-                      Baixar transcrição completa
+                      Download full transcript
                     </button>
                     <button
                       type="button"
                       className="aa-secondary"
                       style={{ ...S.btn2, display: "inline-flex", alignItems: "center", gap: 8 }}
-                      onClick={() => downloadText(buildAtaText(), "ata-da-reuniao.md")}
+                      onClick={() => downloadText(buildAtaText(), "meeting-minutes.md")}
                     >
                       <Icon name="download" />
-                      Baixar ata da reunião
+                      Download meeting minutes
                     </button>
                     <button
                       type="button"
@@ -1174,18 +1213,18 @@ function Index() {
                       style={S.btn2}
                       onClick={resetMeeting}
                     >
-                      Começar de novo
+                      Start over
                     </button>
                   </div>
 
                   <div aria-live="polite">
-                    {dlLoading && <p style={S.text}>Preparando transcrição…</p>}
+                    {dlLoading && <p style={S.text}>Preparing transcript…</p>}
                   </div>
 
                   {dlError && (
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div role="alert" style={S.err}>
-                        <strong>Erro:</strong> {dlError}
+                        <strong>Error:</strong> {dlError}
                       </div>
                       <div>
                         <button
@@ -1195,7 +1234,7 @@ function Index() {
                           onClick={() => void downloadMeetingTranscript()}
                           disabled={dlLoading}
                         >
-                          Tentar baixar novamente
+                          Try download again
                         </button>
                       </div>
                     </div>
@@ -1209,7 +1248,7 @@ function Index() {
                 style={S.overlay}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Ata da Reunião"
+                aria-label="Meeting minutes"
                 onClick={() => setAtaOpen(false)}
               >
                 <div style={S.modal} onClick={(e) => e.stopPropagation()}>
@@ -1221,15 +1260,15 @@ function Index() {
                       gap: 12,
                     }}
                   >
-                    <h3 style={{ ...S.h2 }}>Ata da Reunião</h3>
+                    <h3 style={{ ...S.h2 }}>Meeting minutes</h3>
                     <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <button
                         type="button"
                         className="aa-ghost"
                         style={S.ghost}
                         onClick={() => void copyDocument("ata", buildAtaText())}
-                        aria-label="Copiar ata da reunião"
-                        title="Copiar"
+                        aria-label="Copy meeting minutes"
+                        title="Copy"
                       >
                         <Icon name="copy" />
                       </button>
@@ -1237,9 +1276,9 @@ function Index() {
                         type="button"
                         className="aa-ghost"
                         style={S.ghost}
-                        onClick={() => downloadText(buildAtaText(), "ata-reuniao.md")}
-                        aria-label="Baixar ata da reunião"
-                        title="Baixar"
+                        onClick={() => downloadText(buildAtaText(), "meeting-minutes.md")}
+                        aria-label="Download meeting minutes"
+                        title="Download"
                       >
                         <Icon name="download" />
                       </button>
@@ -1247,9 +1286,9 @@ function Index() {
                         type="button"
                         className="aa-ghost"
                         style={S.ghost}
-                        onClick={() => printText("Ata da Reunião", buildAtaText())}
-                        aria-label="Imprimir ata da reunião"
-                        title="Imprimir"
+                        onClick={() => printText("Meeting minutes", buildAtaText())}
+                        aria-label="Print meeting minutes"
+                        title="Print"
                       >
                         <Icon name="print" />
                       </button>
@@ -1258,8 +1297,8 @@ function Index() {
                         className="aa-ghost"
                         style={S.ghost}
                         onClick={() => setAtaOpen(false)}
-                        aria-label="Fechar"
-                        title="Fechar"
+                        aria-label="Close"
+                        title="Close"
                       >
                         ✕
                       </button>
@@ -1275,7 +1314,7 @@ function Index() {
                       style={S.btn2}
                       onClick={() => setAtaOpen(false)}
                     >
-                      Fechar
+                      Close
                     </button>
                   </div>
                 </div>
@@ -1283,18 +1322,18 @@ function Index() {
             )}
           </section>
 
-          {/* ---------------- PAINEL 2 ---------------- */}
+          {/* ---------------- PANEL 2 ---------------- */}
           <section style={S.panel} aria-labelledby="t-arquivo">
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <h2 id="t-arquivo" style={S.h2}>
-                Transcrever arquivo
+                Transcribe a file
               </h2>
-              <p style={S.text}>Envie um áudio para receber o texto completo.</p>
+              <p style={S.text}>Upload audio to receive the full text.</p>
             </div>
 
             <div>
               <label htmlFor="aa-file" style={S.label}>
-                Arquivo de áudio
+                Audio file
               </label>
               <input
                 id="aa-file"
@@ -1350,14 +1389,14 @@ function Index() {
                 }}
               >
                 <Icon name="upload" />
-                Arraste um áudio aqui ou escolha um arquivo
+                Drag audio here or choose a file
               </button>
             </div>
 
             {file && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <p style={S.chip}>
-                  Arquivo selecionado: {file.name} — {humanSize(file.size)}
+                  Selected file: {file.name} — {humanSize(file.size)}
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                   <button
@@ -1367,7 +1406,7 @@ function Index() {
                     onClick={() => void sendFile(file)}
                     disabled={fileBusy}
                   >
-                    Transcrever arquivo
+                    Transcribe file
                   </button>
                   {fStatus === "success" && (
                     <button
@@ -1376,7 +1415,7 @@ function Index() {
                       style={S.btn2}
                       onClick={resetFile}
                     >
-                      Começar de novo
+                      Start over
                     </button>
                   )}
                 </div>
@@ -1392,7 +1431,7 @@ function Index() {
                   gap: 12,
                 }}
               >
-                <h3 style={S.h3}>Transcrição do arquivo</h3>
+                <h3 style={S.h3}>File transcript</h3>
                 {fStatus === "success" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
                     {copiedDocument === "arquivo" && (
@@ -1400,7 +1439,7 @@ function Index() {
                         aria-live="polite"
                         style={{ color: C.ink2, fontSize: 13, marginRight: 4 }}
                       >
-                        Copiado
+                        Copied
                       </span>
                     )}
                     <button
@@ -1408,8 +1447,8 @@ function Index() {
                       className="aa-ghost"
                       style={S.ghost}
                       onClick={() => void copyDocument("arquivo", transcricao)}
-                      aria-label="Copiar transcrição do arquivo"
-                      title="Copiar"
+                      aria-label="Copy file transcript"
+                      title="Copy"
                     >
                       <Icon name="copy" />
                     </button>
@@ -1417,9 +1456,9 @@ function Index() {
                       type="button"
                       className="aa-ghost"
                       style={S.ghost}
-                      onClick={() => downloadText(transcricao, "transcricao-arquivo.txt")}
-                      aria-label="Baixar transcrição do arquivo"
-                      title="Baixar"
+                      onClick={() => downloadText(transcricao, "file-transcript.txt")}
+                      aria-label="Download file transcript"
+                      title="Download"
                     >
                       <Icon name="download" />
                     </button>
@@ -1427,9 +1466,9 @@ function Index() {
                       type="button"
                       className="aa-ghost"
                       style={S.ghost}
-                      onClick={() => printText("Transcrição do arquivo", transcricao)}
-                      aria-label="Imprimir transcrição do arquivo"
-                      title="Imprimir"
+                      onClick={() => printText("File transcript", transcricao)}
+                      aria-label="Print file transcript"
+                      title="Print"
                     >
                       <Icon name="print" />
                     </button>
@@ -1439,18 +1478,18 @@ function Index() {
 
               <div aria-live="polite">
                 {fStatus === "empty" && !file && (
-                  <p style={S.text}>O texto integral aparecerá aqui após o envio.</p>
+                  <p style={S.text}>The full text will appear here after upload.</p>
                 )}
                 {fStatus === "empty" && file && (
-                  <p style={S.text}>O texto integral aparecerá aqui após o envio.</p>
+                  <p style={S.text}>The full text will appear here after upload.</p>
                 )}
-                {fStatus === "loading" && <p style={S.text}>Transcrevendo o arquivo…</p>}
+                {fStatus === "loading" && <p style={S.text}>Transcribing the file…</p>}
               </div>
 
               {fStatus === "error" && fError && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <div role="alert" style={S.err}>
-                    <strong>Erro:</strong> {fError}
+                    <strong>Error:</strong> {fError}
                   </div>
                   {file && (
                     <div>
@@ -1461,7 +1500,7 @@ function Index() {
                         onClick={() => void sendFile(file)}
                         disabled={fileBusy}
                       >
-                        Tentar novamente
+                        Try again
                       </button>
                     </div>
                   )}
@@ -1472,7 +1511,7 @@ function Index() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <div>
                     <label htmlFor="aa-transcricao" style={S.label}>
-                      Transcrição completa
+                      Full transcript
                     </label>
                     <textarea id="aa-transcricao" readOnly value={transcricao} style={S.ta} />
                   </div>
@@ -1481,10 +1520,10 @@ function Index() {
                       type="button"
                       className="aa-primary"
                       style={{ ...S.btn, display: "inline-flex", alignItems: "center", gap: 8 }}
-                      onClick={() => downloadText(transcricao, "transcricao-arquivo.txt")}
+                      onClick={() => downloadText(transcricao, "file-transcript.txt")}
                     >
                       <Icon name="download" />
-                      Baixar transcrição
+                      Download transcript
                     </button>
                   </div>
                 </div>
