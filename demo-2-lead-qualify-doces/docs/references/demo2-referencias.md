@@ -20,7 +20,7 @@ longo do processo. Não é endosso de compra — é banco de referência. Coleta
 2. **Visual reference collection** — cliente envia foto de referência (Pinterest/Instagram) dentro
    da conversa, anexada ao pedido. *Ideia forte p/ doce personalizado (ex.: brigadeiro temático).*
 3. **Scheduling with lead-time logic** — impõe prazo mínimo por complexidade (impede "bolo elaborado
-   pra amanhã"); mostra só as datas viáveis. *Casa com "sob encomenda" da Alanna.*
+   pra amanhã"); mostra só as datas viáveis. *Casa com o modelo sob encomenda do Demo 2.*
 4. **Multi-channel availability** — mesmo backend atende site, WhatsApp e SMS. *Confirma nossa tese:
    o cérebro (n8n) é um só; o canal é troca de nó.*
 
@@ -34,9 +34,10 @@ progressivo** (o cliente dá passos pequenos antes do cadastro). → refletir no
 ### FAQ — perguntas do segmento (base de MERCADO, não inventadas) — sessão 07
 Consolidado de FAQs reais de confeitarias sob encomenda (BR) + bakeries de custom cake (intl).
 Modelo: acordeão (clica e abre a resposta). Respostas específicas de política ficam como
-placeholder até Alanna confirmar (sinal %, prazos, pedido mínimo, pagamento).
+placeholder até os dados fictícios do negócio serem consolidados (sinal %, prazos, pedido mínimo,
+pagamento).
 
-| Pergunta (recorrente no segmento) | Resposta-base (confirmar com Alanna) |
+| Pergunta (recorrente no segmento) | Resposta-base (validar para o negócio fictício) |
 |---|---|
 | Qual o prazo mínimo de encomenda? | ex.: X dias; datas especiais/casamento exigem mais antecedência |
 | Precisa de sinal para reservar a data? | padrão do setor: **50%** para confirmar e reservar a data; restante na retirada |
@@ -49,7 +50,7 @@ placeholder até Alanna confirmar (sinal %, prazos, pedido mínimo, pagamento).
 
 Fontes: FAQs de confeitarias BR (Chapoca, My Lovin Cake, Sensação Bolos, Andréa Melo, Alô Doces) +
 bakeries intl (That's The Cake, Custom Cakes by Adele). Confiança **Alta** (padrão convergente em
-múltiplas fontes independentes). Prazos/sinais variam por casa → confirmar com Alanna antes do build.
+múltiplas fontes independentes). Prazos/sinais variam por casa → validar antes de qualquer uso comercial.
 
 ### Paleta de cores — preferência + pesquisa de mercado do nicho (sessão 07)
 **Preferência do Luiz:** o roxo atual do protótipo **não** é a preferência; aceitável só se suavizado
@@ -66,12 +67,12 @@ por degradê. Decisão correta: escolher por **pesquisa de design do nicho**, n�
 **Parecer (paleta a TESTAR — trocar o roxo por isto):**
 - Fundo: creme quente `#FBF7F1` (deixa a foto do doce saltar)
 - Primária/CTA: chocolate `#6B3F27` (ou caramelo `#B0764F`)
-- Acento 1: rosa/blush `#E8B4C4` (feminino, casa com a marca da Alanna)
+- Acento 1: rosa/blush `#E8B4C4` (feminino, adequado à marca fictícia)
 - Acento 2: dourado `#C9A24B` (eventos/premium)
 - Texto: marrom escuro `#3B2A20`; muted `#8A7A6D`
 
 Confiança **Alta** (fontes convergem: psicologia de cor de alimento + artesanal→terroso/pastel +
-chocolate→marrom/dourado). Ressalva: casar com as **cores reais da marca da Alanna** (confirmar).
+chocolate→marrom/dourado). Ressalva: adaptar às **cores da marca do cliente** em uso comercial.
 Fontes: bakeryandsnacks.com (cor vende comida) · bakersauthority.com (psicologia de cor) ·
 produkto.io (paletas pastry/bakery) · colorlib.com (26 sites de chocolate) · confetti.design (branding).
 

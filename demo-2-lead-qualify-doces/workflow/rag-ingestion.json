@@ -1,0 +1,181 @@
+{
+  "name": "Demo 2 · RAG ingestion — knowledge base → pgvector (demo2_kb)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b0000000-0000-4000-8000-0000000000b1",
+      "name": "Run · Ingest KB (manual)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fonte legivel: demo-2-lead-qualify-doces/knowledge/dossie-empresa-ficticia.md (Confeitaria Doce Aurora, FICTICIA).\n// Copia enxuta por secao para o RAG indexar. Cada item = 1 chunk auto-contido. (v2 - dossie robusto)\nconst kb = [\n  { s: 'Institucional', t: 'Confeitaria Doce Aurora: atelie de doces finos sob encomenda desde 2016, sede em Sao Paulo (Vila Mariana), equipe de 12 pessoas. Atende casamento, aniversario infantil e adulto, corporativo e datas comemorativas. Producao artesanal com boas praticas.' },\n  { s: 'Atendimento e entrega', t: 'Entrega propria em Sao Paulo capital (taxa R$25 a R$70 por regiao) e Grande SP (R$70 a R$150 sob consulta). Envio nacional apenas de itens nao pereciveis (bem-casados, docinhos secos, kits). Retirada no atelie sem custo, com agendamento.' },\n  { s: 'Precos docinhos', t: 'Docinhos gourmet (brigadeiro belga, beijinho, pistache) a R$3,50 por unidade ou R$320 o cento, minimo 50 unidades por sabor. Sabores premium (pistache, Nutella, frutas nobres) tem acrescimo de 15 por cento.' },\n  { s: 'Precos bem-casados e bolos', t: 'Bem-casados a R$5,50 por unidade, minimo 30. Bolo decorado a partir de R$180 por quilo, minimo 2 kg. Mesa de doces (montagem e reposicao) em pacotes de R$1.200 a R$4.500 sob projeto. Kit lembranca (2 docinhos + tag) a R$14, minimo 40 kits.' },\n  { s: 'Pedido minimo', t: 'Pedido minimo de R$300, fora a taxa de entrega.' },\n  { s: 'Sinal e reserva', t: 'Sinal de 50 por cento para reservar a data; saldo ate 2 dias antes da entrega ou retirada. Sem sinal, a data nao fica reservada.' },\n  { s: 'Antecedencia e expresso', t: 'Antecedencia ideal de 15 dias. Pedidos expressos (5 a 7 dias) conforme agenda, com taxa de urgencia de 20 por cento. Menos de 5 dias, so com disponibilidade.' },\n  { s: 'Cancelamento', t: 'Cancelamento combinado por escrito antes do pagamento: 8 dias ou mais antes, restituicao integral do sinal; 5 a 7 dias antes, retencao de 50 por cento; 4 dias ou menos, retencao de 80 por cento.' },\n  { s: 'Alteracoes', t: 'Alteracoes de quantidade ou sabor ate 7 dias antes, sujeitas a novo orcamento.' },\n  { s: 'Pagamento', t: 'Formas de pagamento: Pix a vista, cartao de credito ate 3x sem juros acima de R$500, dinheiro so na retirada. O sinal confirma a agenda; emitimos recibo ou contrato simples por escrito.' },\n  { s: 'Qualidade e trocas', t: 'Problema de qualidade (sabor, conservacao, avaria no transporte) deve ser comunicado em ate 24h com foto; avaliamos reposicao ou reembolso proporcional. Nao trocamos por mudanca de gosto apos aprovacao em degustacao.' },\n  { s: 'Alergenicos', t: 'Os produtos contem e podem conter leite, gluten, ovos e oleaginosas (mesma cozinha). Opcoes sem gluten e sem lactose sob consulta, com cardapio reduzido e possivel acrescimo. A cozinha nao e livre de alergenicos.' },\n  { s: 'Personalizacao', t: 'Personalizamos tema, cores, topo de bolo e embalagem. Aceitamos foto de referencia (Pinterest ou Instagram). Degustacao disponivel para mesa de doces e casamento, agendada, com custo abatido no fechamento.' },\n  { s: 'FAQ pedido minimo', t: 'Pergunta: qual o pedido minimo? Resposta: R$300, fora a entrega; docinhos a partir de 50 unidades por sabor.' },\n  { s: 'FAQ prazo', t: 'Pergunta: com quanto tempo preciso pedir? Resposta: ideal 15 dias; da para tentar expresso (5 a 7 dias) com taxa de 20 por cento.' },\n  { s: 'FAQ personalizacao', t: 'Pergunta: fazem o tema que eu quiser? Resposta: sim, personalizamos tema, cor, topo e embalagem; pode mandar foto de referencia.' },\n  { s: 'FAQ entrega', t: 'Pergunta: voces entregam? Resposta: em SP capital e Grande SP com taxa por regiao, e enviamos itens secos para todo o Brasil.' },\n  { s: 'FAQ pagamento', t: 'Pergunta: como funciona o pagamento? Resposta: 50 por cento de sinal para reservar a data e o saldo ate 2 dias antes.' },\n  { s: 'FAQ restricoes', t: 'Pergunta: tem opcao sem gluten ou sem lactose? Resposta: sob consulta, cardapio reduzido; a cozinha nao e livre de alergenicos.' },\n  { s: 'FAQ cancelamento', t: 'Pergunta: posso cancelar? Resposta: sim; a restituicao do sinal depende da antecedencia (integral com 8 dias ou mais).' }\n];\nreturn kb.map(k => ({ json: { text: `${k.s}: ${k.t}`, section: k.s } }));"
+      },
+      "id": "b0000000-0000-4000-8000-0000000000b2",
+      "name": "Split KB into sections",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "demo2_kb",
+        "options": {}
+      },
+      "id": "b0000000-0000-4000-8000-0000000000b3",
+      "name": "Store in pgvector (demo2_kb)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "b0000000-0000-4000-8000-0000000000b4",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b0000000-0000-4000-8000-0000000000b5",
+      "name": "Embeddings OpenAI (text-embedding-3-small)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        128,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Build the demo2_kb knowledge base for pgvector RAG\n\n**How it works**\n\nRuns manually. `Split KB into sections` emits the curated, versioned knowledge chunks embedded in its Code node; `knowledge/dossie-empresa-ficticia.md` is the readable companion source in the repository. The *Default Data Loader* + *Embeddings OpenAI (text-embedding-3-small)* turn each chunk into vectors; `Store in pgvector (demo2_kb)` writes them to the `demo2_kb` table — the same base queried by the agent and QA workflow.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials (same database as Demo 2).\n2. Add OpenAI credentials for embeddings.\n3. Edit the curated items in `Split KB into sections` and keep the readable companion file aligned.\n4. Run once; re-run whenever the knowledge base changes.",
+        "height": 456,
+        "width": 504
+      },
+      "id": "b0000000-0000-4000-8000-0000000000b6",
+      "name": "Overview · RAG ingestion",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intelligence\nSplits the base into sections, generates embeddings (OpenAI) + data loader.",
+        "height": 444,
+        "width": 452,
+        "color": 6
+      },
+      "id": "973bb11d-be78-400d-9a42-ac36323cdc0f",
+      "name": "Intelligence · Chunking & embeddings",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Persistence\nStores into the `demo2_kb` pgvector.",
+        "height": 444,
+        "width": 424,
+        "color": 4
+      },
+      "id": "a7f37a65-dd98-4010-a042-6b442c3d17a3",
+      "name": "Persistence · pgvector",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Acquisition · Manual ingest\n\nManual trigger. Run to (re)index the demo2_kb knowledge base.",
+        "height": 448,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "33b695a3-d7ef-44d8-8d9d-2bd6e652254d",
+      "name": "Acquisition · Manual ingest"
+    }
+  ],
+  "connections": {
+    "Run · Ingest KB (manual)": {
+      "main": [
+        [
+          {
+            "node": "Split KB into sections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split KB into sections": {
+      "main": [
+        [
+          {
+            "node": "Store in pgvector (demo2_kb)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Store in pgvector (demo2_kb)",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI (text-embedding-3-small)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Store in pgvector (demo2_kb)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

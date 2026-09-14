@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS leads_doces (
   tier         TEXT,          -- hot | warm | cold | review
   reasoning    TEXT,
   resumo       TEXT,
+  tem_imagem   BOOLEAN NOT NULL DEFAULT FALSE,
+  notified_at  TIMESTAMPTZ,
   criado_em    TIMESTAMPTZ DEFAULT now()
 );
 

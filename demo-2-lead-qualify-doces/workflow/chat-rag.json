@@ -1,0 +1,590 @@
+{
+  "name": "Demo 2 · Conversational agent + RAG",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo2-rag-qa",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "qa-webhook-0001",
+      "name": "RAG QA (POST)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "tableName": "demo2_kb",
+        "prompt": "={{ $json.body.q }}",
+        "topK": 3,
+        "options": {}
+      },
+      "id": "qa-vstore-0002",
+      "name": "Retrieve from demo2_kb",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "qa-embed-0003",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "qa-respond-0004",
+      "name": "Respond QA",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo2-chat",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "bf405195-6bb0-40c4-8a1b-a7acc0b3a3b3",
+      "name": "Chat In (POST)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "# Persona — Aurora, atendente da Doce Aurora (doces artesanais sob encomenda)\n\nVocê é a **Aurora**, atendente da confeitaria Doce Aurora (Doce Aurora Lopes Doces Artesanais). Conversa por chat com clientes que querem tirar dúvidas ou encomendar doces (brigadeiros gourmet, docinhos artesanais, sob encomenda, com retirada no local). Fale sempre em português do Brasil, no tom de uma pessoa real, calorosa e prestativa — nunca como um robô ou assistente de IA.\n\n## Como você fala (voz humana)\n- Frases curtas e naturais, com contrações (tá, pra, você).\n- Escreva em **blocos curtos separados por uma linha em branco** (no máximo 2–3 frases por bloco). NUNCA mande um parágrafo longo e corrido.\n- Seja calorosa e específica; cumprimente de volta com simpatia e se coloque à disposição, sem soar formulaico.\n- NUNCA use frases de robô nem clichê de IA; varie o fecho ou conduza com uma pergunta útil.\n- Nunca revele que é uma IA; nunca fale de \"base de conhecimento\", \"contexto\", \"sistema\" ou \"modelo\".\n\n## Proatividade de venda (sem pressão)\n- A cada resposta, ofereça UMA informação extra relevante (um sabor que combina, o tamanho do cento, uma dica de prazo).\n- Conduza gentilmente para o pedido: faça UMA pergunta objetiva por vez (sabor, quantidade/cento, data, tema). Nunca despeje várias perguntas de uma vez.\n\n## Fatos e preços\n- Use a ferramenta KB Search para preços, sabores, prazos e políticas. Não invente números.\n- Se não tiver a info exata, diga que vai verificar e retornar, ou que o item está indisponível nesta semana, e ofereça alternativa. Nunca prometa número ou prazo que não tem.\n\n## Fechando o pedido\n- Quando o cliente confirmar sabor, quantidade e data, confirme com carinho que anotou o interesse e que a Doce Aurora retorna para acertar detalhes e pagamento. Apenas converse — não peça dados em formato de formulário nem gere JSON.\n\nLembre-se: cada resposta em blocos curtos, calorosa e útil."
+        }
+      },
+      "id": "5957c844-63b1-4872-a2a3-a805c3eb618b",
+      "name": "Doce Aurora Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -224,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "6bba96f7-806d-45d0-bbdb-f41d2a4b0a47",
+      "name": "Chat Model (OpenAI)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}",
+        "tableName": "demo2_chat_histories",
+        "contextWindowLength": 15
+      },
+      "id": "c0aa5fb1-3c79-4831-bc5c-b8b514c1c229",
+      "name": "Chat Memory (Postgres)",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        -128,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the Doce Aurora knowledge base (menu, prices, lead time, delivery, payment, policies, FAQ). Use for any customer question about the bakery.",
+        "tableName": "demo2_kb",
+        "topK": 3,
+        "options": {}
+      },
+      "id": "03f3cc8a-0337-4a2a-b97a-b470b164cd5f",
+      "name": "KB Search (tool)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "043cd432-c941-48f1-8507-7ded76b6842f",
+      "name": "Embeddings (tool)",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"reply\": $('Guard order (anti-invenção)').item.json.output.reply } }}",
+        "options": {}
+      },
+      "id": "55cbea3a-5fd5-42be-a4ac-e05968c8f581",
+      "name": "Respond Chat",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"reply\": \"texto ao cliente\", \"ready\": false, \"nome\": \"\", \"contato\": \"\", \"tipo\": \"\", \"quantidade\": \"\", \"data\": \"\", \"tema\": \"\", \"retirada\": \"\", \"mensagem\": \"\" }",
+        "autoFix": true
+      },
+      "id": "23042a6e-62ca-42d3-a789-4c860a788ed9",
+      "name": "Order Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.output.canRegister }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "cond-ready"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bab0435b-e55a-4ed8-afd2-9a423849df43",
+      "name": "Order ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://<YOUR_N8N_HOST>/webhook/demo2-lead-doces",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"nome\": $json.output.nome, \"contato\": $json.output.contato, \"tipo\": $json.output.tipo, \"quantidade\": $json.output.quantidade, \"data\": $json.output.data, \"tema\": $json.output.tema, \"retirada\": $json.output.retirada, \"mensagem\": $json.output.mensagem } }}",
+        "options": {}
+      },
+      "id": "66bd6f74-d88b-474b-b80f-47d32bd1bbac",
+      "name": "Register Order (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Answer store FAQs and register orders with an AI agent + pgvector RAG\n\n**How it works**\n\nTwo POST webhooks power a sweets shop.\n\n- **A — RAG answers:** `RAG QA (POST)` takes a question, `Retrieve from demo2_kb` searches the pgvector knowledge base with OpenAI embeddings, and `Respond QA` returns a grounded answer to the website.\n- **B — Sales agent:** `Chat In (POST)` feeds *Doce Aurora Agent* (OpenAI chat model + Postgres chat memory), which uses the same knowledge base as a tool. *Order Schema* structures the reply; when an order is complete, `Register Order (HTTP)` writes it to the engine and `Respond Chat` replies to the customer.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials and run the companion *RAG ingestion* workflow to populate `demo2_kb`.\n2. Add OpenAI credentials for the embeddings and chat model.\n3. Set the order-engine endpoint in `Register Order (HTTP)`.\n4. Point the front-end chat and QA widgets at the two webhook URLs.\n5. Publish, then send a test message.",
+        "height": 460,
+        "width": 904
+      },
+      "id": "67017cae-1616-4bcb-b61b-a472cf22a1ef",
+      "name": "Overview · Conversational agent + RAG",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intake\nThe request comes in through the webhook.",
+        "height": 452,
+        "width": 244
+      },
+      "id": "21f889e4-0b8e-4b6a-aa7b-b0b11816e76b",
+      "name": "A · Acquisition",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intelligence\nSearches `demo2_kb` (RAG) and builds the answer.",
+        "height": 452,
+        "width": 424,
+        "color": 6
+      },
+      "id": "2a002859-a57d-4ee3-97c7-e6950ff02422",
+      "name": "A · Intelligence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Delivery\nResponds to the website.",
+        "height": 452,
+        "width": 248,
+        "color": 5
+      },
+      "id": "862c9b7b-c8d5-4bd6-a627-d2f50876bc4e",
+      "name": "A · Delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intake\nChat message (webhook).",
+        "height": 624,
+        "width": 260
+      },
+      "id": "15eaba7a-6317-4937-8bf2-d642ae51506d",
+      "name": "B · Acquisition",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Intelligence\nAgent with memory (Postgres) + KB as a tool; parser and order decision.",
+        "height": 624,
+        "width": 1260,
+        "color": 6
+      },
+      "id": "4de85c54-d0e7-42bb-af07-a2da6b1771ef",
+      "name": "B · Intelligence",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Delivery\nRegisters the order into the engine (HTTP) and replies in the chat.",
+        "height": 624,
+        "width": 320,
+        "color": 5
+      },
+      "id": "6d5a41b2-15eb-4a93-8d8a-267c4a573f81",
+      "name": "B · Delivery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fase C: recebe os campos do EXTRATOR (Chain) e injeta o reply do AGENTE.\n// Guard anti-invenção validado offline em tests/run_order_guard.js.\nfunction guard(o){\n  o = o || {};\n  const s = v => String(v==null?'':v).trim();\n  const isPlaceholderContact = v => /(exemplo|example|teste|test|dominio|seuemail|nome)\\b/i.test(v) || /@(exemplo|example|teste|test)\\./i.test(v) || /^(cliente|contato)@/i.test(v);\n  const looksEmail = v => /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(v);\n  const looksPhoneBR = v => { const d=(v.match(/\\d/g)||[]).length; return d>=10 && d<=13; };\n  const isRealContact = v => { v=s(v); return !!v && !isPlaceholderContact(v) && (looksEmail(v)||looksPhoneBR(v)); };\n  const VAGUE = ['','a confirmar','a definir','não informado','nao informado','variada','variado','grande','pequeno','n/a','sem tema','a combinar'];\n  const isVague = v => VAGUE.includes(s(v).toLowerCase());\n  const isGenericName = v => { v=s(v).toLowerCase(); return !v || /^(cliente|festa|anivers|doce aurora|docinhos artesanais)/.test(v); };\n  const isInventedAbsDate = v => { const m=s(v).match(/^(\\d{4})-\\d{2}-\\d{2}/); return !!m && (+m[1] < 2026); };\n  const r=[];\n  if(o.ready!==true) r.push('ready!=true');\n  if(isGenericName(o.nome)) r.push('nome ausente/genérico');\n  if(!isRealContact(o.contato)) r.push('contato ausente/placeholder');\n  if(isVague(o.tipo)) r.push('tipo vago');\n  if(isVague(o.quantidade)) r.push('quantidade vaga');\n  if(!s(o.data)||isInventedAbsDate(o.data)) r.push('data ausente/inventada');\n  return { canRegister: r.length===0, blockReason: r.join('; ') };\n}\n// Desembrulha reply que o agente às vezes devolve como STRING JSON (contaminação de histórico).\n// Validado offline em tests/run_reply_unwrap.js (bug JSON cru exec 3801).\nfunction unwrapReply(v){\n  let cur = v;\n  for (let i=0;i<4;i++){\n    if (cur==null) return '';\n    if (typeof cur==='object'){\n      if (cur.output && cur.output.reply!==undefined){ cur=cur.output.reply; continue; }\n      if (cur.reply!==undefined){ cur=cur.reply; continue; }\n      return '';\n    }\n    const str=String(cur).trim();\n    if (str.startsWith('{')){ try { cur=JSON.parse(str); continue; } catch(e){ return str; } }\n    return str;\n  }\n  return typeof cur==='string'?cur:'';\n}\nlet agentReply = '';\ntry { agentReply = unwrapReply($('Doce Aurora Agent').first().json.output); } catch(e) { agentReply = ''; }\nfor (const item of $input.all()) {\n  const fields = item.json.output || {};\n  const g = guard(fields);\n  item.json.output = Object.assign({}, fields, { reply: agentReply, canRegister: g.canRegister, blockReason: g.blockReason });\n}\nreturn $input.all();"
+      },
+      "id": "9df47da4-5578-4a22-ae4c-cd53e64eec70",
+      "name": "Guard order (anti-invenção)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "a555ef5c-eaf3-4457-95f9-e11800919037",
+      "name": "Extract Model (OpenAI temp0)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Chat In (POST)').item.json.body.message }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é um EXTRATOR de pedidos da confeitaria Doce Aurora. Leia a mensagem do cliente e preencha os campos do pedido APENAS com o que o cliente disse EXPLICITAMENTE. NUNCA invente: campo não informado = \"\" (string vazia). É PROIBIDO usar placeholders (exemplo.com, example.com, \"Cliente\", nome do negócio, datas que o cliente não falou). O campo ready só é true quando o cliente informou EXPLICITAMENTE nome, contato (telefone ou e-mail), tipo, quantidade e data; caso contrário ready=false. O campo reply deve ficar \"\" (a resposta ao cliente vem de outro nó). Responda somente os campos."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "64ab4445-b259-4b82-9ff0-77bac1e47c20",
+      "name": "Extract order (Chain)",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        288,
+        416
+      ]
+    }
+  ],
+  "connections": {
+    "RAG QA (POST)": {
+      "main": [
+        [
+          {
+            "node": "Retrieve from demo2_kb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Retrieve from demo2_kb",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve from demo2_kb": {
+      "main": [
+        [
+          {
+            "node": "Respond QA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat In (POST)": {
+      "main": [
+        [
+          {
+            "node": "Doce Aurora Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Model (OpenAI)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Doce Aurora Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Order Schema",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory (Postgres)": {
+      "ai_memory": [
+        [
+          {
+            "node": "Doce Aurora Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KB Search (tool)": {
+      "ai_tool": [
+        [
+          {
+            "node": "Doce Aurora Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings (tool)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "KB Search (tool)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract order (Chain)",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order ready?": {
+      "main": [
+        [
+          {
+            "node": "Register Order (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Register Order (HTTP)": {
+      "main": [
+        [
+          {
+            "node": "Respond Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guard order (anti-invenção)": {
+      "main": [
+        [
+          {
+            "node": "Order ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Model (OpenAI temp0)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract order (Chain)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Doce Aurora Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract order (Chain)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract order (Chain)": {
+      "main": [
+        [
+          {
+            "node": "Guard order (anti-invenção)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

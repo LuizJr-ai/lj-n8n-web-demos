@@ -1,40 +1,46 @@
-# Base de conhecimento — Alanna Doces Artesanais (RAG do Demo 2)
+# Base de conhecimento — Doce Aurora (RAG do Demo 2)
 
 Purpose: fonte única do que o agente/FAQ pode responder (cardápio, políticas, prazos). É este
 texto que será fatiado e indexado no pgvector para o RAG. **Rascunho:** itens marcados `⟨CONFIRMAR⟩`
-dependem de dados reais da Alanna (preços, prazos). Nada de preço inventado entra no ar.
+descreve a empresa fictícia Doce Aurora. Os dados são apenas de demonstração e não devem ser
+apresentados como condições de uma empresa real.
 
 ## Sobre
-Alanna Lopes — doces artesanais sob encomenda para festas (casamento, aniversário infantil,
-corporativo). Atende todo o Brasil (retirada combinada ou envio). Cada tema é personalizável.
+Doce Aurora — ateliê fictício de doces artesanais sob encomenda para festas (casamento,
+aniversário infantil, corporativo e datas comemorativas). Cada tema é personalizável.
 
 ## Produtos / cardápio
-- Bem-casados, docinhos finos, bolos e mesa de doces por tema. ⟨CONFIRMAR lista completa + fotos⟩
+- Bem-casados, docinhos finos, bolos, mesas de doces e kits lembrança por tema.
 - Personalização por tema e cor; aceita foto de referência (Pinterest/Instagram).
 
 ## Pedido mínimo e preços
-- Fechamento por cento ou por unidade, dependendo do doce.
-- Preço depende de tipo, quantidade, data e tema — informado no orçamento. ⟨CONFIRMAR tabela/faixas⟩
+- Docinhos gourmet: R$3,50 por unidade ou R$320 por cento; mínimo de 50 por sabor.
+- Bem-casados: R$5,50 por unidade; mínimo de 30. Bolo decorado: a partir de R$180/kg.
+- O pedido mínimo é R$300, fora a taxa de entrega. Valores finais dependem de tipo, quantidade,
+  data e tema.
 
 ## Personalização
 - Fazemos o tema que o cliente quiser (tema + cor). Envie foto de referência junto ao pedido.
 
 ## Entrega / retirada
-- Retirada combinada ou envio; a melhor opção é confirmada pela região no orçamento.
-- ⟨CONFIRMAR regiões de entrega e política de frete⟩
+- Retirada no ateliê, com agendamento, não tem custo.
+- Entrega em São Paulo capital e Grande SP é cotada por região. Envio nacional é apenas para itens
+  não perecíveis; bolos e brigadeiros cremosos ficam restritos à entrega local.
 
 ## Prazos
-- Encomenda sob medida; recomenda-se antecedência. ⟨CONFIRMAR prazo mínimo por tipo de evento⟩
+- O ideal é encomendar com 15 dias de antecedência. Pedidos expressos de 5 a 7 dias dependem da
+  agenda e têm taxa de urgência de 20%; abaixo de 5 dias, apenas se houver disponibilidade.
 
 ## Pagamento
-- ⟨CONFIRMAR formas (Pix, cartão), sinal para reservar data, saldo na entrega⟩
+- Pix, cartão de crédito em até 3x sem juros acima de R$500 e dinheiro na retirada. O sinal de 50%
+  reserva a data; o saldo é pago até 2 dias antes.
 
 ## FAQ (respostas curtas — as do front hoje)
-- **Qual o pedido mínimo?** Fechamos por cento ou por unidade, dependendo do doce. Diga a
-  quantidade no orçamento que já te passamos o valor.
+- **Qual o pedido mínimo?** R$300, fora a entrega. Docinhos têm mínimo de 50 unidades por sabor.
 - **Fazem o tema que eu quiser?** Fazemos! Personalizamos por tema e cor; pode enviar foto de
   referência.
-- **Como recebo o pedido?** Retirada combinada ou envio — confirme sua região no orçamento.
+- **Como recebo o pedido?** Retirada agendada ou entrega em São Paulo e Grande SP. Itens secos
+  também podem seguir por transportadora para outras regiões.
 
 ## Regras para o agente (não são conteúdo público)
 - Se faltar um dado obrigatório do pedido (nome, contato, tipo, quantidade, data, tema, retirada),

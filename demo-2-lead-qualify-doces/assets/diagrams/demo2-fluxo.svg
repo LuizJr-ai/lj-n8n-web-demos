@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 760" font-family="Segoe UI, system-ui, sans-serif">
   <rect width="980" height="760" fill="#0f172a"/>
   <text x="490" y="34" fill="#e2e8f0" font-size="22" font-weight="700" text-anchor="middle">Demo 2 · Qualificação de lead de encomenda (doces artesanais)</text>
-  <text x="490" y="56" fill="#94a3b8" font-size="13" text-anchor="middle">Um webhook; a IA dá nota ao pedido e o IF separa o cliente quente do curioso. Negócio-modelo: Alanna Doces.</text>
+  <text x="490" y="56" fill="#94a3b8" font-size="13" text-anchor="middle">Um webhook; a IA dá nota ao pedido e o IF separa o cliente quente do curioso. Negócio-modelo: Doce Aurora.</text>
 
   <defs>
     <marker id="arw" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">

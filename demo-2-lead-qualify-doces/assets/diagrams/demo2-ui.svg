@@ -11,7 +11,7 @@
   <!-- 1 HERO -->
   <rect x="60" y="96" width="410" height="96" rx="16" fill="#eef2ff"/>
   <rect x="60" y="150" width="410" height="42" fill="#eef2ff"/>
-  <text x="82" y="132" fill="#3730a3" font-size="18" font-weight="700">🧁 Alanna Doces Artesanais</text>
+  <text x="82" y="132" fill="#3730a3" font-size="18" font-weight="700">🧁 Doce Aurora</text>
   <text x="82" y="156" fill="#4338ca" font-size="12">Brigadeiros e doces artesanais · sob encomenda</text>
   <rect x="82" y="166" width="180" height="34" rx="17" fill="#6d28d9"/>
   <text x="172" y="188" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">Pedir orçamento →</text>
