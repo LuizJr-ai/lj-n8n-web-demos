@@ -2,7 +2,7 @@
 
 > Record a meeting to get a structured recap and action list, or upload an audio file to get a full transcription — all from one web interface backed by an n8n workflow.
 
-![Demo 1 interface](assets/demo1-ui-1920x1080.png)
+![Demo 1 interface](assets/ui-1920x1080.png)
 
 ## 🧩 What it does
 
@@ -72,7 +72,7 @@ mode: "reuniao" | "arquivo"
 ## 📦 Files
 
 - `ui/` — React / TanStack Start source.
-- `workflow.json` — sanitized n8n export.
+- `workflows/audio-summary.json` — sanitized n8n export.
 - `assets/` — interface screenshot and workflow diagram.
 
 ## 🏷️ Tags

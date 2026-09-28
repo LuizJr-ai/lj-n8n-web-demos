@@ -13,7 +13,7 @@ with interfaces that people can actually use.
 |---|---|---|
 | [1 — Audio meeting summary](demo-1-audio-summary/) | Records meetings or transcribes audio; returns summary, decisions, actions and a recommendation | ✅ Complete |
 | [2 — Custom-order sweets lead qualifier](demo-2-lead-qualify-doces/) | Conversational storefront, RAG assistance and AI lead routing | ✅ Complete |
-| 3 — FAQ/RAG assistant | Grounded answers from a controlled knowledge base | ⚪ Planned |
+| 3 — To be defined | Scope not decided yet | ⚪ Reserved |
 
 ## Architecture
 
@@ -28,7 +28,7 @@ Runtime URLs and credentials stay outside Git in local environment files.
 
 ```text
 demo-N-topic/
-├── workflow.json or workflows/  # sanitized n8n export(s)
+├── workflows/                   # sanitized n8n export(s)
 ├── ui/                         # end-user interface
 ├── README.md                    # problem, architecture and setup
 └── assets/                      # visual evidence used by the demo

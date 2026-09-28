@@ -1,0 +1,75 @@
+<!-- Purpose: referência visual da galeria por tema do Demo 2. Ilustrações vetoriais próprias (sem IP de terceiros); em produção, substituir por fotos de produto autorizadas. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" font-family="Segoe UI, system-ui, sans-serif">
+  <rect width="960" height="660" fill="#faf7ff"/>
+  <text x="480" y="38" fill="#4c1d95" font-size="22" font-weight="700" text-anchor="middle">Demo 2 · Galeria por tema — referência de estilo (placeholder)</text>
+  <text x="480" y="60" fill="#6d28d9" font-size="12.5" text-anchor="middle">Ilustrações vetoriais de referência. Em produção, substituir por fotos de produto autorizadas.</text>
+
+  <!-- ===== TILE 1: INFANTIL ===== -->
+  <rect x="30" y="86" width="290" height="250" rx="16" fill="#fde4ef" stroke="#f9a8d4" stroke-width="1.5"/>
+  <text x="50" y="116" fill="#9d174d" font-size="15" font-weight="700">🎈 Infantil</text>
+  <!-- brigadeiro com orelhas (mickey) -->
+  <ellipse cx="175" cy="300" rx="70" ry="16" fill="#f5c6dd"/>
+  <circle cx="140" cy="180" r="20" fill="#3b2417"/><circle cx="212" cy="180" r="20" fill="#3b2417"/>
+  <circle cx="176" cy="215" r="46" fill="#4a2c1a"/>
+  <circle cx="160" cy="205" r="3" fill="#f472b6"/><circle cx="190" cy="200" r="3" fill="#38bdf8"/>
+  <circle cx="178" cy="222" r="3" fill="#facc15"/><circle cx="165" cy="230" r="3" fill="#34d399"/>
+  <circle cx="192" cy="228" r="3" fill="#fb7185"/><circle cx="176" cy="195" r="3" fill="#a78bfa"/>
+  <path d="M150 258 L202 258 L196 292 L156 292 Z" fill="#f9a8d4"/>
+  <path d="M150 258 L202 258 M158 268 L194 268 M160 278 L192 278" stroke="#be185d" stroke-width="1.5" opacity=".5"/>
+
+  <!-- ===== TILE 2: CASAMENTO ===== -->
+  <rect x="335" y="86" width="290" height="250" rx="16" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.5"/>
+  <text x="355" y="116" fill="#3730a3" font-size="15" font-weight="700">💍 Casamento</text>
+  <ellipse cx="480" cy="300" rx="70" ry="16" fill="#dbe3f8"/>
+  <circle cx="480" cy="212" r="48" fill="#f8fafc"/>
+  <circle cx="480" cy="212" r="48" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="465" cy="205" r="2.5" fill="#eab308"/><circle cx="495" cy="205" r="2.5" fill="#eab308"/>
+  <circle cx="480" cy="225" r="2.5" fill="#eab308"/><circle cx="472" cy="218" r="2.5" fill="#eab308"/><circle cx="490" cy="216" r="2.5" fill="#eab308"/>
+  <path d="M455 256 L505 256 L499 292 L461 292 Z" fill="#e5e7eb"/>
+  <text x="480" y="330" fill="#64748b" font-size="10" text-anchor="middle">tons pérola · dourado · sóbrio</text>
+
+  <!-- ===== TILE 3: CORPORATIVO ===== -->
+  <rect x="640" y="86" width="290" height="250" rx="16" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="660" y="116" fill="#166534" font-size="15" font-weight="700">🏢 Corporativo</text>
+  <ellipse cx="785" cy="300" rx="70" ry="16" fill="#c3ecd0"/>
+  <circle cx="785" cy="212" r="48" fill="#3b2417"/>
+  <rect x="762" y="196" width="46" height="30" rx="4" fill="#f8fafc" opacity=".9"/>
+  <text x="785" y="217" fill="#166534" font-size="13" font-weight="700" text-anchor="middle">LOGO</text>
+  <path d="M760 256 L810 256 L804 292 L766 292 Z" fill="#166534"/>
+  <text x="785" y="330" fill="#64748b" font-size="10" text-anchor="middle">personalização com marca da empresa</text>
+
+  <!-- ===== TILE 4: DATAS COMEMORATIVAS ===== -->
+  <rect x="30" y="352" width="290" height="250" rx="16" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="50" y="382" fill="#92400e" font-size="15" font-weight="700">🎉 Datas comemorativas</text>
+  <ellipse cx="175" cy="566" rx="70" ry="16" fill="#f6e4a8"/>
+  <circle cx="145" cy="480" r="34" fill="#b91c1c"/>
+  <circle cx="205" cy="480" r="34" fill="#166534"/>
+  <path d="M145 468 q-8 -10 -16 0 q-8 10 16 22 q24 -12 16 -22 q-8 -10 -16 0 Z" fill="#fff" opacity=".85"/>
+  <circle cx="198" cy="474" r="2.5" fill="#fff"/><circle cx="212" cy="482" r="2.5" fill="#fff"/><circle cx="205" cy="492" r="2.5" fill="#facc15"/>
+  <text x="175" y="560" fill="#78350f" font-size="10" text-anchor="middle">Natal · Páscoa · dia dos namorados…</text>
+
+  <!-- ===== TILE 5: MINI CAKE DONUTS ===== -->
+  <rect x="335" y="352" width="290" height="250" rx="16" fill="#ffe4e6" stroke="#fecdd3" stroke-width="1.5"/>
+  <text x="355" y="382" fill="#9f1239" font-size="15" font-weight="700">🍩 Mini cake donuts</text>
+  <ellipse cx="480" cy="566" rx="70" ry="16" fill="#f8ccd1"/>
+  <circle cx="480" cy="478" r="50" fill="#c98a5e"/>
+  <path d="M430 478 a50 50 0 0 1 100 0 l-14 0 a36 36 0 0 0 -72 0 Z" fill="#ec4899"/>
+  <circle cx="480" cy="478" r="18" fill="#ffe4e6"/>
+  <circle cx="455" cy="455" r="2.5" fill="#fff"/><circle cx="505" cy="458" r="2.5" fill="#facc15"/>
+  <circle cx="500" cy="492" r="2.5" fill="#38bdf8"/><circle cx="460" cy="495" r="2.5" fill="#34d399"/><circle cx="482" cy="446" r="2.5" fill="#fff"/>
+  <text x="480" y="560" fill="#9f1239" font-size="10" text-anchor="middle">glacê colorido · confeitos</text>
+
+  <!-- ===== TILE 6: BRIGADEIRO GOURMET ===== -->
+  <rect x="640" y="352" width="290" height="250" rx="16" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+  <text x="660" y="382" fill="#5b21b6" font-size="15" font-weight="700">🍫 Brigadeiro gourmet</text>
+  <ellipse cx="785" cy="566" rx="70" ry="16" fill="#e6e1f7"/>
+  <circle cx="785" cy="478" r="46" fill="#2e1a10"/>
+  <circle cx="770" cy="466" r="3" fill="#5b3a22"/><circle cx="798" cy="468" r="3" fill="#5b3a22"/>
+  <circle cx="785" cy="486" r="3" fill="#5b3a22"/><circle cx="775" cy="492" r="3" fill="#5b3a22"/><circle cx="800" cy="490" r="3" fill="#5b3a22"/>
+  <path d="M760 522 L810 522 L804 558 L766 558 Z" fill="#6d28d9"/>
+  <path d="M760 522 L810 522 M768 532 L802 532 M770 542 L800 542" stroke="#4c1d95" stroke-width="1.5" opacity=".4"/>
+  <text x="785" y="330" fill="#64748b" font-size="10" text-anchor="middle"></text>
+
+  <rect x="30" y="620" width="900" height="28" rx="8" fill="#ede9fe"/>
+  <text x="46" y="639" fill="#5b21b6" font-size="11">Uso: referência de estilo (cores suaves, produto centralizado, forminha visível). Fotos autorizadas substituem cada tile em produção.</text>
+</svg>
