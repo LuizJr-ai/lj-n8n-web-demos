@@ -17,6 +17,8 @@ function CustomerMessagePage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  // The address the answer will go to, kept for the confirmation after the form is cleared.
+  const [sentTo, setSentTo] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,6 +43,7 @@ function CustomerMessagePage() {
       });
 
       if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+      setSentTo(email.trim());
       setSubmitState("success");
       setMessage("");
     } catch (error) {
@@ -119,10 +122,13 @@ function CustomerMessagePage() {
           </button>
 
           {submitState === "success" && (
-            <p className="feedback success" role="status">
-              Recebemos sua mensagem. Enviaremos a resposta para o e-mail que você informou.{" "}
-              <Link to="/acompanhar">Acompanhar por aqui</Link>
-            </p>
+            <div className="feedback success" role="status">
+              <strong>Recebemos sua mensagem.</strong>
+              <span>
+                Um atendente confere a resposta antes de ela chegar ao e-mail <b>{sentTo}</b>.
+              </span>
+              <Link to="/acompanhar">Ver o andamento da sua mensagem</Link>
+            </div>
           )}
           {submitState === "error" && (
             <p className="feedback error" role="alert">

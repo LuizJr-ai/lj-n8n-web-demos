@@ -2,8 +2,10 @@
 
 .mesa {
   min-height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  /* Column, not a two-row grid: the confirmation notice is a third child and a "1fr" row
+     stretched it to fill the screen. Now only the content area grows. */
+  display: flex;
+  flex-direction: column;
   gap: 18px;
   padding: 28px 24px 26px;
   background:
@@ -36,6 +38,7 @@
 }
 
 .mesa-conteudo {
+  flex: 1;
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
   gap: 18px;

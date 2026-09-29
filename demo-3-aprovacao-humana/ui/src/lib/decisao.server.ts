@@ -10,7 +10,12 @@ import {
 /** Header the `Wait for approval` node checks. Its value is the shared secret, never the URL. */
 const CABECALHO_RETOMADA = "X-Demo3-Resume";
 
-type LinhaDecisao = { resume_url: string | null; status: string };
+type LinhaDecisao = {
+  resume_url: string | null;
+  status: string;
+  remetente_nome: string;
+  remetente_email: string;
+};
 
 export async function aplicarDecisao(decisao: DecisaoValida): Promise<{ mensagem: string }> {
   const databaseUrl = process.env["DATABASE_URL"];
@@ -22,7 +27,7 @@ export async function aplicarDecisao(decisao: DecisaoValida): Promise<{ mensagem
 
   // D2: o endereço de retomada é buscado aqui, pelo id. O navegador nunca o envia nem o recebe.
   const linhas = (await sql`
-    SELECT resume_url, status
+    SELECT resume_url, status, remetente_nome, remetente_email
     FROM public.aprovacoes_pendentes
     WHERE id = ${decisao.id}::bigint
   `) as LinhaDecisao[];
@@ -58,5 +63,10 @@ export async function aplicarDecisao(decisao: DecisaoValida): Promise<{ mensagem
     throw new DecisaoInvalida("Não conseguimos concluir agora. Tente de novo em instantes.", 502);
   }
 
-  return { mensagem: mensagemDeConfirmacao(decisao.decisao) };
+  return {
+    mensagem: mensagemDeConfirmacao(decisao.decisao, {
+      nome: linha.remetente_nome,
+      email: linha.remetente_email,
+    }),
+  };
 }

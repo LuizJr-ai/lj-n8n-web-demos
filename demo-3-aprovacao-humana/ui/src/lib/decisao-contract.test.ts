@@ -69,7 +69,34 @@ test("id inventado e opção desconhecida não passam", () => {
 
 test("nenhuma mensagem de confirmação vaza jargão técnico", () => {
   const proibidas = /workflow|execu[çc]|webhook|endpoint|gate|status|api/i;
+  const cliente = { nome: "Marina Alves", email: "marina@exemplo.com" };
   for (const opcao of ["aprovar", "ajustar", "recusar"] as const) {
     assert.equal(proibidas.test(mensagemDeConfirmacao(opcao)), false, opcao);
+    assert.equal(proibidas.test(mensagemDeConfirmacao(opcao, cliente)), false, `${opcao} com cliente`);
+  }
+});
+
+test("a confirmação diz para quem, para qual e-mail e a que horas", () => {
+  const cliente = { nome: "Marina Alves", email: "marina@exemplo.com" };
+  const agora = new Date("2026-09-29T13:32:00Z"); // 10:32 em São Paulo
+
+  assert.equal(
+    mensagemDeConfirmacao("aprovar", cliente, agora),
+    "Resposta aprovada às 10:32. O e-mail para Marina Alves (marina@exemplo.com) foi liberado para envio.",
+  );
+  assert.equal(
+    mensagemDeConfirmacao("ajustar", cliente, agora),
+    "Sua versão foi aprovada às 10:32. O e-mail para Marina Alves (marina@exemplo.com) foi liberado para envio.",
+  );
+  assert.equal(
+    mensagemDeConfirmacao("recusar", cliente, agora),
+    "Nada foi enviado para Marina Alves. O motivo ficou registrado às 10:32.",
+  );
+});
+
+test("a confirmação nunca afirma que o e-mail já foi entregue", () => {
+  const cliente = { nome: "Marina Alves", email: "marina@exemplo.com" };
+  for (const opcao of ["aprovar", "ajustar"] as const) {
+    assert.doesNotMatch(mensagemDeConfirmacao(opcao, cliente), /enviad[ao] para|foi enviad/i, opcao);
   }
 });

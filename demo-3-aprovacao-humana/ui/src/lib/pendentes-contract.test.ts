@@ -1,4 +1,4 @@
-/** Purpose: prove the public mapping against a real Neon row captured in Sprint A. */
+/** Purpose: prove the public mapping against a real database row. */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PENDENTE_PUBLIC_KEYS, mapearPendente, type LinhaPendente } from "./pendentes-contract.ts";

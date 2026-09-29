@@ -92,9 +92,39 @@ export function montarCorpoRetomada(decisao: DecisaoValida): CorpoRetomada {
   return corpo;
 }
 
-/** What the reviewer sees after a decision goes through. Never echoes the resume address. */
-export function mensagemDeConfirmacao(decisao: DecisaoValida["decisao"]): string {
-  if (decisao === "aprovar") return "Resposta enviada para a cliente.";
-  if (decisao === "ajustar") return "Sua versão foi enviada para a cliente.";
-  return "Nada foi enviado. O motivo ficou registrado.";
+export type ClienteDaDecisao = { nome: string; email: string };
+
+/** Fixed zone: the desk is a Brazilian customer-service screen, so the hour reads the same for everyone. */
+const FUSO_EXIBICAO = "America/Sao_Paulo";
+
+function horaDaDecisao(agora: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: FUSO_EXIBICAO,
+  }).format(agora);
+}
+
+/**
+ * What the reviewer sees after a decision goes through: who the reply is for, where it goes and
+ * when it was decided. It says "liberado para envio", not "enviado": this screen knows the decision
+ * was accepted, not that the mail server delivered it — the Telegram notice confirms the delivery.
+ * Never echoes the resume address.
+ */
+export function mensagemDeConfirmacao(
+  decisao: DecisaoValida["decisao"],
+  cliente?: ClienteDaDecisao,
+  agora: Date = new Date(),
+): string {
+  const hora = horaDaDecisao(agora);
+  const para = cliente ? `${cliente.nome} (${cliente.email})` : "a cliente";
+  if (decisao === "aprovar") {
+    return `Resposta aprovada às ${hora}. O e-mail para ${para} foi liberado para envio.`;
+  }
+  if (decisao === "ajustar") {
+    return `Sua versão foi aprovada às ${hora}. O e-mail para ${para} foi liberado para envio.`;
+  }
+  return cliente
+    ? `Nada foi enviado para ${cliente.nome}. O motivo ficou registrado às ${hora}.`
+    : `Nada foi enviado. O motivo ficou registrado às ${hora}.`;
 }

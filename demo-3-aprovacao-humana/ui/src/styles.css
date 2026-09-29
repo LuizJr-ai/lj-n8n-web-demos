@@ -157,7 +157,8 @@ textarea:focus {
   line-height: 1.5;
 }
 
-.feedback.success { color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.feedback.success { display: grid; gap: 4px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.feedback.success a { justify-self: start; margin-top: 4px; color: inherit; font-weight: 650; }
 .feedback.error { color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; }
 
 @media (max-width: 620px) {
