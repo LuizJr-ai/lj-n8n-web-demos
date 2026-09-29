@@ -1,13 +1,10 @@
--- Purpose: tabela dos itens que esperam decisão humana no Demo 3 (aprovação dentro do fluxo).
--- Sprint 1 · S1.1 (escrita) → S1.5 (ajustada ao JSON real) → S1.6 (aplicada no Neon).
---
--- ATENÇÃO ao nome da tabela: o projeto Neon é COMPARTILHADO com C:\Dev\Course_Youtube_Dark, que já
--- usa o prefixo demo3_*. Por isso esta tabela NÃO leva esse prefixo — seria colisão entre projetos.
+-- Purpose: queue of replies waiting for a human decision, and the decision log, for Demo 3
+-- (human approval in the loop). Run once on your Postgres database before the first message.
 
 CREATE TABLE IF NOT EXISTS aprovacoes_pendentes (
   id                BIGSERIAL PRIMARY KEY,
 
-  -- entrada — CONFERIDO contra tests/fixtures/webhook-entrada-real.json (execução 5342).
+  -- entrada — espelha o corpo do webhook.
   -- `remetente` chega como OBJETO {nome, email}, não como texto: por isso duas colunas.
   origem            TEXT        NOT NULL,          -- body.origem
   remetente_nome    TEXT        NOT NULL,          -- body.remetente.nome
@@ -15,17 +12,17 @@ CREATE TABLE IF NOT EXISTS aprovacoes_pendentes (
   mensagem_cliente  TEXT        NOT NULL,          -- body.mensagem
   recebido_em       TIMESTAMPTZ,                   -- body.recebido_em (hora do cliente, não do n8n)
 
-  -- o que a inteligência produziu (Sprint 2)
+  -- o que a IA produziu
   assunto           TEXT,
   urgencia          SMALLINT    CHECK (urgencia BETWEEN 1 AND 3),   -- 1 baixa · 2 média · 3 alta
   resumo            TEXT,        -- summary validado do classificador
   rascunho_ia       TEXT,
 
-  -- a espera (Sprint 3) — o endereço de retomada é credencial: nunca sai do servidor
+  -- a espera — o endereço de retomada é credencial: nunca sai do servidor
   resume_url        TEXT,
   prazo_aviso       TIMESTAMPTZ,                   -- a partir de quando o vigia reclama
 
-  -- a decisão humana (Sprint 4)
+  -- a decisão humana
   status            TEXT        NOT NULL DEFAULT 'pendente'
                     CHECK (status IN ('pendente','aprovado','ajustado','recusado','expirado')),
   texto_final       TEXT,                          -- o que de fato foi enviado

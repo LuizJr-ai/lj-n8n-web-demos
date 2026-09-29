@@ -1,117 +1,97 @@
-# ✋ Demo 3 — Human Approval in the Loop
+# Demo 3 — Human Approval in the Loop
 
-> A customer writes in, an AI drafts the reply, and the workflow **freezes** until a human approves it. Nothing reaches the customer without a person clicking — and the workflow, not a cron job, is what waits.
+> A customer writes in, an AI drafts the reply, and the workflow freezes until a person approves it — nothing reaches the customer without a human click.
 
-![Demo 3 — n8n flow](assets/diagrams/01-fluxo.svg)
+![Demo 3 — n8n workflow](assets/diagrams/01-fluxo.svg)
 
-## 🧩 What it does
+## What it does
 
-One n8n workflow, two lanes on the same canvas:
+1. A customer sends a message from the web form.
+2. n8n classifies it (topic, urgency) and an AI model drafts a reply.
+3. The draft is stored as a pending item and the run **stops at a Wait node**. It stays frozen — no polling, no cron — until a decision arrives.
+4. A reviewer opens the desk, reads the customer's message next to the draft and chooses **send as is**, **send my version** or **don't send** (with a reason).
+5. The same run resumes. Approved and edited replies are e-mailed to the customer and confirmed on Telegram; rejected ones are archived with the reason and nothing is sent.
+6. Every decision records who decided, when, and whether the AI text was corrected.
 
-- **Main lane** — a customer message arrives → the model **classifies** it (topic, urgency, does it need a human?) → a second model **drafts** the reply → the draft is stored in Postgres together with a private resume address → the execution **stops at a `Wait` node**. It stays frozen, with no polling and no cron, until a decision arrives. Then it records **who decided, when, and whether the text was corrected** — and routes to *approved · edited · rejected*.
-- **Watchdog lane** — wakes on a clock (every 15 minutes), asks the database "is anything sitting unapproved for too long?", and pings the reviewer **once**, then snoozes those items for an hour so the same alert is not repeated on every tick. It never touches the main lane; it only reads the table. That is deliberate: a frozen execution that gets lost in a restart cannot alert anyone, so the thing that alerts must be alive.
+A second trigger on the same canvas runs every 15 minutes, finds items pending past their deadline and alerts the reviewer once on Telegram. The customer can look up their message by e-mail on the follow-up page; only approved replies are shown.
 
-The reviewer can send the draft as-is, edit it before sending, or refuse it with a reason. The `houve_correcao` (was it corrected?) column is the point of the demo: over time it becomes a trust scoreboard for the AI, per topic.
-
-> **Status — read this before judging the demo.** The workflow's brain is built and proven; the reviewer screens and the outbound nodes are not. Every claim below is marked. See ✅ Proof.
-
-## 🗺️ Architecture
+## How it works
 
 | Layer | Technology | Role |
 |-------|-----------|------|
-| Front | React 19 + TanStack Start (Vite / Bun) | Customer screen, reviewer desk, follow-up screen |
-| Server routes | TanStack Start (same app) | Reads the queue; holds the resume address; signs the resume call |
-| Orchestration | n8n (webhook + `Wait` node) | Classifies, drafts, **freezes**, resumes, records, delivers |
-| Classification | Groq — `openai/gpt-oss-20b` | Topic · urgency · needs-a-human |
-| Drafting | OpenAI — `gpt-4o-mini` (Basic LLM Chain) | Writes the reply |
-| Persistence | Neon (Postgres) — `aprovacoes_pendentes`, 19 columns | The pending queue and the decision log |
+| Front | React 19 + TanStack Start (Vite) | Customer form, reviewer desk, follow-up page |
+| Server routes | TanStack Start (same app) | Read the queue, hold the resume address, sign the resume call |
+| Orchestration | n8n (webhook + Wait) | Classify, draft, freeze, resume, deliver |
+| Classification | Groq — `openai/gpt-oss-20b` | Topic, urgency, needs-a-human |
+| Drafting | OpenAI — `gpt-4o-mini` | Writes the reply |
+| Persistence | Postgres (Neon) — `aprovacoes_pendentes` | Pending queue and decision log |
+| Delivery | Gmail + Telegram | E-mails the approved text; confirms to the reviewer |
 
 ```text
-Customer screen → n8n webhook → classify (Groq) → parse → draft (OpenAI) → parse
-                                                                             ↓
-                            INSERT row + resume address → ⏸ Wait (frozen) ────┘
-                                                            ↑
-                    reviewer clicks → server route → signed resume call
-                                                            ↓
-                              record decision → route → send · archive · notify
+Form → webhook → classify → draft → save item → ⏸ Wait ← reviewer click → app server → signed resume
+                                                   ↓
+                              record decision → approved / edited → e-mail + Telegram
+                                              → rejected → archive with reason
 ```
 
-Two diagrams live in `assets/diagrams/`: [`01-fluxo.svg`](assets/diagrams/01-fluxo.svg) (the flow, node by node, with what is proven and what is planned) and [`00-esqueleto.svg`](assets/diagrams/00-esqueleto.svg) (the anatomy: folders, lanes, screens).
+The resume address never reaches the browser: whoever holds it could approve as the reviewer. It is stored in the database and read only by the app server; the browser sends just the item id and the decision.
 
-**Why the resume address never reaches the browser:** whoever holds it can approve as if they were you. It is stored in the database, read only by the server, and the browser sends nothing but the item's id — `{ "id": 42, "decisao": "aprovar" }`.
+## Getting started
 
-## ⚙️ How to run
+**Prerequisites** — an n8n instance; credentials for Groq, OpenAI, Gmail (OAuth), a Telegram bot and a Postgres database (Neon works); [Bun](https://bun.sh).
 
-```powershell
-Set-Location .\demo-3-aprovacao-humana\ui
-Copy-Item .env.example .env.local   # fill in DATABASE_URL and VITE_DEMO3_WEBHOOK_URL
+**Setup**
+
+1. Create the table: run [`db/aprovacoes-pendentes.sql`](db/aprovacoes-pendentes.sql) on your database.
+2. Import [`workflows/human-approval.json`](workflows/human-approval.json) into n8n and attach your credentials. The export carries none. Add a Header Auth credential (header `X-Demo3-Resume`) to the `Wait for approval` node, put your chat id in the two Telegram nodes, then activate the workflow.
+3. Configure the app:
+
+```bash
+cd demo-3-aprovacao-humana/ui
+cp .env.example .env.local
+```
+
+Fill in `DATABASE_URL`, `VITE_DEMO3_WEBHOOK_URL` and `RESUME_SECRET` (the same value as the Header Auth credential). `.env.local` is git-ignored.
+
+**Run**
+
+```bash
 bun install
 bun run dev
 ```
 
-Open `http://127.0.0.1:8080/`. You bring your own accounts — n8n, Groq, OpenAI and a Postgres database (Neon works out of the box). Nothing is hosted by us, and no credential is committed: `ui/.env.example` ships placeholders only, and `.env.local` is git-ignored.
+Vite prints the local address. Pages: `/` customer form · `/atendimento` reviewer desk · `/acompanhar` follow-up. Unit tests: `bun run test`.
 
-The database table is in [`db/aprovacoes-pendentes.sql`](db/aprovacoes-pendentes.sql) — run it once against your database before the first message.
+## Webhook contract
 
-## 🔌 Webhook contract
+**Request — customer form → n8n** (`VITE_DEMO3_WEBHOOK_URL`) · `POST` · `application/json`
 
-**Request — customer screen → n8n** (`VITE_DEMO3_WEBHOOK_URL`)
-`POST` · `application/json`
 ```jsonc
 {
-  "origem": "web",
-  "remetente": { "nome": "Ana Ribeiro", "email": "ana@exemplo.com" },
+  "origem": "site-contato",
+  "remetente": { "nome": "Ana Ribeiro", "email": "ana@example.com" },
   "mensagem": "Comprei o produto errado, posso trocar?",
   "recebido_em": "2026-09-28T14:03:11.000Z"
 }
 ```
 
-**Response — n8n → screen** (`application/json`) — answered immediately, before any model runs:
+**Response — n8n → form**, immediate, before any model runs:
+
 ```jsonc
-{ "itemId": null, "status": "pendente" }
+{ "itemId": null, "status": "received" }
 ```
-`itemId` is `null` on purpose: the acknowledgement is sent *before* the row exists, so the customer screen never waits on two model calls. The real id is born with the `INSERT`. The customer finds their message again on `/acompanhar`, by the e-mail they used.
 
-**Queue — server route → reviewer screen** · `GET /api/pendentes` → 8 fields, most urgent first:
-```jsonc
-{ "id": "42", "cliente_nome": "…", "assunto": "exchange", "urgencia": 3,
-  "resumo": "…", "mensagem_cliente": "…", "rascunho": "…", "esperando_ha_min": 7 }
-```
-`urgencia` is `1 | 2 | 3`, where **3 is the most urgent**. `resume_url` is **deliberately absent** — it is a server-side secret, not a field.
+**Errors:** the form shows a plain-language message when the webhook cannot be reached — never a blank screen. The desk and the follow-up page use only the app's own server routes (`/api/pendentes`, `/api/decisao`, `/api/meu-pedido`), which never return the resume address.
 
-**Decision — reviewer screen → server route** · `POST /api/decisao` with `{ id, decisao: "aprovar" | "ajustar" | "recusar", texto_final?, motivo? }`. The server looks the resume address up **by id**, calls it with a signed header, and refuses any item that is no longer `pendente`. *Built and covered by offline tests; not yet proven by a real click.*
+## Scope and limitations
 
-**Follow-up — customer screen → server route** · `POST /api/meu-pedido` with `{ email }` → the customer's own messages and, **only once a person has approved it**, the reply text. The unapproved draft is never returned.
+- One fixed reviewer label; there is no login.
+- The desk confirms the decision, not mail delivery. If Gmail fails, the run stops with an error in n8n and no Telegram message is posted.
+- Demo data only — not hardened for production use.
 
-**Errors:** the interface always speaks plain customer-service language — never a raw status code, never a blank screen.
+## Project structure
 
-## ✅ Proof
-
-**Proven, with evidence:**
-- `26/26` offline parser tests green over **real captured payloads**, not assumed shapes — including the empty-response and rate-limited cases.
-- `17/17` offline tests green on the server-route contracts: the queue mapping, the decision rules, and the guarantee that the customer follow-up **never returns an unapproved draft** (`bun run test` inside `ui/`).
-- An execution **froze at the `Wait` node and resumed**, with the decision written to the database: row closed as `ajustado`, `houve_correcao = true`, `decidido_por` filled in.
-- A message written in the **customer screen** travelled through the webhook and became a real row in `aprovacoes_pendentes`.
-- `GET /api/pendentes` returns the 8-field contract and **no extra field** — checked in the browser's network tab; `resume_url` never appears.
-- The **watchdog fired on its own clock** and, with two items past the deadline, sent **one** aggregated alert instead of one message per row — then snoozed both so the same alert is not repeated on the next tick.
-- No secrets, no personal hosts and no credential ids in this repository.
-
-- **The full loop, by clicking**: a reviewer pressed *approve* in the interface, a run that had been **frozen for 10h28m** woke up, the decision was written with who decided and whether the text was corrected, and the customer then read the approved reply on the follow-up screen. No polling, no cron — the run simply waited.
-
-**Not proven yet — and marked as such everywhere:**
-- Sending the approved reply to the real customer (`Send reply`) — that node is not wired yet.
-- The completion notice on Telegram (the watchdog alert *is* proven; this is the other one).
-- The *rejected* path: *approved* and *edited* are both proven, *rejected* is not.
-
-## 📦 Files
-
-- `ui/` — React / TanStack Start source, including the server routes and their offline tests.
-- `db/aprovacoes-pendentes.sql` — the pending-queue table (19 columns). Run it once before the first message.
-- `assets/diagrams/` — the flow diagram and the anatomy diagram.
-- `workflows/` — sanitized n8n export *(not exported yet)*.
-
-The parser tests and the working notes stay on the author's disk: this repository is the demo, not the build log.
-
-## 🏷️ Tags
-
-`#n8n` `#human-in-the-loop` `#approval-workflow` `#wait-node` `#groq` `#openai` `#postgres` `#react` `#automation`
+- `ui/` — the React app: customer form, reviewer desk, follow-up page, server routes and unit tests
+- `workflows/human-approval.json` — n8n export, no credentials
+- `db/aprovacoes-pendentes.sql` — pending-queue table
+- `assets/diagrams/01-fluxo.svg` — the workflow diagram

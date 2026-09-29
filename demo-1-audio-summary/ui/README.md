@@ -1,16 +1,22 @@
-# Audio to Minutes — local interface
+# Audio to Minutes — web interface
 
-The Demo 1 frontend is maintained locally as a React/TanStack application.
+> The React / TanStack Start front end of Demo 1. The full setup, including the n8n workflow it talks to, is in the [demo README](../README.md).
 
-## Configuration
+## Run locally
 
-1. Copy `.env.example` to `.env.local` and enter the two public webhook URLs.
-2. Run `PowerShell -ExecutionPolicy Bypass -File .\scripts\setup.ps1`.
-3. Start the app with `PowerShell -ExecutionPolicy Bypass -File .\scripts\dev.ps1`.
+```bash
+cp .env.example .env.local   # enter your two n8n webhook URLs
+bun install
+bun run dev
+```
 
-`.env.local`, dependencies, builds, and portable Bun files stay outside Git.
+Vite prints the local address. `.env.local` is git-ignored.
 
-## Quality
+## Scripts
 
-- `PowerShell -ExecutionPolicy Bypass -File .\scripts\qa.ps1`
-- Primary visual criterion: 1920×1080 at 100% zoom, with both panels fully visible and no page scroll.
+| Command | What it does |
+|---------|--------------|
+| `bun run dev` | Starts the development server |
+| `bun run build` | Builds the production bundle |
+| `bun run build:dev` | Builds in development mode |
+| `bun run preview` | Serves the built bundle locally |

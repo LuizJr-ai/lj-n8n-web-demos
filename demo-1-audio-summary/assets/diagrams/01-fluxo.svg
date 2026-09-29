@@ -1,4 +1,4 @@
-<!-- Purpose: diagrama duravel do Demo 1 aprovado (sessao 04). Dois modos de entrada: reuniao ao vivo (->resumo+acoes) e upload de arquivo (->transcricao integral). Switch por 'mode' apos o Whisper. Fonte de verdade visual antes do build. -->
+<!-- Purpose: fluxo do Demo 1. Dois modos de entrada: reuniao ao vivo (->resumo+acoes) e upload de arquivo (->transcricao integral). Switch por 'mode' apos o Whisper. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 940" font-family="Segoe UI, system-ui, sans-serif">
   <rect width="980" height="940" fill="#0f172a"/>
   <text x="490" y="34" fill="#e2e8f0" font-size="22" font-weight="700" text-anchor="middle">Demo 1 · Áudio → Resumo (reunião) ou Transcrição (arquivo)</text>

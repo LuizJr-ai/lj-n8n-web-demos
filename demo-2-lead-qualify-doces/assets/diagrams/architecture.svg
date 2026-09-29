@@ -1,0 +1,67 @@
+<!-- Purpose: architecture of Demo 2 — storefront, three n8n workflows, knowledge base, lead table and Telegram alerts. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 430" width="1240" height="430" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8a7a6d"/></marker>
+  </defs>
+  <rect width="1240" height="430" fill="#fbf7f1"/>
+  <text x="30" y="38" font-size="19" font-weight="700" fill="#3b2a20">Demo 2 — AI lead qualifier for custom-order sweets</text>
+  <text x="30" y="58" font-size="12.5" fill="#8a7a6d">Storefront → n8n → knowledge base, lead table and Telegram</text>
+
+  <!-- storefront -->
+  <rect x="30" y="140" width="200" height="100" rx="10" fill="#faf3ec" stroke="#b0764f" stroke-width="1.6"/>
+  <text x="46" y="168" font-size="13" font-weight="700" fill="#3b2a20">Storefront</text>
+  <text x="46" y="188" font-size="11" fill="#8a7a6d">single-file HTML page</text>
+  <text x="46" y="206" font-size="11" fill="#3b2a20">live chat · quote form</text>
+  <text x="46" y="224" font-size="11" fill="#3b2a20">ViaCEP address lookup</text>
+
+  <!-- workflow 1 -->
+  <rect x="320" y="70" width="300" height="110" rx="10" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.6"/>
+  <text x="336" y="96" font-size="13" font-weight="700" fill="#5a3f7a">Conversational agent</text>
+  <text x="336" y="116" font-size="11" fill="#8a7a6d">POST /webhook/demo2-chat</text>
+  <text x="336" y="136" font-size="11" fill="#3b2a20">OpenAI chat model + chat memory</text>
+  <text x="336" y="154" font-size="11" fill="#3b2a20">answers from the knowledge base (RAG)</text>
+
+  <!-- workflow 2 -->
+  <rect x="320" y="210" width="300" height="110" rx="10" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.6"/>
+  <text x="336" y="236" font-size="13" font-weight="700" fill="#5a3f7a">Lead qualification</text>
+  <text x="336" y="256" font-size="11" fill="#8a7a6d">POST /webhook/demo2-lead-doces</text>
+  <text x="336" y="276" font-size="11" fill="#3b2a20">Groq model · structured output</text>
+  <text x="336" y="294" font-size="11" fill="#3b2a20">score → hot · warm · cold</text>
+
+  <!-- knowledge base + ingestion -->
+  <rect x="700" y="80" width="240" height="90" rx="10" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="716" y="106" font-size="13" font-weight="700" fill="#2f6b2f">Knowledge base</text>
+  <text x="716" y="126" font-size="11" fill="#8a7a6d">demo2_kb · PGVector</text>
+  <text x="716" y="144" font-size="11" fill="#3b2a20">OpenAI embeddings</text>
+
+  <rect x="1000" y="80" width="210" height="90" rx="10" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.6"/>
+  <text x="1016" y="106" font-size="13" font-weight="700" fill="#5a3f7a">RAG ingestion</text>
+  <text x="1016" y="126" font-size="11" fill="#8a7a6d">third workflow · run manually</text>
+  <text x="1016" y="144" font-size="11" fill="#3b2a20">(re)indexes the knowledge base</text>
+
+  <!-- lead table -->
+  <rect x="700" y="225" width="240" height="90" rx="10" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="716" y="251" font-size="13" font-weight="700" fill="#2f6b2f">Postgres (Neon)</text>
+  <text x="716" y="271" font-size="11" fill="#8a7a6d">leads_doces</text>
+  <text x="716" y="289" font-size="11" fill="#3b2a20">every lead is stored first</text>
+
+  <!-- telegram -->
+  <rect x="1000" y="205" width="210" height="60" rx="10" fill="#faf3ec" stroke="#b0764f" stroke-width="1.6"/>
+  <text x="1016" y="231" font-size="13" font-weight="700" fill="#6b3f27">Telegram · hot alert</text>
+  <text x="1016" y="250" font-size="11" fill="#3b2a20">immediate, one per lead</text>
+
+  <rect x="1000" y="285" width="210" height="60" rx="10" fill="#faf3ec" stroke="#b0764f" stroke-width="1.6"/>
+  <text x="1016" y="311" font-size="13" font-weight="700" fill="#6b3f27">Telegram · digest</text>
+  <text x="1016" y="330" font-size="11" fill="#3b2a20">warm / cold, every 30 min</text>
+
+  <!-- arrows -->
+  <line x1="232" y1="170" x2="317" y2="125" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="232" y1="210" x2="317" y2="265" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="622" y1="125" x2="697" y2="125" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="998" y1="125" x2="943" y2="125" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="622" y1="265" x2="697" y2="270" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="942" y1="255" x2="997" y2="238" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+  <line x1="942" y1="285" x2="997" y2="312" stroke="#8a7a6d" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <text x="30" y="392" font-size="12" fill="#8a7a6d">Every lead is stored before anyone is notified. Hot leads alert the owner at once; warm and cold leads wait for the next digest.</text>
+</svg>
