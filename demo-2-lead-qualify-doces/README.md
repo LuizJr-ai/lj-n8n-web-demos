@@ -1,10 +1,13 @@
-# Demo 2 — AI Lead Qualifier for Custom-Order Sweets
+<!-- readme-type: demo -->
+# 🧁 Demo 2 — AI Lead Qualifier for Custom-Order Sweets
 
 > A Portuguese-language conversational storefront for the fictional **Doce Aurora** confectionery: it answers questions from a controlled knowledge base, captures a quote request, scores the lead and alerts the owner instantly when the lead is hot.
 
+> ⚠️ All business data here is fictional and every configuration file ships as a placeholder — never submit real personal data.
+
 ![Demo 2 architecture](assets/diagrams/architecture.svg)
 
-## What it does
+## 🧩 What it does
 
 1. A visitor **chats** with the assistant or opens the **quote form**.
 2. The conversational agent uses **RAG** to answer from the Doce Aurora knowledge base (`demo2_kb`).
@@ -13,7 +16,7 @@
 
 The form fills the address from the Brazilian postal code (ViaCEP) and accepts an optional reference image.
 
-## How it works
+## 🗺️ Architecture
 
 | Layer | Technology | Role |
 |-------|-----------|------|
@@ -31,33 +34,31 @@ HTML UI ─┬─ /webhook/demo2-chat        → conversational agent + RAG → 
 
 A third workflow, **RAG ingestion**, is run manually to index the knowledge base into `demo2_kb`.
 
-## Getting started
+## ⚙️ How to run
 
 **Prerequisites** — an n8n instance; credentials for OpenAI, Groq, Telegram and a Postgres database with the `pgvector` extension (Neon works); Python 3 to serve the static page.
 
 **Setup**
 
 1. Create the leads table: run [`db/schema.sql`](db/schema.sql) on your database.
-2. Import the three files in [`workflows/`](workflows/) into n8n, attach your credentials and put your chat id in the Telegram nodes. Run `rag-ingestion.json` once to index the knowledge base, then activate the other two. The exports carry no credentials.
+2. Import the three files in [`workflows/`](workflows/) into n8n, attach your own credentials and set your chat id in the Telegram nodes. Run `rag-ingestion.json` once to index the knowledge base, then activate the other two. The exports are sanitized — no credentials, credential ids or personal hosts.
 3. Point the page at your webhooks:
 
-```bash
-cd demo-2-lead-qualify-doces/ui
-cp config.example.js config.local.js   # set WEBHOOK_URL and CHAT_URL
+```powershell
+Copy-Item .\ui\config.example.js .\ui\config.local.js   # set WEBHOOK_URL and CHAT_URL
 ```
 
 `config.local.js` is git-ignored; the repository ships placeholders only.
 
 **Run**
 
-```bash
-cd ..
+```powershell
 python -m http.server 5599 --bind 127.0.0.1
 ```
 
 Open `http://127.0.0.1:5599/ui/`.
 
-## Webhook contract
+## 🔌 Webhook contract
 
 **Quote / lead** (`WEBHOOK_URL` → `/webhook/demo2-lead-doces`) · `POST` · `application/json`
 
@@ -77,14 +78,13 @@ Open `http://127.0.0.1:5599/ui/`.
 
 **Errors:** if a webhook is not configured, the page shows an explicit "configure the webhook to test this demo" state — never a blank screen.
 
-## Scope and limitations
+## 🌐 Language & safety
 
-- The storefront and the knowledge base are in Brazilian Portuguese because the fictional customer is a Brazilian confectionery; this README and the workflow labels are in English.
-- All business data is fictional. The image field is a demonstration input: production upload validation and storage isolation are out of scope.
+Portfolio docs and workflow labels are in English; the storefront and the knowledge base are in **PT-BR** because the fictional customer is a Brazilian confectionery. The optional image field is a demonstration input: production upload validation and storage isolation are out of scope.
 
-## Project structure
+## 📦 Files
 
 - `ui/` — single-file storefront, quote form and live chat
-- `workflows/` — n8n exports: `chat-rag.json`, `lead-qualification.json`, `rag-ingestion.json` (no credentials)
+- `workflows/` — n8n exports: `chat-rag.json`, `lead-qualification.json`, `rag-ingestion.json`
 - `db/schema.sql` — the `leads_doces` table
 - `assets/` — the architecture diagram and the reference photos used by the storefront (credits in `fotos-ref/CREDITOS.md`)

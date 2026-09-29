@@ -1,10 +1,13 @@
-# Demo 3 — Human Approval in the Loop
+<!-- readme-type: demo -->
+# 🛡️ Demo 3 — Human Approval in the Loop
 
 > A customer writes in, an AI drafts the reply, and the workflow freezes until a person approves it — nothing reaches the customer without a human click.
 
+> ⚠️ Demo data only, not hardened for production: use fictional names and addresses you control.
+
 ![Demo 3 — n8n workflow](assets/diagrams/01-fluxo.svg)
 
-## What it does
+## 🧩 What it does
 
 1. A customer sends a message from the web form.
 2. n8n classifies it (topic, urgency) and an AI model drafts a reply.
@@ -15,7 +18,7 @@
 
 A second trigger on the same canvas runs every 15 minutes, finds items pending past their deadline and alerts the reviewer once on Telegram. The customer can look up their message by e-mail on the follow-up page; only approved replies are shown.
 
-## How it works
+## 🗺️ Architecture
 
 | Layer | Technology | Role |
 |-------|-----------|------|
@@ -36,33 +39,32 @@ Form → webhook → classify → draft → save item → ⏸ Wait ← reviewer 
 
 The resume address never reaches the browser: whoever holds it could approve as the reviewer. It is stored in the database and read only by the app server; the browser sends just the item id and the decision.
 
-## Getting started
+## ⚙️ How to run
 
 **Prerequisites** — an n8n instance; credentials for Groq, OpenAI, Gmail (OAuth), a Telegram bot and a Postgres database (Neon works); [Bun](https://bun.sh).
 
 **Setup**
 
 1. Create the table: run [`db/aprovacoes-pendentes.sql`](db/aprovacoes-pendentes.sql) on your database.
-2. Import [`workflows/human-approval.json`](workflows/human-approval.json) into n8n and attach your credentials. The export carries none. Add a Header Auth credential (header `X-Demo3-Resume`) to the `Wait for approval` node, put your chat id in the two Telegram nodes, then activate the workflow.
+2. Import [`workflows/human-approval.json`](workflows/human-approval.json) into n8n and attach your own credentials. The export is sanitized — no credentials, credential ids or personal hosts. Add a Header Auth credential (header `X-Demo3-Resume`) to the `Wait for approval` node, put your chat id in the two Telegram nodes, then activate the workflow.
 3. Configure the app:
 
-```bash
-cd demo-3-aprovacao-humana/ui
-cp .env.example .env.local
+```powershell
+Copy-Item .\ui\.env.example .\ui\.env.local
 ```
 
 Fill in `DATABASE_URL`, `VITE_DEMO3_WEBHOOK_URL` and `RESUME_SECRET` (the same value as the Header Auth credential). `.env.local` is git-ignored.
 
 **Run**
 
-```bash
+```powershell
 bun install
 bun run dev
 ```
 
 Vite prints the local address. Pages: `/` customer form · `/atendimento` reviewer desk · `/acompanhar` follow-up. Unit tests: `bun run test`.
 
-## Webhook contract
+## 🔌 Webhook contract
 
 **Request — customer form → n8n** (`VITE_DEMO3_WEBHOOK_URL`) · `POST` · `application/json`
 
@@ -83,13 +85,12 @@ Vite prints the local address. Pages: `/` customer form · `/atendimento` review
 
 **Errors:** the form shows a plain-language message when the webhook cannot be reached — never a blank screen. The desk and the follow-up page use only the app's own server routes (`/api/pendentes`, `/api/decisao`, `/api/meu-pedido`), which never return the resume address.
 
-## Scope and limitations
+## 🚧 Scope and limitations
 
 - One fixed reviewer label; there is no login.
-- The desk confirms the decision, not mail delivery. If Gmail fails, the run stops with an error in n8n and no Telegram message is posted.
-- Demo data only — not hardened for production use.
+- The desk confirms the decision, not mail delivery: if Gmail fails, the run stops with an error in n8n and no Telegram message is posted.
 
-## Project structure
+## 📦 Files
 
 - `ui/` — the React app: customer form, reviewer desk, follow-up page, server routes and unit tests
 - `workflows/human-approval.json` — n8n export, no credentials

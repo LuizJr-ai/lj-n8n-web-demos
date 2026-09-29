@@ -1,10 +1,13 @@
-# Demo 1 — Audio to Minutes
+<!-- readme-type: demo -->
+# 🎙️ Demo 1 — Audio to Minutes
 
 > Record a meeting to get a structured recap and action list, or upload an audio file to get a full transcription — all from one web interface backed by an n8n workflow.
 
+> ⚠️ Demo data only: bring your own accounts and never upload audio you are not allowed to process.
+
 ![Demo 1 interface](assets/ui-1920x1080.png)
 
-## What it does
+## 🧩 What it does
 
 Two modes, one interface:
 
@@ -13,7 +16,7 @@ Two modes, one interface:
 
 Accepted audio: WEBM, MP3, WAV, M4A, OGG — up to 25 MB.
 
-## How it works
+## 🗺️ Architecture
 
 | Layer | Technology | Role |
 |-------|-----------|------|
@@ -31,33 +34,32 @@ UI → n8n webhook → Groq Whisper → route by mode
 
 A second webhook returns a stored transcription by id.
 
-## Getting started
+## ⚙️ How to run
 
 **Prerequisites** — an n8n instance; credentials for Groq, OpenAI and a Postgres database (Neon works); [Bun](https://bun.sh).
 
 **Setup**
 
 1. Create a `transcricoes` table with the columns the workflow uses: `id` (generated key), `transcricao` and `resumo`.
-2. Import [`workflows/audio-summary.json`](workflows/audio-summary.json) into n8n, attach your credentials and activate it. The export carries none.
+2. Import [`workflows/audio-summary.json`](workflows/audio-summary.json) into n8n, attach your own credentials and activate it. The export is sanitized — no credentials, credential ids or personal hosts.
 3. Configure the app with your two webhook URLs:
 
-```bash
-cd demo-1-audio-summary/ui
-cp .env.example .env.local
+```powershell
+Copy-Item .\ui\.env.example .\ui\.env.local
 ```
 
 `.env.local` is git-ignored; the repository ships placeholders only.
 
 **Run**
 
-```bash
+```powershell
 bun install
 bun run dev
 ```
 
 Vite prints the local address.
 
-## Webhook contract
+## 🔌 Webhook contract
 
 **Request — UI → n8n** (`VITE_DEMO1_TRANSCRIBE_URL`) · `POST` · `multipart/form-data`
 
@@ -80,7 +82,7 @@ mode: "reuniao" | "arquivo"
 
 **Errors:** the UI shows an explicit state for timeout, network failure, invalid format and an unconfigured integration — never a blank screen.
 
-## Project structure
+## 📦 Files
 
 - `ui/` — React / TanStack Start source
 - `workflows/audio-summary.json` — n8n export, no credentials
