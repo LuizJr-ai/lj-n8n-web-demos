@@ -1,6 +1,6 @@
 // Purpose: the reviewer's desk — the waiting queue on the left, the open case on the right.
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "../components/atendimento/atendimento.css";
 import { AjudaBolha } from "../components/atendimento/ajuda-bolha";
@@ -106,6 +106,10 @@ function MesaDeAtendimento() {
             <span aria-hidden="true">●</span> Central de atendimento
           </div>
           <h1>Mensagens esperando resposta</h1>
+          {/* Volta para a tela de quem escreve: as duas fazem parte do mesmo atendimento. */}
+          <Link to="/" className="voltar-cliente">
+            ← Ver a página de quem escreve
+          </Link>
         </div>
         <p className="mesa-nota">
           Cada resposta passa por você antes de chegar à cliente.

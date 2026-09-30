@@ -56,6 +56,27 @@ textarea { font: inherit; }
 /* Verde escurecido: o ponto é decorativo, mas precisa ser visível em tela clara (≥ 4.5:1). */
 .eyebrow span { color: #15803d; font-size: 0.72rem; }
 
+/* Rodapé de papéis: a porta para a mesa de atendimento. Discreto de propósito — quem chega
+   aqui é cliente; a equipe sabe que este link existe. Cinza-azulado 4.6:1 sobre o fundo claro. */
+.rodape-papeis {
+  margin: 22px auto 0;
+  text-align: center;
+}
+
+.rodape-papeis a {
+  color: #52607a;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.rodape-papeis a:hover { color: #4338ca; text-decoration: underline; }
+.rodape-papeis a:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+}
+
 h1 {
   margin: 0;
   color: #172033;

@@ -14,6 +14,24 @@
     #f4f7fb;
 }
 
+/* Volta para a página de quem escreve: prova que as duas telas são o mesmo atendimento,
+   não dois programas. Discreto, abaixo do título. */
+.voltar-cliente {
+  display: inline-block;
+  margin-top: 10px;
+  color: #52607a;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.voltar-cliente:hover { color: #4338ca; text-decoration: underline; }
+.voltar-cliente:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+}
+
 .mesa-cabecalho {
   display: flex;
   flex-wrap: wrap;

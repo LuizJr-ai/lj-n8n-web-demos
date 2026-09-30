@@ -137,6 +137,12 @@ function CustomerMessagePage() {
           )}
         </form>
       </section>
+
+      {/* Entrada discreta para o outro papel: quem escreve é cliente, quem responde é a equipe.
+          Fica no rodapé de propósito — não deve competir com o formulário. */}
+      <footer className="rodape-papeis">
+        <Link to="/atendimento">Sou da equipe de atendimento</Link>
+      </footer>
     </main>
   );
 }
