@@ -1,0 +1,188 @@
+<!-- Purpose: o fluxo n8n do Demo 3 — a raia principal (mensagem → rascunho → congela → decisão → entrega) e a raia do vigia. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 830" width="1240" height="830" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="ag" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#4a8f4a"/></marker>
+    <marker id="ap" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#9bbf9b"/></marker>
+  </defs>
+  <rect width="1240" height="830" fill="#fbf7f1"/>
+
+  <text x="34" y="42" font-size="19" font-weight="700" fill="#3b2a20">Demo 3 — o fluxo n8n: a raia principal e a raia do vigia</text>
+  <text x="34" y="63" font-size="12.5" fill="#8a7a6d">Approve AI-drafted customer replies with human-in-the-loop review · 26 nós (20 executáveis + 6 anotações)</text>
+
+  <!-- ===================== RAIA 1 ===================== -->
+  <rect x="30" y="80" width="1180" height="440" rx="12" fill="#faf3ec" stroke="#b0764f" stroke-width="1.5"/>
+  <text x="48" y="103" font-size="13.5" font-weight="700" fill="#6b3f27">⚙️ R1 · Raia principal — uma execução para cada mensagem de cliente</text>
+
+  <text x="52" y="123" font-size="11.5" font-weight="700" fill="#2f6b2f">① Chegada e inteligência</text>
+
+  <!-- linha 1 -->
+  <rect x="52" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="64" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Receive customer</text>
+  <text x="64" y="169" font-size="11.5" font-weight="700" fill="#3b2a20">message</text>
+  <text x="64" y="186" font-size="10.5" fill="#8a7a6d">Webhook · POST</text>
+  <text x="64" y="203" font-size="10.5" fill="#3b2a20">a tela do cliente manda</text>
+
+  <rect x="248" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="260" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Acknowledge to app</text>
+  <text x="260" y="171" font-size="10.5" fill="#8a7a6d">Respond to Webhook</text>
+  <text x="260" y="190" font-size="10.5" fill="#3b2a20">responde na hora:</text>
+  <text x="260" y="205" font-size="10.5" fill="#3b2a20">“recebemos sua mensagem”</text>
+
+  <rect x="444" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="456" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Classify message</text>
+  <text x="456" y="171" font-size="10.5" fill="#8a7a6d">HTTP → Groq gpt-oss-20b</text>
+  <text x="456" y="190" font-size="10.5" fill="#3b2a20">assunto · urgência ·</text>
+  <text x="456" y="205" font-size="10.5" fill="#3b2a20">precisa de humano?</text>
+
+  <rect x="640" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="652" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Parse classification</text>
+  <text x="652" y="171" font-size="10.5" fill="#8a7a6d">Code</text>
+  <text x="652" y="190" font-size="10.5" fill="#3b2a20">lê o último bloco {…};</text>
+  <text x="652" y="205" font-size="10.5" fill="#3b2a20">falha fechada, nunca chuta</text>
+
+  <rect x="836" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="848" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Draft reply</text>
+  <text x="848" y="171" font-size="10.5" fill="#8a7a6d">Basic LLM Chain · gpt-4o-mini</text>
+  <text x="848" y="190" font-size="10.5" fill="#3b2a20">escreve o rascunho da</text>
+  <text x="848" y="205" font-size="10.5" fill="#3b2a20">resposta ao cliente</text>
+
+  <rect x="1032" y="132" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="1044" y="154" font-size="11.5" font-weight="700" fill="#3b2a20">Parse draft</text>
+  <text x="1044" y="171" font-size="10.5" fill="#8a7a6d">Code</text>
+  <text x="1044" y="190" font-size="10.5" fill="#3b2a20">texto limpo — o chain</text>
+  <text x="1044" y="205" font-size="10.5" fill="#3b2a20">devolve em “text”</text>
+
+  <line x1="225" y1="175" x2="245" y2="175" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="421" y1="175" x2="441" y2="175" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="617" y1="175" x2="637" y2="175" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="813" y1="175" x2="833" y2="175" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="1009" y1="175" x2="1029" y2="175" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <!-- volta de linha 1 para linha 2 -->
+  <path d="M1117,218 L1117,236 L41,236 L41,307 L49,307" fill="none" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <text x="52" y="254" font-size="11.5" font-weight="700" fill="#2f6b2f">② A pausa e a decisão</text>
+
+  <!-- linha 2 -->
+  <rect x="52" y="264" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="64" y="286" font-size="11.5" font-weight="700" fill="#3b2a20">Save pending item</text>
+  <text x="64" y="303" font-size="10.5" fill="#8a7a6d">Postgres · INSERT</text>
+  <text x="64" y="322" font-size="10.5" fill="#3b2a20">cria a linha e guarda o</text>
+  <text x="64" y="337" font-size="10.5" fill="#3b2a20">endereço de retomada</text>
+
+  <rect x="248" y="264" width="170" height="86" rx="8" fill="#fff" stroke="#6b3f27" stroke-width="2.4"/>
+  <text x="260" y="286" font-size="11.5" font-weight="700" fill="#3b2a20">Wait for approval</text>
+  <text x="260" y="303" font-size="10.5" fill="#8a7a6d">Wait v1.1 · header auth</text>
+  <text x="260" y="322" font-size="11" font-weight="700" fill="#6b3f27">🔴 a execução congela aqui</text>
+  <text x="260" y="337" font-size="10.5" fill="#3b2a20">e espera um humano</text>
+
+  <rect x="444" y="264" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="456" y="286" font-size="11.5" font-weight="700" fill="#3b2a20">Record decision</text>
+  <text x="456" y="303" font-size="10.5" fill="#8a7a6d">Postgres · UPDATE</text>
+  <text x="456" y="322" font-size="10.5" fill="#3b2a20">quem · quando ·</text>
+  <text x="456" y="337" font-size="10.5" fill="#3b2a20">houve correção?</text>
+
+  <rect x="640" y="264" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="652" y="286" font-size="11.5" font-weight="700" fill="#3b2a20">Route decision</text>
+  <text x="652" y="303" font-size="10.5" fill="#8a7a6d">Switch · 3 saídas</text>
+  <text x="652" y="322" font-size="10.5" fill="#3b2a20">Approved · Edited ·</text>
+  <text x="652" y="337" font-size="10.5" fill="#3b2a20">Rejected, sem fallback</text>
+
+  <line x1="225" y1="307" x2="245" y2="307" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="421" y1="307" x2="441" y2="307" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="617" y1="307" x2="637" y2="307" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <!-- painel: quem descongela -->
+  <rect x="840" y="264" width="362" height="86" rx="8" fill="#f3eef7" stroke="#7a5a9f" stroke-width="1.8"/>
+  <text x="854" y="286" font-size="11.5" font-weight="700" fill="#5a3f7a">🔒 Quem descongela: o servidor da tela</text>
+  <text x="854" y="304" font-size="10.5" fill="#3b2a20">O navegador manda só o número do item. O servidor busca o</text>
+  <text x="854" y="320" font-size="10.5" fill="#3b2a20">endereço de retomada no banco e chama com header assinado.</text>
+  <text x="854" y="339" font-size="10.5" fill="#8a7a6d">Aprovar, ajustar e recusar seguem o mesmo caminho.</text>
+
+  <!-- volta de linha 2 para linha 3 -->
+  <path d="M725,350 L725,368 L41,368 L41,439 L49,439" fill="none" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <text x="52" y="386" font-size="11.5" font-weight="700" fill="#2f6b2f">③ A entrega — e-mail ao cliente, aviso no Telegram e arquivo da recusa</text>
+
+  <!-- linha 3 -->
+  <rect x="52" y="396" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="64" y="418" font-size="11.5" font-weight="700" fill="#3b2a20">Load final reply</text>
+  <text x="64" y="435" font-size="10.5" fill="#8a7a6d">Postgres · SELECT</text>
+  <text x="64" y="454" font-size="10.5" fill="#3b2a20">busca o e-mail e o texto</text>
+  <text x="64" y="469" font-size="10.5" fill="#3b2a20">final; só item aprovado</text>
+
+  <rect x="248" y="396" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="260" y="418" font-size="11.5" font-weight="700" fill="#3b2a20">Send reply</text>
+  <text x="260" y="435" font-size="10.5" fill="#8a7a6d">Gmail · OAuth</text>
+  <text x="260" y="454" font-size="10.5" fill="#3b2a20">manda o texto FINAL ao</text>
+  <text x="260" y="469" font-size="10.5" fill="#3b2a20">cliente, nunca o rascunho</text>
+
+  <rect x="444" y="396" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="456" y="418" font-size="11.5" font-weight="700" fill="#3b2a20">Notify completion</text>
+  <text x="456" y="435" font-size="10.5" fill="#8a7a6d">Telegram</text>
+  <text x="456" y="454" font-size="10.5" fill="#3b2a20">avisa que o e-mail saiu;</text>
+  <text x="456" y="469" font-size="10.5" fill="#3b2a20">só depois do envio</text>
+
+  <rect x="640" y="396" width="170" height="86" rx="8" fill="#eef7ee" stroke="#4a8f4a" stroke-width="1.6"/>
+  <text x="652" y="418" font-size="11.5" font-weight="700" fill="#3b2a20">Archive without sending</text>
+  <text x="652" y="435" font-size="10.5" fill="#8a7a6d">Set · saída “Rejected”</text>
+  <text x="652" y="454" font-size="10.5" fill="#3b2a20">recusa: guarda o motivo,</text>
+  <text x="652" y="469" font-size="10.5" fill="#3b2a20">nada é enviado</text>
+
+  <line x1="225" y1="439" x2="245" y2="439" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+  <line x1="421" y1="439" x2="441" y2="439" stroke="#4a8f4a" stroke-width="1.8" marker-end="url(#ag)"/>
+
+  <rect x="840" y="396" width="362" height="86" rx="8" fill="#faf3ec" stroke="#b0764f" stroke-width="1.5"/>
+  <text x="854" y="418" font-size="11.5" font-weight="700" fill="#6b3f27">Regras da entrega</text>
+  <text x="854" y="436" font-size="10.5" fill="#3b2a20">Aprovado ou ajustado: e-mail ao cliente + aviso no Telegram.</text>
+  <text x="854" y="452" font-size="10.5" fill="#3b2a20">Recusado: arquivado com o motivo e nada enviado. Sem linha aprovada</text>
+  <text x="854" y="468" font-size="10.5" fill="#3b2a20">no banco, nada sai (falha fechada).</text>
+
+  <!-- ===================== RAIA 2 ===================== -->
+  <rect x="30" y="540" width="1180" height="150" rx="12" fill="#f3eef7" stroke="#7a5a9f" stroke-width="2"/>
+  <text x="48" y="563" font-size="13.5" font-weight="700" fill="#5a3f7a">⏱️ R2 · Raia do vigia — mesmo canvas, outro começo: o relógio (5 nós)</text>
+
+  <rect x="52" y="576" width="210" height="86" rx="8" fill="#fff" stroke="#6f9e6f" stroke-width="1.8"/>
+  <text x="64" y="598" font-size="11.5" font-weight="700" fill="#3b2a20">Check pending queue</text>
+  <text x="64" y="615" font-size="10.5" fill="#8a7a6d">Schedule Trigger</text>
+  <text x="64" y="634" font-size="10.5" fill="#3b2a20">acorda de 15 em 15 min,</text>
+  <text x="64" y="649" font-size="10.5" fill="#3b2a20">sempre igual</text>
+
+  <rect x="284" y="576" width="210" height="86" rx="8" fill="#fff" stroke="#6f9e6f" stroke-width="1.8"/>
+  <text x="296" y="598" font-size="11.5" font-weight="700" fill="#3b2a20">Find overdue items</text>
+  <text x="296" y="615" font-size="10.5" fill="#8a7a6d">Postgres · SELECT</text>
+  <text x="296" y="634" font-size="10.5" fill="#3b2a20">devolve UM item só:</text>
+  <text x="296" y="649" font-size="10.5" fill="#3b2a20">quantos e quais</text>
+
+  <rect x="516" y="576" width="210" height="86" rx="8" fill="#fff" stroke="#6f9e6f" stroke-width="1.8"/>
+  <text x="528" y="598" font-size="11.5" font-weight="700" fill="#3b2a20">Has overdue items?</text>
+  <text x="528" y="615" font-size="10.5" fill="#8a7a6d">IF</text>
+  <text x="528" y="634" font-size="10.5" fill="#3b2a20">nada atrasado,</text>
+  <text x="528" y="649" font-size="10.5" fill="#3b2a20">o vigia cala a boca</text>
+
+  <rect x="748" y="576" width="210" height="86" rx="8" fill="#fff" stroke="#6f9e6f" stroke-width="1.8"/>
+  <text x="760" y="598" font-size="11.5" font-weight="700" fill="#3b2a20">Alert reviewer</text>
+  <text x="760" y="615" font-size="10.5" fill="#8a7a6d">Telegram</text>
+  <text x="760" y="634" font-size="10.5" fill="#3b2a20">UMA mensagem com</text>
+  <text x="760" y="649" font-size="10.5" fill="#3b2a20">a lista inteira</text>
+
+  <rect x="980" y="576" width="210" height="86" rx="8" fill="#fff" stroke="#6f9e6f" stroke-width="1.8"/>
+  <text x="992" y="598" font-size="11.5" font-weight="700" fill="#3b2a20">Snooze alerted items</text>
+  <text x="992" y="615" font-size="10.5" fill="#8a7a6d">Postgres · UPDATE</text>
+  <text x="992" y="634" font-size="10.5" fill="#3b2a20">adia o próximo aviso,</text>
+  <text x="992" y="649" font-size="10.5" fill="#3b2a20">para não repetir</text>
+
+  <line x1="265" y1="619" x2="281" y2="619" stroke="#6f9e6f" stroke-width="1.8" marker-end="url(#ap)"/>
+  <line x1="497" y1="619" x2="513" y2="619" stroke="#6f9e6f" stroke-width="1.8" marker-end="url(#ap)"/>
+  <line x1="729" y1="619" x2="745" y2="619" stroke="#6f9e6f" stroke-width="1.8" marker-end="url(#ap)"/>
+  <line x1="961" y1="619" x2="977" y2="619" stroke="#6f9e6f" stroke-width="1.8" marker-end="url(#ap)"/>
+
+  <!-- rodapé -->
+  <rect x="30" y="710" width="1180" height="68" rx="8" fill="#faf3ec" stroke="#b0764f" stroke-width="1.5"/>
+  <text x="48" y="732" font-size="12" font-weight="700" fill="#6b3f27">Analogia:</text>
+  <text x="118" y="732" font-size="12" fill="#3b2a20">a raia principal é o carregamento — cada carga tem a sua. A raia do vigia é o conferente do pátio: ele não carrega</text>
+  <text x="48" y="750" font-size="12" fill="#3b2a20">caminhão nenhum, passa de 15 em 15 minutos e pergunta “esta carga está parada tempo demais?”. Por isso o vigia não conhece a</text>
+  <text x="48" y="768" font-size="12" fill="#3b2a20">execução congelada — ele conhece a tabela. Se a execução se perder num reinício, ela não avisa ninguém; o conferente avisa.</text>
+
+  <text x="34" y="806" font-size="11.5" fill="#8a7a6d">A Groq classifica, a OpenAI redige, o Neon guarda, o Gmail entrega e o Telegram avisa.</text>
+</svg>

@@ -1,0 +1,5 @@
+# Purpose: reproduce the Demo 1 lockfile and supply-chain policy.
+[install]
+saveTextLockfile = true
+minimumReleaseAge = 86400
+minimumReleaseAgeExcludes = ["@lovable.dev/vite-tanstack-config"]

@@ -1,9 +1,6 @@
 -- Demo 2 · Qualificação de lead de doces — schema Neon (Postgres)
--- Purpose: DDL da tabela `leads_doces` que o nó "Save Lead to Neon" grava; fonte de verdade do
--- schema do Demo 2, versionada para o setup do workflow. NÃO aplicado ainda (alterar banco = gated).
---
--- Neon PostgreSQL · branch production
--- Aplicar quando o Luiz autorizar (via Neon CLI/MCP), 1x. Sem dados de teste aqui.
+-- Purpose: DDL da tabela `leads_doces` que o nó "Save Lead to Neon" grava. Rode uma vez no seu
+-- Postgres antes de usar os workflows. Sem dados de teste aqui.
 --
 -- Nota de tipos: data_evento é TEXT (não DATE) de propósito — o chat pode mandar
 -- "semana que vem", "dia 18/10", "sábado". O motor não deve quebrar por parse de data.

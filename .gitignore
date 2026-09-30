@@ -36,6 +36,10 @@ Desktop.ini
 .DS_Store
 .vscode/
 .idea/
+
+# === Config local do agente — NUNCA versionar (decisão do Luiz, S17) ===
+# Inclui os hooks de estrutura: são configuração pessoal do ambiente, não produto.
+# Consequência aceita: num clone limpo eles não vêm junto; recriar a partir do handoff.
 .claude/
 
 # === Temporários ===
@@ -49,14 +53,17 @@ demo-*/tests/fixtures/*
 demo-*/tests/results/
 
 # === Prompts internos para agentes externos; não são parte do produto ===
-demo-*/docs/prompts/
-demo-*/docs/RELATORIO-*
+demo-*/docs/codex/
+demo-*/docs/relatorio-*
 
 # === Processo interno por demo; a vitrine mantém somente o produto ===
 demo-*/tests/
 demo-*/docs/
 demo-*/scripts/
 demo-*/ui/scripts/
+# Base de conhecimento do agente (conteúdo de negócio fictício, insumo do RAG):
+# o repo_standard_gate já a classifica como interna; aqui ela para de aparecer no status.
+demo-*/knowledge/
 
 # === Cérebro do projeto (LOCAL — NÃO é o produto) ===
 # O repo publicado é a VITRINE: só README + pastas demo-*/ + LICENSE.
@@ -66,7 +73,6 @@ CLAUDE.md
 PROJECT_MEMORY.md
 STATUS.md
 INTEGRATIONS.md
-SEEDnovoprojeton8nwebdemos.md
 /docs/
 /tests/
 /tasks/

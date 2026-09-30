@@ -1,0 +1,104 @@
+/* Purpose: styles used only by the customer follow-up page, kept out of the shared sheet. */
+
+.acompanhar-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.acompanhar-lista {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.pedido-card {
+  padding: 20px 22px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.pedido-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pedido-assunto {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #172033;
+}
+
+.pedido-data {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+/* A forma do ponto muda junto com a cor: quem não distingue cor ainda distingue o selo. */
+.selo::before { font-size: 0.7rem; }
+.selo.em_analise { color: #854d0e; background: #fefce8; border-color: #fde68a; }
+.selo.em_analise::before { content: "◔"; }
+.selo.respondida { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.selo.respondida::before { content: "✓"; }
+.selo.encerrada { color: #3f3f46; background: #f4f4f5; border-color: #d4d4d8; }
+.selo.encerrada::before { content: "—"; }
+
+.pedido-frase {
+  margin: 0;
+  color: #526078;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.pedido-resposta {
+  margin: 14px 0 0;
+  padding: 16px 18px;
+  border-left: 3px solid #4338ca;
+  border-radius: 0 12px 12px 0;
+  background: #f8fafc;
+  color: #172033;
+  font-size: 0.97rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.voltar {
+  display: inline-block;
+  margin-top: 26px;
+  color: #4338ca;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.voltar:hover { text-decoration: underline; }
+.voltar:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+}
+
+@media (max-width: 620px) {
+  .acompanhar-form { grid-template-columns: 1fr; }
+  .pedido-data { margin-left: 0; width: 100%; }
+}

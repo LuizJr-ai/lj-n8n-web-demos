@@ -1,6 +1,6 @@
 # Créditos das imagens — Demo 2
 
-Purpose: rastrear a origem de cada imagem (criada por IA vs. banco de imagens autorizado). Sessão 07.
+Purpose: rastrear a origem de cada imagem (criada por IA vs. banco de imagens autorizado).
 
 ## Fotos de banco de imagens — Pexels (licença livre, uso comercial permitido, sem exigência de atribuição)
 Fonte: https://www.pexels.com/license/ · baixadas em `assets/fotos-ref/`.

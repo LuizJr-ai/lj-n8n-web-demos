@@ -1,0 +1,767 @@
+{
+  "name": "Approve AI-drafted customer replies with human-in-the-loop review",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Lane 4 · Decide and deliver\n\nSplits approved, edited and rejected; sends the **final** text, records the decision and posts the confirmation.",
+        "height": 436,
+        "width": 948,
+        "color": 5
+      },
+      "id": "sticky-r1-deliver",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "aprovado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Approved"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "ajustado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Edited"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "recusado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-route-decision",
+      "name": "Route decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1936,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⏰ Replies waiting past the deadline: {{ $json.total }}\n\n{{ $json.lista }}\n\nOpen the review queue to answer them.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "062a4dec-c6c2-4e1e-bd56-8f3fc92b2803",
+      "name": "Alert reviewer",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE aprovacoes_pendentes SET status = CASE $2::text WHEN 'approved' THEN 'aprovado' WHEN 'adjusted' THEN 'ajustado' WHEN 'rejected' THEN 'recusado' END, texto_final = CASE $2::text WHEN 'approved' THEN rascunho_ia WHEN 'adjusted' THEN $3::text END, motivo_recusa = CASE $2::text WHEN 'rejected' THEN $4::text END, decidido_por = $5::text, decidido_em = now(), houve_correcao = ($2::text = 'adjusted') WHERE id = $1::bigint AND status = 'pendente' RETURNING id, status, houve_correcao, decidido_por;",
+        "options": {
+          "queryReplacement": "={{ [$('Save pending item').first().json.id, $json.body.decision, $json.body.editedText ?? null, $json.body.rejectReason ?? null, $json.body.decidedBy] }}"
+        }
+      },
+      "id": "node-record-decision",
+      "name": "Record decision",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1712,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.remetente_email }}",
+        "subject": "Resposta à sua mensagem — Central de atendimento",
+        "emailType": "text",
+        "message": "={{ $json.texto_final }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Central de atendimento"
+        }
+      },
+      "id": "node-send-reply",
+      "name": "Send reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2416,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ (s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'))('✅ Reply sent to ' + $('Load final reply').first().json.remetente_nome) }}\n{{ 'Decision by ' + String($('Load final reply').first().json.decidido_por).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ($('Load final reply').first().json.houve_correcao ? ' (text edited)' : ' (sent as drafted)') }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "node-notify-completion",
+      "name": "Notify completion",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2624,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Approve AI-drafted customer replies with human-in-the-loop review\n\n### How it works\nA customer message arrives on a webhook. A free model classifies it (topic, urgency), a second model drafts the reply, and the draft is stored as a pending item together with its unique resume URL. The run then **freezes** on a Wait node. Nothing is sent. A reviewer opens the app, reads the customer message next to the AI draft, and clicks Approve, Edit or Reject. That click resumes the very same execution from where it stopped. Approved and edited replies are e-mailed to the customer with the **final** text and a Telegram confirmation is posted; rejected ones are archived with the reason and nothing is sent. The decision records who decided and whether the AI text was corrected. A second trigger on the same canvas watches for items left pending past their deadline.\n\n### Setup steps\n1. Create the pending-items table in Postgres (DDL ships with the demo).\n2. Add credentials: Groq (classification), OpenAI (drafting), Postgres, Gmail (reply), Telegram (alerts), and a Header Auth credential for the Wait node, shared with your app's backend.\n3. Point your app's backend at the webhook path and let it call the stored resume URL - never expose that URL to the browser.\n4. Keep the workflow inactive until one clean end-to-end run.",
+        "height": 364,
+        "width": 1964
+      },
+      "id": "sticky-main",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Lane 1 · Intake\n\nReceives the customer message and answers the app in the same request with the item reference.\n",
+        "height": 436,
+        "width": 404
+      },
+      "id": "sticky-r1-intake",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Lane 2 · Intelligence\n\nThe free model reads the customer message and returns subject, urgency and whether a person is needed. The paid model then drafts the reply. Each model output passes through a Code node that fails closed, so nothing unreadable reaches the approval screen.",
+        "height": 440,
+        "width": 912,
+        "color": 6
+      },
+      "id": "sticky-r1-intelligence",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Lane 3 · Store and hold\n\nSaves the pending item **together with its resume URL**, then freezes. Order matters: past the Wait node that URL can no longer be read.",
+        "height": 436,
+        "width": 612,
+        "color": 4
+      },
+      "id": "sticky-r1-hold",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Lane 5 · Pending watchdog — its own trigger, started by the clock\n\nIt connects to no node of the lane above; it only talks to the table. Every N minutes it asks whether any item sat past its deadline and alerts. It is also the detector for a frozen run that was lost — which is why it must be alive, and not inside the execution that froze.",
+        "height": 300,
+        "width": 1324,
+        "color": 2
+      },
+      "id": "sticky-r2-watchdog",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo3-aprovacao",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Receive customer message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ itemId: null, status: 'received' }) }}",
+        "options": {}
+      },
+      "id": "node-respond",
+      "name": "Acknowledge to app",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'openai/gpt-oss-20b', temperature: 0, max_completion_tokens: 800, reasoning_effort: 'low', include_reasoning: false, messages: [ { role: 'system', content: 'You are a customer-service triage assistant. Reply with ONE JSON object and nothing else - no prose, no code fences. Schema: {\"subject\": one of \"warranty\"|\"exchange\"|\"delivery\"|\"billing\"|\"product_info\"|\"complaint\"|\"other\", \"urgency\": one of \"low\"|\"medium\"|\"high\", \"needs_human\": boolean, \"summary\": one short sentence in the same language as the customer message}. Never invent facts that are not in the message. If something is unclear, choose \"other\" and set needs_human to true.' }, { role: 'user', content: $('Receive customer message').item.json.body.mensagem } ] }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "8883046f-6b76-4f55-ab9d-04d9de10c811",
+      "name": "Classify message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Le a classificacao que a Groq devolveu e so deixa passar o que da para confiar.\n// Falha FECHADA: valor estranho para o fluxo AQUI, nunca chega na tela de aprovacao.\n\n// Dominios aceitos. Valor fora daqui e erro, nao aviso: o banco tem CHECK nessas colunas\n// e a tela de pendentes ordena por urgencia — texto livre quebraria as duas coisas.\nconst ASSUNTOS_ACEITOS = ['warranty', 'exchange', 'delivery', 'billing', 'product_info', 'complaint', 'other'];\nconst URGENCIAS_ACEITAS = ['low', 'medium', 'high'];\n\n// O modelo as vezes embrulha o JSON em prosa ou em crases (```json ... ```).\n// Varre o texto de tras para frente e devolve o ULTIMO bloco {...} com chaves balanceadas.\n// De tras para frente porque, quando o modelo \"pensa alto\", o JSON bom e o ultimo.\nfunction ultimoBlocoBalanceado(texto) {\n  let fim = texto.lastIndexOf('}');\n  while (fim !== -1) {\n    let nivel = 0;\n    for (let i = fim; i >= 0; i--) {\n      if (texto[i] === '}') nivel++;\n      else if (texto[i] === '{') {\n        nivel--;\n        if (nivel === 0) return texto.slice(i, fim + 1);\n      }\n    }\n    fim = texto.lastIndexOf('}', fim - 1);\n  }\n  return null;\n}\n\nconst entrada = $input.first().json;\n\n// 1. O no HTTP foi configurado com neverError+fullResponse, entao erro da Groq NAO explode\n//    o no: chega aqui como statusCode. Traduzimos para uma mensagem que diz o que fazer.\nconst status = entrada.statusCode;\nif (status !== 200) {\n  const motivo = status === 429\n    ? 'limite de uso da Groq atingido (429) — esperar a janela reabrir'\n    : `a Groq respondeu HTTP ${status}`;\n  throw new Error(`Classify message falhou: ${motivo}. Nada segue adiante.`);\n}\n\n// 2. O texto do modelo nunca vem na superficie da resposta: mora em choices[0].message.\n//    Se essa estrutura mudar, preferimos parar a adivinhar onde o texto foi parar.\nconst mensagem = entrada.body && entrada.body.choices && entrada.body.choices[0] && entrada.body.choices[0].message;\nif (!mensagem) {\n  throw new Error('Classify message: resposta da Groq sem choices[0].message — formato inesperado.');\n}\n\n// 3. Armadilha conhecida: modelo com raciocinio as vezes devolve content VAZIO\n//    e deixa o texto em 'reasoning'. Sem este fallback o fluxo quebraria calado.\nlet texto = String(mensagem.content || '').trim();\nlet veioDoReasoning = false;\nif (!texto) {\n  texto = String(mensagem.reasoning || '').trim();\n  veioDoReasoning = texto.length > 0;\n}\nif (!texto) {\n  throw new Error('Classify message: a Groq devolveu content e reasoning vazios — nada para classificar.');\n}\n\n// 4. Extrair o JSON de dentro do texto, seja ele limpo ou embrulhado em prosa/crases.\nconst bruto = ultimoBlocoBalanceado(texto);\nif (!bruto) {\n  throw new Error(`Classify message: nenhum bloco JSON no texto do modelo. Recebido: ${texto.slice(0, 200)}`);\n}\n\nlet dados;\ntry {\n  dados = JSON.parse(bruto);\n} catch (e) {\n  throw new Error(`Classify message: o bloco encontrado nao e JSON valido. Recebido: ${bruto.slice(0, 200)}`);\n}\n\n// 5. Validar campo a campo. Modelo fraco inventa valor fora do dominio quando o schema\n//    e forcado — caso conhecido. Aqui o valor invalido vira parada.\nif (!ASSUNTOS_ACEITOS.includes(dados.subject)) {\n  throw new Error(`Classify message: assunto \"${dados.subject}\" fora do dominio aceito.`);\n}\nif (!URGENCIAS_ACEITAS.includes(dados.urgency)) {\n  throw new Error(`Classify message: urgencia \"${dados.urgency}\" fora do dominio aceito.`);\n}\nif (typeof dados.needs_human !== 'boolean') {\n  throw new Error(`Classify message: needs_human precisa ser true/false, veio \"${dados.needs_human}\".`);\n}\nconst resumo = typeof dados.summary === 'string' ? dados.summary.trim() : '';\nif (!resumo) {\n  throw new Error('Classify message: summary vazio — a tela de pendentes ficaria sem descricao.');\n}\n\n// 6. Saida enxuta e previsivel para os proximos nos. Os tokens viajam junto porque o teto\n//    da conta gratuita e por DIA (200.000) — quem grava o pendente registra o consumo.\nconst uso = (entrada.body && entrada.body.usage) || {};\nreturn [{\n  json: {\n    subject: dados.subject,\n    urgency: dados.urgency,\n    needs_human: dados.needs_human,\n    summary: resumo,\n    tokens_usados: uso.total_tokens || 0,\n    veio_do_reasoning: veioDoReasoning,\n  },\n}];\n"
+      },
+      "id": "384fd677-3db7-4985-9dae-d64de6a5b821",
+      "name": "Parse classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer message: {{ $('Receive customer message').item.json.body.mensagem }}\nCustomer name: {{ $('Receive customer message').item.json.body.remetente.nome }}\nTopic: {{ $json.subject }}\nUrgency: {{ $json.urgency }}\n\nWrite a reply to this customer, in the SAME language as the customer message. Be warm, direct and concrete. Never invent order numbers, dates, refund amounts, deadlines or policies that are not in the customer message - if something is missing, ask for it politely. Do not add a subject line, a greeting placeholder or a signature. Return only the reply body.",
+        "batching": {}
+      },
+      "id": "acae085b-a835-4e31-8fa9-2d0c3de929ed",
+      "name": "Draft reply",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        768,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 600,
+          "temperature": 0
+        }
+      },
+      "id": "846e00b6-a680-44db-aa32-2598117143c8",
+      "name": "Reply model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Le o rascunho que o modelo escreveu, venha ele no campo que vier.\n//\n// Por que este no existe: o Basic LLM Chain nao promete ONDE o texto vem. Ja veio em\n// 'text' e ja veio em 'output'. Apostar num campo so significa rascunho\n// vazio chegando na tela de aprovacao — e o humano aprovando o nada.\n\n// Um rascunho menor que isto nao e uma resposta ao cliente, e sobra de geracao.\nconst MINIMO_DE_CARACTERES = 20;\n\n// Os lugares onde o texto ja apareceu, na ordem em que vale a pena procurar. A lista e\n// explicita de proposito: campo novo entra aqui depois de ser MEDIDO, nunca por varredura\n// magica que aceita qualquer coisa.\nconst CAMPOS_CONHECIDOS = ['text', 'output', 'response', 'content'];\n\nfunction extrairTexto(saida) {\n  // 1. O chain pode devolver a propria string, sem embrulho nenhum.\n  if (typeof saida === 'string') return saida;\n  if (!saida || typeof saida !== 'object') return null;\n\n  // 2. Caminho normal: um dos campos conhecidos com a string dentro.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    if (typeof saida[campo] === 'string' && saida[campo].trim()) return saida[campo];\n  }\n\n  // 3. Um nivel de aninhamento: { output: { text: \"...\" } } ja foi visto em versoes do chain.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    const dentro = saida[campo];\n    if (dentro && typeof dentro === 'object') {\n      for (const interno of CAMPOS_CONHECIDOS) {\n        if (typeof dentro[interno] === 'string' && dentro[interno].trim()) return dentro[interno];\n      }\n    }\n  }\n\n  return null;\n}\n\nconst saida = $input.first().json;\n\n// A classificacao nao vem por este fio (o chain so devolve o texto): buscamos no no que a produziu.\nconst classificacao = $('Parse classification').first().json;\n\n// 1. Achar o texto onde quer que ele esteja. Se nao achar, o fluxo para aqui.\nconst bruto = extrairTexto(saida);\nif (bruto === null) {\n  const campos = saida && typeof saida === 'object' ? Object.keys(saida).join(', ') : typeof saida;\n  throw new Error(`Draft reply: nao achei o texto do rascunho. Campos recebidos: ${campos}`);\n}\n\n// 2. Limpar as bordas. Modelo costuma devolver quebra de linha sobrando no inicio e no fim.\nconst texto = String(bruto).trim();\n\n// 3. Falha FECHADA: rascunho vazio ou curto demais nunca chega na tela de aprovacao,\n//    porque o humano aprovaria uma resposta em branco sem perceber.\nif (!texto) {\n  throw new Error('Draft reply: o modelo devolveu um rascunho vazio.');\n}\nif (texto.length < MINIMO_DE_CARACTERES) {\n  throw new Error(`Draft reply: rascunho curto demais (${texto.length} caracteres): \"${texto}\"`);\n}\n\n// 4. O item de aprovacao carrega o rascunho E a classificacao, porque a tela de pendentes\n//    mostra os dois lado a lado e o no seguinte grava tudo numa linha so.\nreturn [{\n  json: {\n    subject: classificacao.subject || null,\n    urgency: classificacao.urgency || null,\n    needs_human: typeof classificacao.needs_human === 'boolean' ? classificacao.needs_human : null,\n    summary: classificacao.summary || null,\n    draft: texto,\n    draft_chars: texto.length,\n  },\n}];\n"
+      },
+      "id": "ba714b40-f81f-467d-a180-c16080aa0464",
+      "name": "Parse draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO aprovacoes_pendentes (origem, remetente_nome, remetente_email, mensagem_cliente, recebido_em, assunto, urgencia, rascunho_ia, resume_url, resumo) VALUES ($1, $2, $3, $4, $5::timestamptz, $6, CASE $7 WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END, $8, $9, $10) RETURNING id, resume_url, status;",
+        "options": {
+          "queryReplacement": "={{ [$('Receive customer message').first().json.body.origem, $('Receive customer message').first().json.body.remetente.nome, $('Receive customer message').first().json.body.remetente.email, $('Receive customer message').first().json.body.mensagem, $('Receive customer message').first().json.body.recebido_em, $json.subject, $json.urgency, $json.draft, $execution.resumeUrl, $json.summary] }}"
+        }
+      },
+      "id": "node-save-pending",
+      "name": "Save pending item",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1328,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "incomingAuthentication": "headerAuth",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "node-wait-approval",
+      "name": "Wait for approval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "019c4775-f48a-46bf-8342-449742db6635",
+      "name": "Check pending queue",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT count(*)::int AS total,\n       COALESCE(string_agg(\n         format('#%s %s (%s) - %s min',\n           id,\n           replace(replace(replace(remetente_nome, '&', '&amp;'), '<', '&lt;'), '>', '&gt;'),\n           replace(replace(replace(COALESCE(assunto, 'no subject'), '&', '&amp;'), '<', '&lt;'), '>', '&gt;'),\n           round(EXTRACT(EPOCH FROM (now() - criado_em))/60)),\n         E'\\n' ORDER BY urgencia DESC, criado_em ASC\n       ), '') AS lista\nFROM aprovacoes_pendentes\nWHERE status = 'pendente'\n  AND now() > COALESCE(prazo_aviso, criado_em + interval '15 minutes');",
+        "options": {}
+      },
+      "id": "3b3738bd-69e0-4508-add6-282079f1d4c6",
+      "name": "Find overdue items",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        272,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "overdue-gate",
+              "leftValue": "={{ $json.total }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c67913af-5a73-4833-bfc3-11594f9cd4a8",
+      "name": "Has overdue items?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Pushes the next warning one hour ahead for everything just alerted,\n-- so the same item is not reported again on every 15-minute tick.\nUPDATE aprovacoes_pendentes\nSET prazo_aviso = now() + interval '60 minutes'\nWHERE status = 'pendente'\n  AND now() > COALESCE(prazo_aviso, criado_em + interval '15 minutes')\nRETURNING id, prazo_aviso;",
+        "options": {}
+      },
+      "id": "f86f2460-8af7-4637-938c-8c91af870c3b",
+      "name": "Snooze alerted items",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        992,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "sent",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "a3",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "decided_by",
+              "value": "={{ $json.decidido_por }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "reject_reason",
+              "value": "={{ $('Wait for approval').first().json.body.rejectReason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-archive-rejected",
+      "name": "Archive without sending",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2192,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, remetente_nome, remetente_email, texto_final, status, decidido_por, houve_correcao FROM aprovacoes_pendentes WHERE id = $1::bigint AND status IN ('aprovado','ajustado') AND texto_final IS NOT NULL;",
+        "options": {
+          "queryReplacement": "={{ [$json.id] }}"
+        }
+      },
+      "id": "node-load-final-reply",
+      "name": "Load final reply",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2192,
+        -96
+      ]
+    }
+  ],
+  "connections": {
+    "Receive customer message": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge to app",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acknowledge to app": {
+      "main": [
+        [
+          {
+            "node": "Classify message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify message": {
+      "main": [
+        [
+          {
+            "node": "Parse classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Draft reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse classification": {
+      "main": [
+        [
+          {
+            "node": "Draft reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft reply": {
+      "main": [
+        [
+          {
+            "node": "Parse draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse draft": {
+      "main": [
+        [
+          {
+            "node": "Save pending item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save pending item": {
+      "main": [
+        [
+          {
+            "node": "Wait for approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for approval": {
+      "main": [
+        [
+          {
+            "node": "Record decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record decision": {
+      "main": [
+        [
+          {
+            "node": "Route decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check pending queue": {
+      "main": [
+        [
+          {
+            "node": "Find overdue items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find overdue items": {
+      "main": [
+        [
+          {
+            "node": "Has overdue items?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has overdue items?": {
+      "main": [
+        [
+          {
+            "node": "Alert reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert reviewer": {
+      "main": [
+        [
+          {
+            "node": "Snooze alerted items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route decision": {
+      "main": [
+        [
+          {
+            "node": "Load final reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load final reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Archive without sending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load final reply": {
+      "main": [
+        [
+          {
+            "node": "Send reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send reply": {
+      "main": [
+        [
+          {
+            "node": "Notify completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
