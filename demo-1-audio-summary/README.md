@@ -36,11 +36,11 @@ A second webhook returns a stored transcription by id.
 
 ## ⚙️ How to run
 
-**Prerequisites** — an n8n instance; credentials for Groq, OpenAI and a Postgres database (Neon works); [Bun](https://bun.sh).
+**Prerequisites** — an n8n instance; credentials for Groq, OpenAI and a Postgres database (Neon works); [Node.js 20+](https://nodejs.org).
 
 **Setup**
 
-1. Create a `transcricoes` table with the columns the workflow uses: `id` (generated key), `transcricao` and `resumo`.
+1. Create the transcriptions table: run [`db/transcricoes.sql`](db/transcricoes.sql) on your database.
 2. Import [`workflows/audio-summary.json`](workflows/audio-summary.json) into n8n, attach your own credentials and activate it. The export is sanitized — no credentials, credential ids or personal hosts.
 3. Configure the app with your two webhook URLs:
 
@@ -53,8 +53,8 @@ Copy-Item .\ui\.env.example .\ui\.env.local
 **Run**
 
 ```powershell
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
 Vite prints the local address.
@@ -86,4 +86,5 @@ mode: "reuniao" | "arquivo"
 
 - `ui/` — React / TanStack Start source
 - `workflows/audio-summary.json` — n8n export, no credentials
+- `db/transcricoes.sql` — the `transcricoes` table
 - `assets/` — interface screenshot and workflow diagram

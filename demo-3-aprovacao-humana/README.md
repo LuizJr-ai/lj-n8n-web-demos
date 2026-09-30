@@ -41,7 +41,7 @@ The resume address never reaches the browser: whoever holds it could approve as 
 
 ## ⚙️ How to run
 
-**Prerequisites** — an n8n instance; credentials for Groq, OpenAI, Gmail (OAuth), a Telegram bot and a Postgres database (Neon works); [Bun](https://bun.sh).
+**Prerequisites** — an n8n instance; credentials for Groq, OpenAI, Gmail (OAuth), a Telegram bot and a Postgres database (Neon works); [Node.js 20+](https://nodejs.org).
 
 **Setup**
 
@@ -58,11 +58,11 @@ Fill in `DATABASE_URL`, `VITE_DEMO3_WEBHOOK_URL` and `RESUME_SECRET` (the same v
 **Run**
 
 ```powershell
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
-Vite prints the local address. Pages: `/` customer form · `/atendimento` reviewer desk · `/acompanhar` follow-up. Unit tests: `bun run test`.
+Vite prints the local address. Pages: `/` customer form · `/atendimento` reviewer desk · `/acompanhar` follow-up. Unit tests: `npm test`.
 
 ## 🔌 Webhook contract
 

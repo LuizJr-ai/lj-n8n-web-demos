@@ -29,6 +29,7 @@ demo-N-topic/
 ├── README.md     # what it does, how it works, how to run it
 ├── workflows/    # n8n export(s), no credentials
 ├── ui/           # the end-user interface
+├── db/           # table definitions, no data
 └── assets/       # screenshots and diagrams used in the README
 ```
 

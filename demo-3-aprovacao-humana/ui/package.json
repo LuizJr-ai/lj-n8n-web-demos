@@ -1,7 +1,6 @@
 {
   "name": "demo-3-human-approval-ui",
   "private": true,
-  "packageManager": "bun@1.4.2",
   "sideEffects": false,
   "type": "module",
   "scripts": {
