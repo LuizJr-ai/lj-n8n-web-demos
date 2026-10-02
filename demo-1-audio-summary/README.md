@@ -7,6 +7,8 @@
 
 ![Demo 1 interface](assets/ui-1920x1080.png)
 
+https://github.com/LuizJr-ai/lj-n8n-web-demos/raw/main/demo-1-audio-summary/assets/demo-1-audio-to-minutes.mp4
+
 ## 🧩 What it does
 
 Two modes, one interface:
@@ -87,4 +89,4 @@ mode: "reuniao" | "arquivo"
 - `ui/` — React / TanStack Start source
 - `workflows/audio-summary.json` — n8n export, no credentials
 - `db/transcricoes.sql` — the `transcricoes` table
-- `assets/` — interface screenshot and workflow diagram
+- `assets/` — interface screenshot, workflow diagram and the walkthrough recording

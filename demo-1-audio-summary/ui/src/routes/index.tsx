@@ -218,7 +218,11 @@ const font = '"IBM Plex Sans", "Segoe UI", sans-serif';
 
 const S = {
   page: {
+    // Casca travada na altura da janela: a pagina ocupa UMA tela, nunca mais que isso.
+    // Quem rola e a caixa de resultado, nao o documento — exigencia da gravacao de tela.
     minHeight: "100vh",
+    height: "100vh",
+    overflowY: "hidden",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -227,7 +231,7 @@ const S = {
     fontFamily: font,
     fontSize: 16,
     lineHeight: 1.55,
-    padding: "clamp(32px, 6vh, 80px) 24px",
+    padding: "clamp(16px, 2.5vh, 40px) 24px",
     boxSizing: "border-box",
     overflowX: "hidden",
   },
@@ -237,8 +241,11 @@ const S = {
     margin: "0 auto",
     paddingInline: 32,
     boxSizing: "border-box",
+    minHeight: 0,
   },
-  header: { padding: "40px 0 24px" },
+  // Alturas enxutas de proposito: a pagina inteira tem de caber numa tela de 1536x820
+  // (notebook do Luiz, zoom 100%) sem rolagem, para a gravacao de tela nao precisar de zoom.
+  header: { padding: "22px 0 16px" },
   brand: {
     display: "inline-flex",
     alignItems: "center",
@@ -251,24 +258,25 @@ const S = {
     color: C.accent,
   },
   h1: {
-    fontSize: "clamp(2rem, 4vw, 3rem)",
+    fontSize: "clamp(1.9rem, 3.2vw, 2.5rem)",
     fontWeight: 700,
-    margin: "16px 0 0",
+    margin: "10px 0 0",
     lineHeight: 1.1,
     color: C.ink,
   },
-  sub: { color: C.ink2, margin: "12px 0 0", fontSize: 17, lineHeight: 1.6, maxWidth: "60ch" },
-  rule: { border: 0, borderTop: `1px solid ${C.rule}`, margin: "0 0 24px" },
-  grid: { display: "grid", gap: 24, gridTemplateColumns: "1fr 1fr", alignItems: "stretch" },
+  sub: { color: C.ink2, margin: "8px 0 0", fontSize: 16, lineHeight: 1.5, maxWidth: "60ch" },
+  rule: { border: 0, borderTop: `1px solid ${C.rule}`, margin: "0 0 16px" },
+  grid: { display: "grid", gap: 20, gridTemplateColumns: "1fr 1fr", alignItems: "stretch", minHeight: 0 },
   panel: {
     background: C.surface,
     border: `1px solid ${C.rule}`,
     borderRadius: 12,
-    padding: 24,
+    padding: 20,
     display: "flex",
     flexDirection: "column",
-    gap: 18,
+    gap: 14,
     minWidth: 0,
+    minHeight: 0,
     height: "100%",
     boxSizing: "border-box",
     boxShadow: "0 1px 2px rgba(31, 41, 51, 0.04), 0 2px 6px rgba(31, 41, 51, 0.04)",
@@ -284,8 +292,11 @@ const S = {
     flexDirection: "column",
     gap: 16,
     minWidth: 0,
-    minHeight: 260,
-    flex: 1,
+    minHeight: 160,
+    flex: "1 1 0",
+    // A ata/transcricao rola DENTRO da caixa. Sem isto o texto longo empurra a pagina
+    // para fora da tela e a gravacao precisaria de rolagem ou de diminuir o zoom.
+    overflowY: "auto",
     background: C.surface,
   },
   btn: {

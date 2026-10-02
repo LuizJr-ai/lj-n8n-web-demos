@@ -1,5 +1,5 @@
 {
-  "name": "Demo 2 · RAG ingestion — knowledge base → pgvector (demo2_kb)",
+  "name": "Web Demo 2b · Load the knowledge base (run once)",
   "active": false,
   "nodes": [
     {

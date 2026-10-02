@@ -7,7 +7,7 @@
   <rect width="1240" height="830" fill="#fbf7f1"/>
 
   <text x="34" y="42" font-size="19" font-weight="700" fill="#3b2a20">Demo 3 — o fluxo n8n: a raia principal e a raia do vigia</text>
-  <text x="34" y="63" font-size="12.5" fill="#8a7a6d">Approve AI-drafted customer replies with human-in-the-loop review · 26 nós (20 executáveis + 6 anotações)</text>
+  <text x="34" y="63" font-size="12.5" fill="#8a7a6d">Web Demo 3 · Human approval of AI-drafted replies · 26 nós (20 executáveis + 6 anotações)</text>
 
   <!-- ===================== RAIA 1 ===================== -->
   <rect x="30" y="80" width="1180" height="440" rx="12" fill="#faf3ec" stroke="#b0764f" stroke-width="1.5"/>

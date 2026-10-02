@@ -32,7 +32,7 @@ HTML UI ─┬─ /webhook/demo2-chat        → conversational agent + RAG → 
          └─ /webhook/demo2-lead-doces  → qualification → Postgres → Telegram / response
 ```
 
-A third workflow, **RAG ingestion**, is run manually to index the knowledge base into `demo2_kb`.
+A third workflow, **Load the knowledge base**, is run manually to index the knowledge base into `demo2_kb`.
 
 ## ⚙️ How to run
 
