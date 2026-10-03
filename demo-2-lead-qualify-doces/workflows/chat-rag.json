@@ -387,12 +387,12 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $('Chat In (POST)').item.json.body.message }}",
+        "text": "={{ $json.conversa }}",
         "hasOutputParser": true,
         "messages": {
           "messageValues": [
             {
-              "message": "Você é um EXTRATOR de pedidos da confeitaria Doce Aurora. Leia a mensagem do cliente e preencha os campos do pedido APENAS com o que o cliente disse EXPLICITAMENTE. NUNCA invente: campo não informado = \"\" (string vazia). É PROIBIDO usar placeholders (exemplo.com, example.com, \"Cliente\", nome do negócio, datas que o cliente não falou). O campo ready só é true quando o cliente informou EXPLICITAMENTE nome, contato (telefone ou e-mail), tipo, quantidade e data; caso contrário ready=false. O campo reply deve ficar \"\" (a resposta ao cliente vem de outro nó). Responda somente os campos."
+              "message": "=Você é um EXTRATOR de solicitação de orçamento da confeitaria Doce Aurora. Abaixo vem a CONVERSA INTEIRA entre a cliente (CLIENTE:) e a atendente (ATENDENTE:). Leia tudo e preencha os campos com o que a CLIENTE disse EXPLICITAMENTE em QUALQUER momento da conversa — um campo informado no início continua valendo no fim.\n\nREGRAS\n1. NUNCA invente. Campo que a cliente não informou = \"\" (string vazia).\n2. É PROIBIDO usar placeholder: exemplo.com, example.com, \"Cliente\", o nome do negócio, ou data que a cliente não falou.\n3. Só conta o que a CLIENTE disse. O que a ATENDENTE sugeriu ou supos não vale como informado.\n4. `data`: converta para o formato dd/MM/aaaa. Hoje é {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }}. \"9 de outubro\" vira 09/10/2026. Se a cliente não deu dia e mês, deixe \"\".\n5. `retirada`: \"Retirada\" ou \"Entrega\". Se for entrega e a cliente tiver dito bairro, região ou CEP, inclua no mesmo campo (ex.: \"Entrega — Tatuapé, CEP 03077-010\"). Sem escolha dita pela cliente = \"\".\n6. `mensagem`: copie a frase da PRÓPRIA CLIENTE que mostra intenção de compra ou urgência (ex.: \"orçamento aprovado, quero fechar hoje\"). Sem frase dessas = \"\".\n7. `ready` só é true quando TODOS os SETE estiverem preenchidos: nome, contato (telefone ou e-mail), tipo, quantidade, data, tema e retirada. Faltando um único, ready=false.\n8. `reply` fica sempre \"\" (a resposta à cliente vem de outro nó).\n\nResponda somente os campos do schema."
             }
           ]
         },
@@ -405,6 +405,40 @@
       "position": [
         288,
         416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT coalesce(string_agg(CASE WHEN message->>'type' = 'human' THEN 'CLIENTE: ' ELSE 'ATENDENTE: ' END || (message->>'content'), chr(10) ORDER BY id), '') AS conversa\nFROM demo2_chat_histories\nWHERE session_id = $1\n  AND message->>'type' IN ('human','ai')\n  AND coalesce(message->>'content','') NOT IN ('', '[]');",
+        "options": {
+          "queryReplacement": "={{ $('Chat In (POST)').item.json.body.sessionId }}"
+        }
+      },
+      "id": "load-conversation-0001",
+      "name": "Load conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        96,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {
+          "maxTokens": 4096,
+          "temperature": 0.5
+        }
+      },
+      "id": "chat-model-openrouter-0001",
+      "name": "Chat Model — Nemotron Super (OpenRouter free)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        784
       ]
     }
   ],
@@ -457,12 +491,18 @@
       "ai_languageModel": [
         [
           {
-            "node": "Doce Aurora Agent",
+            "node": "Lead Schema",
             "type": "ai_languageModel",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Chat Model — Nemotron Super (OpenRouter free)": {
+      "ai_languageModel": [
+        [
           {
-            "node": "Lead Schema",
+            "node": "Doce Aurora Agent",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -565,6 +605,17 @@
       ]
     },
     "Doce Aurora Agent": {
+      "main": [
+        [
+          {
+            "node": "Load conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load conversation": {
       "main": [
         [
           {
