@@ -164,7 +164,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"reply\": $('Guard order (anti-invenção)').item.json.output.reply } }}",
+        "responseBody": "={{ { \"reply\": $('Guard lead fields').item.json.output.reply } }}",
         "options": {}
       },
       "id": "55cbea3a-5fd5-42be-a4ac-e05968c8f581",
@@ -182,7 +182,7 @@
         "autoFix": true
       },
       "id": "23042a6e-62ca-42d3-a789-4c860a788ed9",
-      "name": "Order Schema",
+      "name": "Lead Schema",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
@@ -216,7 +216,7 @@
         "options": {}
       },
       "id": "bab0435b-e55a-4ed8-afd2-9a423849df43",
-      "name": "Order ready?",
+      "name": "Lead complete?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
@@ -234,7 +234,7 @@
         "options": {}
       },
       "id": "66bd6f74-d88b-474b-b80f-47d32bd1bbac",
-      "name": "Register Order (HTTP)",
+      "name": "Register lead",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
@@ -244,7 +244,7 @@
     },
     {
       "parameters": {
-        "content": "## Answer store FAQs and register orders with an AI agent + pgvector RAG\n\n**How it works**\n\nTwo POST webhooks power a sweets shop.\n\n- **A — RAG answers:** `RAG QA (POST)` takes a question, `Retrieve from demo2_kb` searches the pgvector knowledge base with OpenAI embeddings, and `Respond QA` returns a grounded answer to the website.\n- **B — Sales agent:** `Chat In (POST)` feeds *Doce Aurora Agent* (OpenAI chat model + Postgres chat memory), which uses the same knowledge base as a tool. *Order Schema* structures the reply; when an order is complete, `Register Order (HTTP)` writes it to the engine and `Respond Chat` replies to the customer.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials and run the companion *RAG ingestion* workflow to populate `demo2_kb`.\n2. Add OpenAI credentials for the embeddings and chat model.\n3. Set the order-engine endpoint in `Register Order (HTTP)`.\n4. Point the front-end chat and QA widgets at the two webhook URLs.\n5. Publish, then send a test message.",
+        "content": "## Answer store FAQs and capture qualified leads with an AI agent + pgvector RAG\n\n**How it works**\n\nTwo POST webhooks power a sweets shop.\n\n- **A — RAG answers:** `RAG QA (POST)` takes a question, `Retrieve from demo2_kb` searches the pgvector knowledge base with OpenAI embeddings, and `Respond QA` returns a grounded answer to the website.\n- **B — Sales agent:** `Chat In (POST)` feeds *Doce Aurora Agent* (OpenAI chat model + Postgres chat memory), which uses the same knowledge base as a tool. *Extract lead details* pulls the quote request out of the conversation against *Lead Schema*, *Guard lead fields* rejects invented or placeholder data, and once the lead is complete `Register lead` posts it to the qualification workflow while `Respond Chat` answers the customer.\n\n**Scope:** this workflow captures a sales **lead** — a quote request the shop owner still has to price and close. It never confirms an order, reserves a date or takes payment.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials and run the companion *RAG ingestion* workflow to populate `demo2_kb`.\n2. Add OpenAI credentials for the embeddings and chat model.\n3. Set the lead-qualification webhook URL in `Register lead`.\n4. Point the front-end chat and QA widgets at the two webhook URLs.\n5. Publish, then send a test message.",
         "height": 460,
         "width": 904
       },
@@ -321,7 +321,7 @@
     },
     {
       "parameters": {
-        "content": "## Intelligence\nAgent with memory (Postgres) + KB as a tool; parser and order decision.",
+        "content": "## Intelligence\nAgent with memory (Postgres) + KB as a tool; schema parser and the decision on whether the lead is complete enough to register.",
         "height": 624,
         "width": 1260,
         "color": 6
@@ -337,7 +337,7 @@
     },
     {
       "parameters": {
-        "content": "## Delivery\nRegisters the order into the engine (HTTP) and replies in the chat.",
+        "content": "## Delivery\nPosts the lead to the qualification workflow (HTTP) and replies in the chat.",
         "height": 624,
         "width": 320,
         "color": 5
@@ -356,7 +356,7 @@
         "jsCode": "// Fase C: recebe os campos do EXTRATOR (Chain) e injeta o reply do AGENTE.\n// Guard anti-invenção.\nfunction guard(o){\n  o = o || {};\n  const s = v => String(v==null?'':v).trim();\n  const isPlaceholderContact = v => /(exemplo|example|teste|test|dominio|seuemail|nome)\\b/i.test(v) || /@(exemplo|example|teste|test)\\./i.test(v) || /^(cliente|contato)@/i.test(v);\n  const looksEmail = v => /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(v);\n  const looksPhoneBR = v => { const d=(v.match(/\\d/g)||[]).length; return d>=10 && d<=13; };\n  const isRealContact = v => { v=s(v); return !!v && !isPlaceholderContact(v) && (looksEmail(v)||looksPhoneBR(v)); };\n  const VAGUE = ['','a confirmar','a definir','não informado','nao informado','variada','variado','grande','pequeno','n/a','sem tema','a combinar'];\n  const isVague = v => VAGUE.includes(s(v).toLowerCase());\n  const isGenericName = v => { v=s(v).toLowerCase(); return !v || /^(cliente|festa|anivers|doce aurora|docinhos artesanais)/.test(v); };\n  const isInventedAbsDate = v => { const m=s(v).match(/^(\\d{4})-\\d{2}-\\d{2}/); return !!m && (+m[1] < 2026); };\n  const r=[];\n  if(o.ready!==true) r.push('ready!=true');\n  if(isGenericName(o.nome)) r.push('nome ausente/genérico');\n  if(!isRealContact(o.contato)) r.push('contato ausente/placeholder');\n  if(isVague(o.tipo)) r.push('tipo vago');\n  if(isVague(o.quantidade)) r.push('quantidade vaga');\n  if(!s(o.data)||isInventedAbsDate(o.data)) r.push('data ausente/inventada');\n  return { canRegister: r.length===0, blockReason: r.join('; ') };\n}\n// Desembrulha reply que o agente às vezes devolve como STRING JSON (contaminação de histórico).\nfunction unwrapReply(v){\n  let cur = v;\n  for (let i=0;i<4;i++){\n    if (cur==null) return '';\n    if (typeof cur==='object'){\n      if (cur.output && cur.output.reply!==undefined){ cur=cur.output.reply; continue; }\n      if (cur.reply!==undefined){ cur=cur.reply; continue; }\n      return '';\n    }\n    const str=String(cur).trim();\n    if (str.startsWith('{')){ try { cur=JSON.parse(str); continue; } catch(e){ return str; } }\n    return str;\n  }\n  return typeof cur==='string'?cur:'';\n}\nlet agentReply = '';\ntry { agentReply = unwrapReply($('Doce Aurora Agent').first().json.output); } catch(e) { agentReply = ''; }\nfor (const item of $input.all()) {\n  const fields = item.json.output || {};\n  const g = guard(fields);\n  item.json.output = Object.assign({}, fields, { reply: agentReply, canRegister: g.canRegister, blockReason: g.blockReason });\n}\nreturn $input.all();"
       },
       "id": "9df47da4-5578-4a22-ae4c-cd53e64eec70",
-      "name": "Guard order (anti-invenção)",
+      "name": "Guard lead fields",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -399,7 +399,7 @@
         "batching": {}
       },
       "id": "64ab4445-b259-4b82-9ff0-77bac1e47c20",
-      "name": "Extract order (Chain)",
+      "name": "Extract lead details",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
@@ -462,7 +462,7 @@
             "index": 0
           },
           {
-            "node": "Order Schema",
+            "node": "Lead Schema",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -502,22 +502,22 @@
         ]
       ]
     },
-    "Order Schema": {
+    "Lead Schema": {
       "ai_outputParser": [
         [
           {
-            "node": "Extract order (Chain)",
+            "node": "Extract lead details",
             "type": "ai_outputParser",
             "index": 0
           }
         ]
       ]
     },
-    "Order ready?": {
+    "Lead complete?": {
       "main": [
         [
           {
-            "node": "Register Order (HTTP)",
+            "node": "Register lead",
             "type": "main",
             "index": 0
           }
@@ -531,7 +531,7 @@
         ]
       ]
     },
-    "Register Order (HTTP)": {
+    "Register lead": {
       "main": [
         [
           {
@@ -542,11 +542,11 @@
         ]
       ]
     },
-    "Guard order (anti-invenção)": {
+    "Guard lead fields": {
       "main": [
         [
           {
-            "node": "Order ready?",
+            "node": "Lead complete?",
             "type": "main",
             "index": 0
           }
@@ -557,7 +557,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "Extract order (Chain)",
+            "node": "Extract lead details",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -568,18 +568,18 @@
       "main": [
         [
           {
-            "node": "Extract order (Chain)",
+            "node": "Extract lead details",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract order (Chain)": {
+    "Extract lead details": {
       "main": [
         [
           {
-            "node": "Guard order (anti-invenção)",
+            "node": "Guard lead fields",
             "type": "main",
             "index": 0
           }
