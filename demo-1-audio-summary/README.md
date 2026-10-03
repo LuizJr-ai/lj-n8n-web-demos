@@ -7,7 +7,9 @@
 
 ![Demo 1 interface](assets/ui-1920x1080.png)
 
-https://github.com/LuizJr-ai/lj-n8n-web-demos/raw/main/demo-1-audio-summary/assets/demo-1-audio-to-minutes.mp4
+**▶ [Watch the walkthrough](assets/demo-1-audio-to-minutes.mp4)** — a meeting is spoken into the browser and comes back as minutes (2 min, with sound).
+
+[![Minutes produced from a spoken meeting](assets/demo-1-video-poster.png)](assets/demo-1-audio-to-minutes.mp4)
 
 ## 🧩 What it does
 
