@@ -7,9 +7,11 @@
 
 ![Demo 1 interface](assets/ui-1920x1080.png)
 
-**▶ [Watch the walkthrough](assets/demo-1-audio-to-minutes.mp4)** — a meeting is spoken into the browser and comes back as minutes (2 min, with sound).
+A meeting spoken into the browser, coming back as minutes:
 
-[![Minutes produced from a spoken meeting](assets/demo-1-video-poster.png)](assets/demo-1-audio-to-minutes.mp4)
+![Minutes produced from a spoken meeting](assets/demo-1-audio-to-minutes.gif)
+
+The full two-minute walkthrough, with sound, is in [`assets/demo-1-audio-to-minutes.mp4`](assets/demo-1-audio-to-minutes.mp4) — download it to watch; GitHub does not play video of that size in the browser.
 
 ## 🧩 What it does
 
