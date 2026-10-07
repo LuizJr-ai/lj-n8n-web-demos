@@ -8,6 +8,14 @@
 
 CREATE TABLE IF NOT EXISTS leads_doces (
   id           BIGSERIAL PRIMARY KEY,
+  -- Marca da conversa que originou o pedido. Uma conversa = um pedido: se o cliente voltar ao
+  -- chat, o fluxo atualiza esta linha em vez de criar outra, e o aviso ao dono nao repete.
+  -- Fica NULL quando o pedido vem do formulario do site (ali cada envio e um pedido novo).
+  sessao       TEXT,
+  -- Lista de-para do que mudou na ultima alteracao deste pedido, em linguagem de gente.
+  -- A dona pode ja ter o pedido na linha de producao: trocar sabor, quantidade, data ou local
+  -- muda o trabalho dela. Volta a NULL quando a gravacao seguinte nao encontra mudanca.
+  alteracoes   TEXT,
   nome         TEXT,
   contato      TEXT,
   tipo         TEXT,
@@ -26,4 +34,7 @@ CREATE TABLE IF NOT EXISTS leads_doces (
 );
 
 -- Painel da dona: leads ordenados por score desc, quentes no topo.
+-- Uma conversa so pode ter um pedido. NULL nao conflita, logo o formulario do site segue livre.
+CREATE UNIQUE INDEX IF NOT EXISTS leads_doces_sessao_key ON leads_doces (sessao);
+
 CREATE INDEX IF NOT EXISTS idx_leads_doces_score ON leads_doces (score DESC NULLS LAST, criado_em DESC);
