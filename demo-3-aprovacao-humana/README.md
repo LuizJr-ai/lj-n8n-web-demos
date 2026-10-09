@@ -3,9 +3,13 @@
 
 > A customer writes in, an AI drafts the reply, and the workflow freezes until a person approves it — nothing reaches the customer without a human click.
 
-> ⚠️ Demo data only, not hardened for production: use fictional names and addresses you control.
+> ⚠️ Demo data only, not hardened for production: the reviewer area has no login and the reviewer is a fixed label, so use fictional names and addresses you control.
 
 ![Demo 3 — n8n workflow](assets/diagrams/01-fluxo.svg)
+
+![A customer writes in, the AI drafts a reply and a reviewer approves it before it is sent](assets/demo-3-human-approval.gif)
+
+The full walkthrough, with sound, is in [`assets/demo-3-human-approval.mp4`](assets/demo-3-human-approval.mp4) — download it to watch; GitHub does not play video of that size in the browser.
 
 ## 🧩 What it does
 
@@ -87,12 +91,9 @@ Vite prints the local address. Pages: `/` customer form · `/atendimento` review
 
 ## 🚧 Scope and limitations
 
-- One fixed reviewer label; there is no login.
 - The desk confirms the decision, not mail delivery: if Gmail fails, the run stops with an error in n8n and no Telegram message is posted.
 
 ## 📦 Files
 
 - `ui/` — the React app: customer form, reviewer desk, follow-up page, server routes and unit tests
-- `workflows/human-approval.json` — n8n export, no credentials
-- `db/aprovacoes-pendentes.sql` — pending-queue table
-- `assets/diagrams/01-fluxo.svg` — the workflow diagram
+- `workflows/human-approval.json` (n8n export, no credentials) · `db/aprovacoes-pendentes.sql` (pending-queue table) · `assets/` (diagram and recorded walkthrough)
