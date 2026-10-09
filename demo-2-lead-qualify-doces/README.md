@@ -7,6 +7,10 @@
 
 ![Demo 2 architecture](assets/diagrams/architecture.svg)
 
+![A customer asks about delivery and flavours, and the assistant answers](assets/demo-2-doce-aurora.gif)
+
+The full five-minute walkthrough, with sound, is in [`assets/demo-2-doce-aurora.mp4`](assets/demo-2-doce-aurora.mp4) — download it to watch; GitHub does not play video of that size in the browser.
+
 ## 🧩 What it does
 
 1. A visitor **chats** with the assistant or opens the **quote form**.
