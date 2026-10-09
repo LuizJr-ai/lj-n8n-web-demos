@@ -172,6 +172,11 @@
   }
 
   /* ===== Chat ao vivo na seção "Fale com a gente" ===== */
+  /* "Começar de novo": link discreto, alinhado à direita, acima dos balões */
+  .chat-bar{display:flex;justify-content:flex-end;margin-bottom:6px}
+  .chat-reset{background:none;border:0;cursor:pointer;font:inherit;font-size:13px;
+    color:var(--muted);padding:2px 4px;border-radius:6px;text-decoration:underline}
+  .chat-reset:hover,.chat-reset:focus-visible{color:var(--accent-2)}
   .chat-log{display:flex;flex-direction:column;max-height:360px;overflow-y:auto;padding-right:4px}
   .bubble.pre{opacity:.6;font-style:italic}
   /* balão-exemplo (mockup): some no 1º envio real */
@@ -229,6 +234,9 @@
     <h2 class="title">Fale com a gente</h2>
     <p class="sub">Tire uma dúvida rápida (sem cadastro) ou peça seu orçamento — respondemos na hora.</p>
     <div class="chat-wrap">
+      <div class="chat-bar">
+        <button type="button" id="chat-reset" class="chat-reset">Começar de novo</button>
+      </div>
       <div id="chat-log" class="chat-log">
         <div class="bubble bot">Oi! 😊 Sou a atendente da Doce Aurora. Tire dúvidas (preços, prazos, entrega) ou peça seu orçamento por aqui — é só escrever abaixo.</div>
         <div class="bubble me mock">Ex.: Quero 100 do tema Mickey pra dia 20/12</div>
@@ -633,6 +641,28 @@
     if(!sid){ sid = 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
       try { localStorage.setItem('doce_chat_sid', sid); } catch(e){} }
 
+    // "Começar de novo": descarta o crachá da conversa para que a próxima mensagem
+    // abra um atendimento do zero, sem o histórico anterior sendo relido pelo agente.
+    var resetBtn = document.getElementById('chat-reset');
+    if(resetBtn){
+      resetBtn.addEventListener('click', function(){
+        try { localStorage.removeItem('doce_chat_sid'); } catch(e){}
+        location.reload();
+      });
+    }
+
+    // O modelo às vezes responde em markdown (**negrito**, "- " de lista, "###" de título).
+    // Um cliente da confeitaria não deve ver marcação crua no balão — tiramos os símbolos e
+    // deixamos só o texto, com "•" no lugar do hífen de lista.
+    function limparMarcacao(texto){
+      return String(texto)
+        .replace(/\*\*([^*]+)\*\*/g, '$1')   // **negrito** → negrito
+        .replace(/(^|\s)\*([^*\n]+)\*/g, '$1$2') // *itálico* → itálico
+        .replace(/^#{1,6}\s*/gm, '')         // "### Título" → "Título"
+        .replace(/^\s*[-*]\s+/gm, '• ')      // "- item" → "• item"
+        .replace(/[ \t]+$/gm, '');           // espaços sobrando no fim da linha
+    }
+
     // Acrescenta um balão no estilo já existente (.bubble .bot / .me).
     function add(role, text){
       var b = document.createElement('div');
@@ -693,6 +723,7 @@
 
     // Revela o texto progressivamente dentro do balão (streaming). Chama done() no fim.
     function streamInto(bubble, text, done){
+      text = limparMarcacao(text);
       var i = 0, step = Math.max(1, Math.round(REVEAL_CPS / 20)); // ~20 quadros/seg
       var timer = setInterval(function(){
         i = Math.min(text.length, i + step);
