@@ -1,7 +1,12 @@
 /* Purpose: visual language of the reviewer desk, kept scoped so the customer page is untouched. */
 
+/* Regra da casa: a mesa ocupa exatamente uma tela a 100% de zoom e nunca rola a página inteira.
+   O que cresce é o miolo — a fila e o rascunho —, cada um rolando dentro do seu próprio cartão.
+   Rolar a página inteira numa tela de triagem esconde os três botões de decisão, que precisam
+   estar sempre à vista. */
 .mesa {
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   /* Column, not a two-row grid: the confirmation notice is a third child and a "1fr" row
      stretched it to fill the screen. Now only the content area grows. */
   display: flex;
@@ -57,10 +62,13 @@
 
 .mesa-conteudo {
   flex: 1;
+  /* `min-height: 0` é o que permite os cartões encolherem: sem isso um filho em grid recusa
+     ficar menor que o próprio conteúdo e empurra a página para fora da tela. */
+  min-height: 0;
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
   transition: grid-template-columns 220ms ease;
 }
 
@@ -76,7 +84,7 @@
   box-shadow: 0 18px 50px rgba(30, 41, 59, 0.1);
 }
 
-.fila { padding: 18px 16px; }
+.fila { padding: 18px 16px; display: flex; flex-direction: column; min-height: 0; }
 
 .fila-cabecalho {
   display: flex;
@@ -118,7 +126,9 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: calc(100vh - 220px);
+  /* Ocupa o que sobrar do cartão, em vez de uma conta fixa contra a altura da janela. */
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -202,7 +212,16 @@
 
 /* ---------- painel ---------- */
 
-.painel { padding: 22px 24px; display: grid; gap: 18px; align-content: start; }
+.painel {
+  padding: 22px 24px 0;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  /* Rede de segurança: se a mensagem do cliente for muito longa, quem rola é este cartão —
+     a página continua inteira na tela e os botões de decisão continuam visíveis. */
+  min-height: 0;
+  overflow-y: auto;
+}
 
 .painel-vazio { gap: 10px; color: #526078; }
 .painel-vazio h2 { margin: 0; color: #172033; font-size: 1.15rem; }
@@ -257,7 +276,7 @@
 .bloco-resposta-topo .rotulo-bloco { margin: 0; }
 
 .campo-resposta { display: grid; gap: 0; }
-.campo-resposta textarea { min-height: 180px; line-height: 1.6; }
+.campo-resposta textarea { min-height: clamp(130px, 23vh, 220px); line-height: 1.6; }
 
 .contador {
   justify-self: end;
@@ -310,11 +329,18 @@
 
 /* ---------- ações ---------- */
 
+/* A barra de decisão fica colada no rodapé do cartão mesmo quando o texto acima é longo: as três
+   escolhas são o motivo desta tela existir e não podem depender de a pessoa rolar para achá-las. */
 .painel-acoes {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   display: grid;
   gap: 10px;
   padding-top: 16px;
+  padding-bottom: 22px;
   border-top: 1px solid #eef1f6;
+  background: #fff;
 }
 
 .grupo-botoes { display: flex; flex-wrap: wrap; gap: 10px; }

@@ -1,19 +1,61 @@
 /* Purpose: styles used only by the customer follow-up page, kept out of the shared sheet. */
 
+/* Esta tela faz UMA pergunta. Num cartão da largura do formulário de contato ela parecia uma
+   caixa perdida no meio da página — o vazio vinha da largura sobrando, não da altura faltando.
+   Esticar uma consulta de um campo só seria pior: o padrão de "rastrear meu pedido" é um cartão
+   estreito e centrado. Quando a resposta chega, o cartão alarga para o texto respirar. */
+.cartao-consulta {
+  width: min(100%, 560px);
+  padding: clamp(26px, 3.4vh, 44px) clamp(24px, 4vw, 44px);
+  transition: width 220ms ease;
+}
+
+.cartao-consulta:has(.acompanhar-lista) { width: min(100%, 720px); }
+.cartao-consulta h1 { font-size: clamp(1.7rem, 2.4vh + 0.9vw, 2.5rem); }
+
+/* Campo e botão formam UM controle: mesma altura, mesmo raio, mesma linha de base. Antes o botão
+   herdava a altura e o arredondamento do botão principal da outra tela, muito maior que o campo
+   ao lado — ficava com cara de adesivo colado no formulário. */
 .acompanhar-form {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 12px;
+  gap: 10px;
   align-items: end;
   margin-bottom: 8px;
 }
 
+/* Altura ditada pela mesma conta para os dois, em vez de cada um chegar na sua por caminhos
+   diferentes (um pelo padding, o outro pela altura da letra). É o que faz os dois terminarem
+   exatamente na mesma linha. */
+.acompanhar-form input,
+.acompanhar-form .submit-button {
+  height: clamp(44px, 5.4vh, 54px);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.acompanhar-form .submit-button {
+  min-height: 0;
+  padding-right: 24px;
+  padding-left: 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  box-shadow: none;
+}
+
+.acompanhar-form .submit-button:hover:not(:disabled) { transform: none; }
+
+/* Regra da casa: esta tela cabe em uma tela a 100% de zoom. A resposta aprovada pode ter qualquer
+   tamanho, então quem rola é a lista dentro do cartão — nunca a página, que levaria o título e o
+   campo de busca para fora da vista. */
 .acompanhar-lista {
   display: grid;
   gap: 16px;
-  margin-top: 28px;
+  margin-top: clamp(14px, 2.6vh, 28px);
   padding: 0;
   list-style: none;
+  max-height: clamp(200px, 46vh, 560px);
+  overflow-y: auto;
 }
 
 .pedido-card {
@@ -85,7 +127,7 @@
 
 .voltar {
   display: inline-block;
-  margin-top: 26px;
+  margin-top: clamp(12px, 2.2vh, 26px);
   color: #4338ca;
   font-weight: 650;
   text-decoration: none;

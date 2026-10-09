@@ -1,15 +1,48 @@
 /* Purpose: shared visual baseline for the Demo 3 interface. */
+/* A fonte vem antes do Tailwind: `@import` tem de preceder qualquer regra, e o import do Tailwind
+   já expande em regras — invertido, o build falha. */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* Paleta em um lugar só. Família índigo para tudo que é ação, cinza-azulado para texto e
+   estrutura, e um tom de papel muito claro para os campos — é esse tom que dá ao formulário a
+   leitura de "aqui você escreve", que faltava quando campo branco ficava sobre cartão branco. */
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #172033;
-  background: #f4f7fb;
+  --indigo-900: #312e81;
+  --indigo-700: #4338ca;
+  --indigo-600: #4f46e5;
+  --indigo-200: #c9cdf8;
+  --indigo-100: #dfe2ff;
+  --indigo-50: #f1f2fe;
+
+  --tinta: #141b2d;
+  --tinta-media: #4a5569;
+  --tinta-fraca: #6b7488;
+
+  --papel: #ffffff;
+  --papel-campo: #f1f3fb;
+  --linha: #d6dbeb;
+  --linha-forte: #c6cbe0;
+
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  color: var(--tinta);
+  background: #eef1f9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
 * { box-sizing: border-box; }
+
+/* Uma entrada só, encadeada de cima para baixo: o cartão sobe e os blocos aparecem na ordem em
+   que se lê. Serve para o vídeo e para a primeira impressão — não é enfeite espalhado. */
+@keyframes sobe {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 
 body {
   margin: 0;
@@ -21,31 +54,92 @@ button,
 input,
 textarea { font: inherit; }
 
+/* Regra da casa: esta tela cabe em UMA tela a 100% de zoom, sem barra de rolagem. Por isso toda
+   medida vertical daqui para baixo é amarrada à altura da janela (`vh`) e não a um número fixo:
+   numa tela baixa tudo encolhe junto e continua legível, numa tela alta tudo respira. Se algum dia
+   for preciso acrescentar conteúdo aqui, encolha ou corte outra coisa — não deixe a página crescer. */
+/* O cartão PREENCHE a tela por construção, não por conta de altura escrita à mão: a página é uma
+   coluna da altura exata da janela, o cartão cresce dentro dela e o campo de mensagem — o único
+   elemento que ganha com mais espaço — absorve toda a sobra. Nenhum valor fixo para ajustar
+   quando a janela muda de tamanho, e nunca mais um palmo de fundo vazio em cima e embaixo. */
 .customer-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 48px 20px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(12px, 2.2vh, 36px) 20px;
   background:
-    radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12), transparent 32%),
-    radial-gradient(circle at 88% 86%, rgba(14, 165, 233, 0.12), transparent 30%),
-    #f4f7fb;
+    radial-gradient(circle at 12% 6%, rgba(99, 102, 241, 0.16), transparent 34%),
+    radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.14), transparent 32%),
+    #eef1f9;
 }
 
 .customer-card {
-  width: min(100%, 720px);
-  padding: clamp(28px, 5vw, 52px);
-  border: 1px solid rgba(148, 163, 184, 0.34);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 24px 70px rgba(30, 41, 59, 0.12);
+  width: min(100%, 760px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 2.8vh, 40px) clamp(24px, 5vw, 48px);
+  border: 1px solid var(--linha);
+  border-radius: 26px;
+  background: var(--papel);
+  box-shadow: 0 1px 2px rgba(20, 27, 45, 0.04), 0 24px 60px -24px rgba(20, 27, 45, 0.22);
+}
+
+/* Só a tela com formulário se estica. A de confirmação é curta de propósito — esticá-la seria
+   trocar vazio nas pontas por vazio no meio. */
+.customer-card:has(.customer-form) {
+  flex: 1 1 auto;
+  max-height: min(100%, 940px);
+}
+
+.customer-card { animation: sobe 420ms ease both; }
+.customer-card > * { animation: sobe 420ms ease both; }
+.customer-card > *:nth-child(2) { animation-delay: 70ms; }
+.customer-card > *:nth-child(3) { animation-delay: 120ms; }
+.customer-card > *:nth-child(4) { animation-delay: 170ms; }
+
+/* Tarja e porta da equipe na mesma linha: a da esquerda diz onde a pessoa está, a da direita é
+   para quem trabalha aqui. Ficam lado a lado para não gastar uma faixa inteira de altura. */
+.topo-cartao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Deliberadamente apagada: existe para quem já sabe que precisa dela. O cadeado avisa, antes do
+   clique, que ali não é atendimento ao cliente. */
+.acesso-equipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: clamp(6px, 1.2vh, 14px);
+  padding: 5px 11px;
+  border: 1px solid #dbe1ea;
+  border-radius: 999px;
+  color: #5c6779;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.acesso-equipe span { font-size: 0.72rem; }
+.acesso-equipe:hover { border-color: #c3cbd8; color: #344054; background: #eef1f6; }
+.acesso-equipe:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: clamp(6px, 1.2vh, 14px);
   color: #4338ca;
   font-size: 0.82rem;
   font-weight: 700;
@@ -59,7 +153,7 @@ textarea { font: inherit; }
 /* Rodapé de papéis: a porta para a mesa de atendimento. Discreto de propósito — quem chega
    aqui é cliente; a equipe sabe que este link existe. Cinza-azulado 4.6:1 sobre o fundo claro. */
 .rodape-papeis {
-  margin: 22px auto 0;
+  margin: clamp(8px, 1.3vh, 22px) auto 0;
   text-align: center;
 }
 
@@ -80,24 +174,24 @@ textarea { font: inherit; }
 h1 {
   margin: 0;
   color: #172033;
-  font-size: clamp(2rem, 6vw, 3.25rem);
+  font-size: clamp(1.75rem, 2.6vh + 1.1vw, 3.25rem);
   line-height: 1.08;
   letter-spacing: -0.04em;
 }
 
 .intro {
   max-width: 590px;
-  margin: 18px 0 30px;
+  margin: clamp(6px, 1.2vh, 18px) 0 clamp(12px, 2.2vh, 30px);
   color: #526078;
   font-size: 1.04rem;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
-.examples { margin-bottom: 26px; }
+.examples { margin-bottom: clamp(12px, 2.2vh, 26px); }
 .examples > p,
 label > span {
   display: block;
-  margin: 0 0 9px;
+  margin: 0 0 clamp(5px, 0.9vh, 9px);
   color: #344054;
   font-size: 0.9rem;
   font-weight: 650;
@@ -109,43 +203,78 @@ label > span {
   gap: 10px;
 }
 
+/* Atalhos de assunto, não decoração: eram cinza-claro sobre branco e ninguém via que dava para
+   clicar. Em índigo suave eles se oferecem, sem disputar com o botão de enviar, que é sólido. */
 .example-button {
-  min-height: 46px;
-  padding: 10px 13px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  color: #334155;
-  background: #f8fafc;
+  min-height: clamp(38px, 5vh, 48px);
+  padding: 8px 14px;
+  border: 1px solid var(--indigo-100);
+  border-radius: 999px;
+  color: var(--indigo-900);
+  background: var(--indigo-50);
   cursor: pointer;
-  font-weight: 650;
-  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+  font-weight: 600;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .example-button:hover {
-  border-color: #6366f1;
-  background: #eef2ff;
+  border-color: var(--indigo-600);
+  background: var(--indigo-100);
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px -8px rgba(67, 56, 202, 0.5);
 }
 
-.customer-form { display: grid; gap: 20px; }
+.example-button:focus-visible {
+  outline: none;
+  border-color: var(--indigo-600);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.18);
+}
+
+.customer-form {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.7vh, 18px);
+}
+
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* O campo de mensagem é o elástico do formulário: tudo o mais tem a altura que precisa, e o que
+   sobrar da tela vira espaço para escrever. */
+.campo-mensagem {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 
 input,
 textarea {
   width: 100%;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--linha);
   border-radius: 12px;
-  padding: 13px 14px;
-  color: #172033;
-  background: #fff;
+  padding: clamp(9px, 1.4vh, 13px) 14px;
+  color: var(--tinta);
+  /* Campo tingido: a área onde se escreve precisa se distinguir do cartão, e borda sozinha não
+     faz isso. No foco ele vira branco — o contraste conduz o olho para onde a pessoa está. */
+  background: var(--papel-campo);
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
-textarea { min-height: 132px; resize: vertical; line-height: 1.5; }
+input::placeholder,
+textarea::placeholder { color: var(--tinta-fraca); }
+
+/* Sem altura escrita à mão e sem o atributo `rows`: o campo recebe a sobra da tela pelo flex do
+   pai. `min-height` é só o piso para a janela mais baixa possível. */
+textarea { flex: 1 1 auto; height: auto; min-height: 92px; resize: none; line-height: 1.55; }
+
 input:focus,
 textarea:focus {
-  border-color: #4f46e5;
+  border-color: var(--indigo-600);
+  background: var(--papel);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
 }
 
@@ -156,7 +285,7 @@ textarea:focus {
 }
 
 .submit-button {
-  min-height: 50px;
+  min-height: clamp(42px, 6vh, 50px);
   border: 0;
   border-radius: 14px;
   color: #fff;
@@ -167,8 +296,34 @@ textarea:focus {
   transition: background 150ms ease, transform 150ms ease;
 }
 
-.submit-button:hover:not(:disabled) { background: #3730a3; transform: translateY(-1px); }
+.submit-button:hover:not(:disabled) { background: var(--indigo-900); transform: translateY(-1px); }
 .submit-button:disabled { cursor: wait; opacity: 0.7; }
+
+/* Ação secundária: quem chega aqui já enviou e quer a resposta. Discreta, mas centrada sob o
+   botão, que é onde o olho termina depois de ler o formulário. */
+.link-acompanhar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  color: var(--tinta-media);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.link-acompanhar:hover { color: var(--indigo-700); text-decoration: underline; }
+
+/* O ícone já nasce em índigo, para puxar o olho antes da leitura da frase; o texto só o alcança
+   quando o ponteiro chega. */
+.icone-acompanhar {
+  flex: none;
+  color: var(--indigo-600);
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.link-acompanhar:hover .icone-acompanhar { transform: translateX(-2px); }
 
 .feedback {
   margin: 0;
@@ -181,6 +336,38 @@ textarea:focus {
 .feedback.success { display: grid; gap: 4px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; }
 .feedback.success a { justify-self: start; margin-top: 4px; color: inherit; font-weight: 650; }
 .feedback.error { color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; }
+
+/* Volta ao formulário depois da confirmação. Discreto: a ação principal da tela de confirmação é
+   acompanhar a mensagem que acabou de ser enviada, não escrever outra. */
+.botao-voltar-ao-formulario {
+  justify-self: start;
+  margin-top: clamp(10px, 1.8vh, 18px);
+  padding: 10px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  color: #334155;
+  background: #f8fafc;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.botao-voltar-ao-formulario:hover { border-color: #6366f1; background: #eef2ff; }
+
+/* Telas altas — o caso comum num monitor de 1080p. Aqui sobrava um palmo de fundo vazio em cima e
+   embaixo enquanto o campo de mensagem ficava apertado. O espaço vai para onde a pessoa escreve e
+   para o respiro entre os blocos, não para a margem: o cartão cresce, a página continua inteira. */
+/* Telas baixas — janela de 1280×720, notebook pequeno, navegador com muitas barras. Encolher o
+   espaçamento já não basta aqui, então sai a linha de abertura: ela diz a mesma coisa que o texto
+   logo abaixo dos três botões ("conte o que aconteceu" / "escolha o assunto e complete"). Some a
+   frase repetida, não a instrução que a pessoa precisa para preencher. */
+@media (max-height: 790px) {
+  .intro { display: none; }
+  /* A pastilha da área restrita é mais alta que a tarja ao lado e passa a mandar na altura da
+     primeira linha. Em tela baixa ela encolhe para não cobrar esses pixels. */
+  .acesso-equipe { padding: 3px 9px; font-size: 0.74rem; }
+  h1 { font-size: clamp(1.6rem, 2.2vh + 1vw, 2.2rem); }
+  .customer-card { border-radius: 22px; }
+}
 
 @media (max-width: 620px) {
   .customer-page { padding: 20px 12px; }

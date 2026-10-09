@@ -77,7 +77,7 @@ function FollowUpPage() {
 
   return (
     <main className="customer-page">
-      <section className="customer-card" aria-labelledby="acompanhar-title">
+      <section className="customer-card cartao-consulta" aria-labelledby="acompanhar-title">
         <div className="eyebrow">
           <span aria-hidden="true">●</span> Central de atendimento
         </div>
