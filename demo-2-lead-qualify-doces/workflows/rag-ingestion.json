@@ -71,7 +71,7 @@
     },
     {
       "parameters": {
-        "content": "## Build the demo2_kb knowledge base for pgvector RAG\n\n**How it works**\n\nRuns manually. `Split KB into sections` emits the curated knowledge chunks embedded in its Code node. The *Default Data Loader* + *Embeddings OpenAI (text-embedding-3-small)* turn each chunk into vectors; `Store in pgvector (demo2_kb)` writes them to the `demo2_kb` table — the same base queried by the agent.\n\n**Setup steps**\n\n1. Create Postgres / pgvector credentials (same database as Demo 2).\n2. Add OpenAI credentials for embeddings.\n3. Edit the curated items in `Split KB into sections` when the knowledge changes.\n4. Run once; re-run whenever the knowledge base changes.",
+        "content": "## Load the store knowledge for similarity search\n\n### How it works\nRun manually to read curated knowledge sections embedded in the workflow. Their readable companion is the fictional-business dossier in the repository. A document loader reads each section, and OpenAI text-embedding-3-small represents its text as a vector for similarity search.\n\nPostgres with pgvector stores these documents in the shared store-knowledge table. Both the conversational assistant and the reference-search route use that knowledge.\n\nInsert mode adds rows; it does not replace existing content. A direct rerun can duplicate sections and leave outdated information available.\n\n### Setup steps\n1. Connect Postgres with pgvector and OpenAI embeddings.\n2. Review the curated sections and align their readable companion.\n3. Before the initial load, check whether the intended content is already present.\n4. Before reloading, back up and review the existing content, then arrange controlled removal of the previous ingestion from the specific knowledge table.\n5. Run manually once and verify the stored knowledge and retrieval results.",
         "height": 456,
         "width": 504
       },
@@ -86,7 +86,7 @@
     },
     {
       "parameters": {
-        "content": "## Intelligence\nSplits the base into sections, generates embeddings (OpenAI) + data loader.",
+        "content": "## Prepare searchable documents\nRead the curated section text as documents and generate OpenAI embeddings, which represent text for similarity matching. Keep the sections aligned with their readable companion so the store search uses the intended facts.",
         "height": 444,
         "width": 452,
         "color": 6
@@ -102,7 +102,7 @@
     },
     {
       "parameters": {
-        "content": "## Persistence\nStores into the `demo2_kb` pgvector.",
+        "content": "## Add documents to store knowledge\nInsert documents and embeddings into the shared store-knowledge table. This operation adds rows rather than replacing them. Before reloading, back up the existing knowledge and arrange controlled removal of the previous ingestion from this specific table.",
         "height": 444,
         "width": 424,
         "color": 4
@@ -118,7 +118,7 @@
     },
     {
       "parameters": {
-        "content": "## Acquisition · Manual ingest\n\nManual trigger. Run to (re)index the demo2_kb knowledge base.",
+        "content": "## Start a controlled knowledge load\nRun manually once after checking existing content. Review any knowledge change before starting another load. Repeating the trigger directly adds another ingestion and can duplicate sections.",
         "height": 448,
         "width": 288
       },
