@@ -69,7 +69,12 @@ export function mapearPedido(linha: LinhaPedido): PedidoPublico {
 export function frasePara(situacao: Situacao): string {
   if (situacao === "respondida") return "Um atendente revisou e aprovou esta resposta.";
   if (situacao === "encerrada") {
-    return "Vamos falar com você por outro caminho. Nenhuma resposta automática foi enviada.";
+    // Antes dizia "vamos falar com você por outro caminho" — promessa de um contato que
+    // ninguém faz, e ainda revelava que existe uma resposta automática por trás. O caminho
+    // recusado apenas arquiva o caso; a frase agora diz só isso, sem inventar continuação.
+    return "Este caso foi encerrado pelo atendimento, sem resposta enviada.";
   }
-  return "Um atendente está revisando a resposta. Volte aqui em alguns minutos.";
+  // Antes mandava "volte em alguns minutos" — prazo que não existe. Não há compromisso de
+  // tempo no demo, então a frase não cria um.
+  return "Um atendente está revisando a resposta. Consulte novamente mais tarde.";
 }

@@ -73,6 +73,23 @@ test("nenhuma frase ao cliente usa jargão técnico", () => {
   }
 });
 
+test("nenhuma frase promete prazo, canal ou contato que não existe", () => {
+  // Achado da revisão do Codex (07/10/2026): a tela prometia "volte em alguns minutos" sem
+  // haver prazo nenhum, e "vamos falar com você por outro caminho" sem haver outro caminho.
+  // Promessa que o atendimento não cumpre é pior do que não dizer nada.
+  const promessas = [
+    /alguns minutos|em instantes|em breve|dentro de \d/i, // prazo inventado
+    /outro caminho|entraremos em contato|vamos te ligar|telefone/i, // canal inexistente
+    /voc[êe] receber[áa]|ser[áa] enviad/i, // envio garantido antes da decisão humana
+  ];
+  for (const situacao of ["em_analise", "respondida", "encerrada"] as const) {
+    const frase = frasePara(situacao);
+    for (const promessa of promessas) {
+      assert.equal(promessa.test(frase), false, `${situacao}: "${frase}"`);
+    }
+  }
+});
+
 test("e-mail é conferido antes de ir ao banco", () => {
   assert.equal(emailValido("marina.alves@exemplo.com.br"), true);
   assert.equal(emailValido("marina@"), false);

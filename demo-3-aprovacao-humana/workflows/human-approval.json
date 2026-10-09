@@ -4,7 +4,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## Lane 4 · Decide and deliver\n\nSplits approved, edited and rejected; sends the **final** text, records the decision and posts the confirmation.",
+        "content": "## Record the decision and deliver\nRecord the reviewer’s decision before delivery. Approved or edited requests load final text from the database, send the email and notify Telegram. Rejected requests record the reason without sending a reply.",
         "height": 436,
         "width": 948,
         "color": 5
@@ -107,7 +107,7 @@
     {
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "=⏰ Replies waiting past the deadline: {{ $json.total }}\n\n{{ $json.lista }}\n\nOpen the review queue to answer them.",
+        "text": "=⏰ Respostas esperando além do prazo: {{ $json.total }}\n\n{{ $json.lista }}\n\nAbra a fila de revisão para responder.",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "HTML"
@@ -162,7 +162,7 @@
     {
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{ (s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'))('✅ Reply sent to ' + $('Load final reply').first().json.remetente_nome) }}\n{{ 'Decision by ' + String($('Load final reply').first().json.decidido_por).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ($('Load final reply').first().json.houve_correcao ? ' (text edited)' : ' (sent as drafted)') }}",
+        "text": "={{ (s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'))('✅ Resposta enviada para ' + $('Load final reply').first().json.remetente_nome) }}\n{{ 'Decisão de ' + String($('Load final reply').first().json.decidido_por).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ($('Load final reply').first().json.houve_correcao ? ' (texto ajustado)' : ' (enviado como estava)') }}",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "HTML"
@@ -179,7 +179,7 @@
     },
     {
       "parameters": {
-        "content": "## Approve AI-drafted customer replies with human-in-the-loop review\n\n### How it works\nA customer message arrives on a webhook. A free model classifies it (topic, urgency), a second model drafts the reply, and the draft is stored as a pending item together with its unique resume URL. The run then **freezes** on a Wait node. Nothing is sent. A reviewer opens the app, reads the customer message next to the AI draft, and clicks Approve, Edit or Reject. That click resumes the very same execution from where it stopped. Approved and edited replies are e-mailed to the customer with the **final** text and a Telegram confirmation is posted; rejected ones are archived with the reason and nothing is sent. The decision records who decided and whether the AI text was corrected. A second trigger on the same canvas watches for items left pending past their deadline.\n\n### Setup steps\n1. Create the pending-items table in Postgres (DDL ships with the demo).\n2. Add credentials: Groq (classification), OpenAI (drafting), Postgres, Gmail (reply), Telegram (alerts), and a Header Auth credential for the Wait node, shared with your app's backend.\n3. Point your app's backend at the webhook path and let it call the stored resume URL - never expose that URL to the browser.\n4. Keep the workflow inactive until one clean end-to-end run.",
+        "content": "## Approve AI-drafted customer replies\n\n### How it works\nA customer message enters through the app. A free model classifies it, and a paid model drafts a reply. Both outputs must pass validation before the request is saved as pending.\n\nThe app receives the actual request reference while the workflow waits for a human decision. A reviewer can approve, edit or reject the draft. The decision is recorded first. Approved or edited requests then load the final text from the database, send it by email and notify Telegram. Rejected requests record the reason without sending a reply.\n\nA separate scheduled lane checks for overdue pending requests every 15 minutes. It alerts Telegram and postpones the next reminder by 60 minutes. Silence leaves the request pending; it does not automatically reject it.\n\n### Setup steps\n1. Configure Postgres, Groq, OpenAI, Gmail and Telegram credentials.\n2. Match the Wait node’s Header Auth credential with the app backend.\n3. Keep resume URLs on the backend; never expose them to the browser.\n4. Complete a clean end-to-end run before enabling customer traffic.",
         "height": 364,
         "width": 1964
       },
@@ -194,7 +194,7 @@
     },
     {
       "parameters": {
-        "content": "## Lane 1 · Intake\n\nReceives the customer message and answers the app in the same request with the item reference.\n",
+        "content": "## Receive the customer message\nAccept the customer’s message from the app. After the pending request is saved, return its actual reference in the same HTTP request, so the reviewer can find the correct item.",
         "height": 436,
         "width": 404
       },
@@ -209,7 +209,7 @@
     },
     {
       "parameters": {
-        "content": "## Lane 2 · Intelligence\n\nThe free model reads the customer message and returns subject, urgency and whether a person is needed. The paid model then drafts the reply. Each model output passes through a Code node that fails closed, so nothing unreadable reaches the approval screen.",
+        "content": "## Classify and draft safely\nA free model identifies topic, urgency and whether a person is needed. A paid model drafts the reply. Both outputs must pass validation; a failure stops processing before a pending request is created.",
         "height": 440,
         "width": 912,
         "color": 6
@@ -225,7 +225,7 @@
     },
     {
       "parameters": {
-        "content": "## Lane 3 · Store and hold\n\nSaves the pending item **together with its resume URL**, then freezes. Order matters: past the Wait node that URL can no longer be read.",
+        "content": "## Save and wait for a decision\nSave the pending request and its resume URL, then wait for a human decision. The app backend uses that URL with Header Auth; the browser never receives it. Without a decision, the request remains pending.",
         "height": 436,
         "width": 612,
         "color": 4
@@ -241,7 +241,7 @@
     },
     {
       "parameters": {
-        "content": "## Lane 5 · Pending watchdog — its own trigger, started by the clock\n\nIt connects to no node of the lane above; it only talks to the table. Every N minutes it asks whether any item sat past its deadline and alerts. It is also the detector for a frozen run that was lost — which is why it must be alive, and not inside the execution that froze.",
+        "content": "## Remind the reviewer of overdue requests\nRun independently every 15 minutes. Check the database for overdue pending requests, alert Telegram and delay the next reminder by 60 minutes. This checks request age, not whether the waiting execution is still alive.",
         "height": 300,
         "width": 1324,
         "color": 2
@@ -274,7 +274,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ itemId: null, status: 'received' }) }}",
+        "responseBody": "={{ JSON.stringify({ itemId: $json.id, status: 'received' }) }}",
         "options": {}
       },
       "id": "node-respond",
@@ -282,8 +282,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        160,
-        -48
+        1424,
+        112
       ]
     },
     {
@@ -294,7 +294,7 @@
         "nodeCredentialType": "groqApi",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'openai/gpt-oss-20b', temperature: 0, max_completion_tokens: 800, reasoning_effort: 'low', include_reasoning: false, messages: [ { role: 'system', content: 'You are a customer-service triage assistant. Reply with ONE JSON object and nothing else - no prose, no code fences. Schema: {\"subject\": one of \"warranty\"|\"exchange\"|\"delivery\"|\"billing\"|\"product_info\"|\"complaint\"|\"other\", \"urgency\": one of \"low\"|\"medium\"|\"high\", \"needs_human\": boolean, \"summary\": one short sentence in the same language as the customer message}. Never invent facts that are not in the message. If something is unclear, choose \"other\" and set needs_human to true.' }, { role: 'user', content: $('Receive customer message').item.json.body.mensagem } ] }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: 'openai/gpt-oss-20b', temperature: 0, max_completion_tokens: 800, reasoning_effort: 'low', include_reasoning: false, messages: [ { role: 'system', content: 'You are a customer-service triage assistant. Today is ' + $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') + ' (timezone America/Sao_Paulo). Resolve relative time expressions such as \"today\", \"tomorrow\", \"this week\" or \"by Friday\" against that date: a deadline that is already past or is within 48 hours raises urgency; a far-away date does not. Reply with ONE JSON object and nothing else - no prose, no code fences. Schema: {\"subject\": one of \"warranty\"|\"exchange\"|\"delivery\"|\"billing\"|\"product_info\"|\"complaint\"|\"other\", \"urgency\": one of \"low\"|\"medium\"|\"high\", \"needs_human\": boolean, \"summary\": one short sentence in the same language as the customer message}. Never invent facts that are not in the message. If something is unclear, choose \"other\" and set needs_human to true.' }, { role: 'user', content: $('Receive customer message').item.json.body.mensagem } ] }) }}",
         "options": {
           "response": {
             "response": {
@@ -330,7 +330,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Customer message: {{ $('Receive customer message').item.json.body.mensagem }}\nCustomer name: {{ $('Receive customer message').item.json.body.remetente.nome }}\nTopic: {{ $json.subject }}\nUrgency: {{ $json.urgency }}\n\nWrite a reply to this customer, in the SAME language as the customer message. Be warm, direct and concrete. Never invent order numbers, dates, refund amounts, deadlines or policies that are not in the customer message - if something is missing, ask for it politely. Do not add a subject line, a greeting placeholder or a signature. Return only the reply body.",
+        "text": "=Customer message: {{ $('Receive customer message').item.json.body.mensagem }}\nCustomer name: {{ $('Receive customer message').item.json.body.remetente.nome }}\nTopic: {{ $json.subject }}\nUrgency: {{ $json.urgency }}\nToday: {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }} (timezone America/Sao_Paulo)\n\nWrite a reply to this customer, in the SAME language as the customer message. Be warm, direct and concrete. Use the date above to understand any relative deadline the customer mentions (\"today\", \"tomorrow\", \"by Friday\"), and never contradict it. Never invent order numbers, dates, refund amounts, deadlines or policies that are not in the customer message - if something is missing, ask for it politely. Never promise on the company's behalf: no delivery channel, no callback, no future action, no refund, no replacement, no deadline and no decision that a human has not made yet. You may say the request was received and is being reviewed. Do not add a subject line, a greeting placeholder or a signature. Return only the reply body.",
         "batching": {}
       },
       "id": "acae085b-a835-4e31-8fa9-2d0c3de929ed",
@@ -380,9 +380,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO aprovacoes_pendentes (origem, remetente_nome, remetente_email, mensagem_cliente, recebido_em, assunto, urgencia, rascunho_ia, resume_url, resumo) VALUES ($1, $2, $3, $4, $5::timestamptz, $6, CASE $7 WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END, $8, $9, $10) RETURNING id, resume_url, status;",
+        "query": "INSERT INTO aprovacoes_pendentes (origem, remetente_nome, remetente_email, mensagem_cliente, recebido_em, assunto, urgencia, rascunho_ia, resume_url, resumo, request_id) VALUES ($1, $2, $3, $4, $5::timestamptz, $6, CASE $7 WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END, $8, $9, $10, $11) ON CONFLICT (request_id) WHERE request_id IS NOT NULL DO UPDATE SET request_id = EXCLUDED.request_id RETURNING id, resume_url, status;",
         "options": {
-          "queryReplacement": "={{ [$('Receive customer message').first().json.body.origem, $('Receive customer message').first().json.body.remetente.nome, $('Receive customer message').first().json.body.remetente.email, $('Receive customer message').first().json.body.mensagem, $('Receive customer message').first().json.body.recebido_em, $json.subject, $json.urgency, $json.draft, $execution.resumeUrl, $json.summary] }}"
+          "queryReplacement": "={{ [$('Receive customer message').first().json.body.origem, $('Receive customer message').first().json.body.remetente.nome, $('Receive customer message').first().json.body.remetente.email, $('Receive customer message').first().json.body.mensagem, $('Receive customer message').first().json.body.recebido_em, $json.subject, $json.urgency, $json.draft, $execution.resumeUrl, $json.summary, $('Receive customer message').first().json.body.request_id || null] }}"
         }
       },
       "id": "node-save-pending",
@@ -563,7 +563,7 @@
       "main": [
         [
           {
-            "node": "Acknowledge to app",
+            "node": "Classify message",
             "type": "main",
             "index": 0
           }
@@ -574,7 +574,7 @@
       "main": [
         [
           {
-            "node": "Classify message",
+            "node": "Wait for approval",
             "type": "main",
             "index": 0
           }
@@ -640,7 +640,7 @@
       "main": [
         [
           {
-            "node": "Wait for approval",
+            "node": "Acknowledge to app",
             "type": "main",
             "index": 0
           }

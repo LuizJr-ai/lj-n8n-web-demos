@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS aprovacoes_pendentes (
   mensagem_cliente  TEXT        NOT NULL,          -- body.mensagem
   recebido_em       TIMESTAMPTZ,                   -- body.recebido_em (hora do cliente, não do n8n)
 
+  -- identificador do ENVIO, criado pela tela e repetido em cada tentativa do mesmo envio.
+  -- É ele que impede que um clique duplo, ou um reenvio após resposta perdida, vire dois
+  -- casos na fila do atendente. Fica nulo nas linhas anteriores a esta coluna.
+  request_id        TEXT,                          -- body.request_id
+
   -- o que a IA produziu
   assunto           TEXT,
   urgencia          SMALLINT    CHECK (urgencia BETWEEN 1 AND 3),   -- 1 baixa · 2 média · 3 alta
@@ -38,6 +43,13 @@ CREATE TABLE IF NOT EXISTS aprovacoes_pendentes (
 CREATE INDEX IF NOT EXISTS idx_aprovacoes_fila
   ON aprovacoes_pendentes (status, urgencia DESC, criado_em)
   WHERE status = 'pendente';
+
+-- um envio = um caso. O índice é PARCIAL de propósito: linhas antigas, sem request_id,
+-- continuam válidas (em Postgres vários NULL não colidem num índice único, mas o WHERE
+-- deixa a intenção explícita para quem ler o esquema depois).
+CREATE UNIQUE INDEX IF NOT EXISTS aprovacoes_pendentes_request_id_key
+  ON aprovacoes_pendentes (request_id)
+  WHERE request_id IS NOT NULL;
 
 -- coerência: item fechado tem quem decidiu e quando; item pendente não tem
 ALTER TABLE aprovacoes_pendentes
