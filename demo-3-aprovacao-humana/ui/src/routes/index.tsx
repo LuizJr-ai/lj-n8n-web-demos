@@ -42,17 +42,6 @@ const examples = [
       "Preciso receber até: [dd/mm, se houver uma data importante]",
     ].join("\n"),
   },
-  {
-    label: "Produto com defeito",
-    message: [
-      "Recebi um produto que não está funcionando como deveria.",
-      "",
-      "Pedido nº: [número do pedido]",
-      "Produto: [nome do produto]",
-      "O que está acontecendo: [descreva o defeito]",
-      "Quando começou: [dd/mm]",
-    ].join("\n"),
-  },
 ] as const;
 
 type SubmitState = "idle" | "sending" | "success" | "error";
