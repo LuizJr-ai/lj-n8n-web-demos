@@ -32,7 +32,7 @@
         -64,
         176
       ],
-      "notes": "Recebe multipart: áudio (binário) + campo mode. PROVISÓRIO: confirmar body.mode e o nome da propriedade binária na 1ª chamada real (Estágio 1)."
+      "notes": "Recebe multipart: áudio (binário) + campo mode."
     },
     {
       "parameters": {
@@ -67,7 +67,7 @@
         176,
         176
       ],
-      "notes": "true=segue / false=erro. PROVISÓRIO: adicionar checagem de binário presente e tamanho <=25MB após ver o payload real."
+      "notes": "true=segue / false=erro."
     },
     {
       "parameters": {
@@ -100,7 +100,7 @@
         384,
         16
       ],
-      "notes": "Groq transcreve áudio->texto (resposta: { text }). Credencial: Groq Header Auth. PROVISÓRIO: inputDataFieldName ('file') = nome da propriedade binária do webhook; confirmar na 1ª chamada."
+      "notes": "Groq transcreve áudio->texto (resposta: { text }). Credencial: Groq Header Auth. inputDataFieldName ('file') = nome da propriedade binária do webhook."
     },
     {
       "parameters": {
@@ -202,7 +202,7 @@
         1248,
         16
       ],
-      "notes": "Grava só TEXTO e devolve o id. Credencial: Neon (Postgres). PROVISÓRIO: criar a tabela 'transcricoes' no Neon (schema pendente) e conferir as colunas antes de ativar."
+      "notes": "Grava só TEXTO e devolve o id. Credencial: Neon (Postgres). Tabela 'transcricoes' definida em db/transcricoes.sql."
     },
     {
       "parameters": {
@@ -251,7 +251,7 @@
         -64,
         576
       ],
-      "notes": "2º endpoint: recebe { id } e devolve a transcrição salva (só reunião). PROVISÓRIO: confirmar onde o id chega no payload."
+      "notes": "2º endpoint: recebe { id } (query ou body) e devolve a transcrição salva (só reunião)."
     },
     {
       "parameters": {
@@ -269,7 +269,7 @@
         1248,
         560
       ],
-      "notes": "Busca a transcrição pelo id. Credencial: Neon. PROVISÓRIO: schema da tabela."
+      "notes": "Busca a transcrição pelo id. Credencial: Neon."
     },
     {
       "parameters": {
