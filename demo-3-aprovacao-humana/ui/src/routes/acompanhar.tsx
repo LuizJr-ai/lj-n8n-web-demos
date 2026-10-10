@@ -29,6 +29,9 @@ function FollowUpPage() {
   const [email, setEmail] = useState("");
   const [estado, setEstado] = useState<Estado>("idle");
   const [pedidos, setPedidos] = useState<PedidoPublico[]>([]);
+  // Guarda o endereço que REALMENTE foi consultado. O campo acima continua editável, então usar
+  // `email` no resultado mostraria um endereço que ainda não foi buscado.
+  const [consultado, setConsultado] = useState("");
   const [aviso, setAviso] = useState("");
 
   // Lembra o e-mail de quem acabou de escrever, para ela não digitar de novo.
@@ -68,6 +71,7 @@ function FollowUpPage() {
       }
 
       setPedidos(dados.pedidos ?? []);
+      setConsultado(email.trim());
       setEstado("pronto");
     } catch {
       setAviso("Não conseguimos consultar agora. Confira sua conexão e tente novamente.");
@@ -112,25 +116,35 @@ function FollowUpPage() {
 
         {estado === "pronto" && pedidos.length === 0 && (
           <p className="feedback success" role="status">
-            Não encontramos nenhuma mensagem com esse e-mail. Confira se digitou o mesmo endereço
-            que usou ao escrever para nós.
+            Não encontramos nenhuma mensagem de <strong>{consultado}</strong>. Confira se digitou o
+            mesmo endereço que usou ao escrever para nós.
           </p>
         )}
 
         {pedidos.length > 0 && (
-          <ul className="acompanhar-lista">
-            {pedidos.map((pedido) => (
-              <li className="pedido-card" key={pedido.id}>
-                <div className="pedido-topo">
-                  <h2 className="pedido-assunto">{pedido.assunto}</h2>
-                  <span className={`selo ${pedido.situacao}`}>{ROTULO[pedido.situacao]}</span>
-                  <span className="pedido-data">Enviada em {dataLegivel(pedido.enviado_em)}</span>
-                </div>
-                <p className="pedido-frase">{frasePara(pedido.situacao)}</p>
-                {pedido.resposta && <p className="pedido-resposta">{pedido.resposta}</p>}
-              </li>
-            ))}
-          </ul>
+          <>
+            {/* Dizer qual endereço foi consultado evita a dúvida de quem escreve de mais de um
+                e-mail e não entende por que a mensagem recente não aparece. */}
+            <p className="acompanhar-resumo" role="status">
+              Mostrando {pedidos.length === 1 ? "a mensagem" : `as ${pedidos.length} mensagens`} de{" "}
+              <strong>{consultado}</strong>, da mais recente para a mais antiga.
+            </p>
+            <ul className="acompanhar-lista">
+              {pedidos.map((pedido) => (
+                <li className="pedido-card" key={pedido.id}>
+                  <div className="pedido-topo">
+                    {/* O número é o que distingue duas mensagens do mesmo assunto. */}
+                    <span className="pedido-protocolo">Pedido nº {pedido.id}</span>
+                    <h2 className="pedido-assunto">{pedido.assunto}</h2>
+                    <span className={`selo ${pedido.situacao}`}>{ROTULO[pedido.situacao]}</span>
+                    <span className="pedido-data">Enviada em {dataLegivel(pedido.enviado_em)}</span>
+                  </div>
+                  <p className="pedido-frase">{frasePara(pedido.situacao)}</p>
+                  {pedido.resposta && <p className="pedido-resposta">{pedido.resposta}</p>}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
 
         <Link to="/" className="voltar">

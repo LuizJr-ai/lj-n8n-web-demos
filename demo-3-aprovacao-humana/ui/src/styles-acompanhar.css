@@ -65,6 +65,25 @@
   background: #fff;
 }
 
+/* Linha que diz de qual e-mail sao os resultados mostrados. */
+.acompanhar-resumo {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  color: #475569;
+}
+
+/* Numero do pedido: e a unica coisa que distingue duas mensagens do mesmo assunto, entao vem
+   antes do assunto e com peso proprio, sem roubar o destaque do selo de situacao. */
+.pedido-protocolo {
+  order: -1;
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
 .pedido-topo {
   display: flex;
   flex-wrap: wrap;
