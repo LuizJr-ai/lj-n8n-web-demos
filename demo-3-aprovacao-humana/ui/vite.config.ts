@@ -3,9 +3,10 @@
 //
 // Why it is done here, and not with a `.env` file: the real values (database connection, resume
 // secret) must never sit inside the project folder, where a tool or an agent could read them.
-// They live in `C:\Dev\.secrets`, outside every repository and every working directory. The lines
-// below read that file into this process's memory when the dev server starts — nothing is copied,
-// and nothing is written to disk. The repository holds the PATH, never the values.
+// They live in a `.secrets` folder kept beside the repository, outside every working directory a
+// tool is pointed at. The lines below read that file into this process's memory when the dev server
+// starts — nothing is copied, and nothing is written to disk. The repository holds the PATH, never
+// the values, and the path is relative, so it carries no machine layout of its own.
 //
 // Reading it here is what makes it reach both halves of the app: the Vite wrapper publishes every
 // `VITE_*` variable it finds in this process to the browser, and the server routes read the
@@ -17,12 +18,18 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 const aquiDentro = dirname(fileURLToPath(import.meta.url));
 
-// Tried in order. The secret store comes first so that on this machine the values are always the
+// Tried in order. The secret store comes first so that where it exists the values are always the
 // ones outside the repository; `.env.local` is the fallback for anyone who clones the demo from
-// GitHub and follows the README, since they have no `C:\Dev\.secrets` folder.
+// GitHub and follows the README, since they keep no secret store beside it.
+//
+// The store is addressed relative to this file — three levels up is the folder that holds the
+// repository, so `<parent of repo>/.secrets/n8n_web_demos/demo3-app.env`. Set DEMO3_ENV_FILE to
+// put it anywhere else.
+const LOJA_DE_SEGREDOS = resolve(aquiDentro, "../../..", ".secrets/n8n_web_demos/demo3-app.env");
+
 const CANDIDATOS = [
   process.env["DEMO3_ENV_FILE"],
-  "C:\\Dev\\.secrets\\n8n_web_demos\\demo3-app.env",
+  LOJA_DE_SEGREDOS,
   resolve(aquiDentro, ".env.local"),
 ].filter((caminho): caminho is string => typeof caminho === "string" && caminho.length > 0);
 
