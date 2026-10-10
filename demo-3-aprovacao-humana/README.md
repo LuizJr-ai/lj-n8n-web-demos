@@ -81,11 +81,13 @@ Vite prints the local address. Pages: `/` customer form · `/atendimento` review
 }
 ```
 
-**Response — n8n → form**, immediate, before any model runs:
+**Response — n8n → form**, sent once the pending item exists, so the reference is the real one:
 
 ```jsonc
-{ "itemId": null, "status": "received" }
+{ "itemId": 42, "status": "received" }
 ```
+
+Classification and drafting run first, the item is saved, and only then does the request return. The run freezes at the Wait node after that.
 
 **Errors:** the form shows a plain-language message when the webhook cannot be reached — never a blank screen. The desk and the follow-up page use only the app's own server routes (`/api/pendentes`, `/api/decisao`, `/api/meu-pedido`), which never return the resume address.
 

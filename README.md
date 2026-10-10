@@ -30,7 +30,7 @@ demo-N-topic/
 ├── workflows/    # n8n export(s), no credentials
 ├── ui/           # the end-user interface
 ├── db/           # table definitions, no data
-└── assets/       # screenshots and diagrams used in the README
+└── assets/       # diagrams, screenshots and the recorded walkthrough shown in the README
 ```
 
 Runtime URLs, secrets and credentials are never committed: each demo ships placeholder files (`.env.example` or `config.example.js`) and you bring your own accounts.

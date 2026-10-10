@@ -91,4 +91,4 @@ Portfolio docs and workflow labels are in English; the storefront and the knowle
 - `ui/` — single-file storefront, quote form and live chat
 - `workflows/` — n8n exports: `chat-rag.json`, `lead-qualification.json`, `rag-ingestion.json`
 - `db/schema.sql` — the `leads_doces` table
-- `assets/` — the architecture diagram and the reference photos used by the storefront (credits in `fotos-ref/CREDITOS.md`)
+- `assets/` — the architecture diagram, the walkthrough recording and the reference photos used by the storefront (credits in `fotos-ref/CREDITOS.md`)

@@ -32,6 +32,8 @@ Accepted audio: WEBM, MP3, WAV, M4A, OGG — up to 25 MB.
 | Structuring | OpenAI | Summary, decisions and actions (meeting mode) |
 | Persistence | Postgres (Neon) | Stores the transcription and summary for later retrieval |
 
+![Demo 1 — n8n workflow](assets/diagrams/01-fluxo.svg)
+
 ```text
 UI → n8n webhook → Groq Whisper → route by mode
                               ├─ reuniao → OpenAI → validation → Postgres → response
