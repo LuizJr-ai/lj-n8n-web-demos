@@ -1,6 +1,6 @@
 {
   "name": "Web Demo 2a · Qualify cake-order leads and alert the baker",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -16,8 +16,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        32,
-        -48
+        64,
+        -32
       ]
     },
     {
@@ -93,8 +93,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        240,
-        -48
+        80,
+        176
       ]
     },
     {
@@ -111,8 +111,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        512,
-        -48
+        352,
+        -32
       ],
       "retryOnFail": true,
       "maxTries": 2,
@@ -129,8 +129,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        672,
-        176
+        528,
+        192
       ]
     },
     {
@@ -146,8 +146,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        480,
-        176
+        352,
+        192
       ]
     },
     {
@@ -159,8 +159,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
-        -48
+        688,
+        -32
       ]
     },
     {
@@ -176,8 +176,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        1072,
-        -48
+        928,
+        -32
       ]
     },
     {
@@ -189,8 +189,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1072,
-        160
+        928,
+        176
       ]
     },
     {
@@ -222,8 +222,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1312,
-        160
+        1152,
+        176
       ]
     },
     {
@@ -237,8 +237,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1312,
-        -48
+        1152,
+        -32
       ]
     },
     {
@@ -255,14 +255,14 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1552,
-        -48
+        1376,
+        -32
       ]
     },
     {
       "parameters": {
         "content": "## Qualify sweets-order quote requests and notify the baker\n\n### How it works\nReceive requests from the website form or conversational assistant and sanitize their fields. Groq scores purchase intent from 0 to 100 and classifies each request as hot, warm or cold. A guard preserves invalid or unavailable qualification as review. Today and the order lead-time windows arrive already calculated in São Paulo time.\n\nSave each request before any notification. Conversation submissions update the same lead; form submissions without a session remain independent. Return the lead ID, tier and score to the website before notification routing.\n\nSend the initial hot-lead alert only when it has not already been notified. For later updates, normalize the database differences and alert on real contradictions, such as changed units, date, flavor or delivery choice. Capitalization, accents and added details on incomplete fields do not create change alerts.\n\nEvery 30 minutes, send one digest of unnotified warm and cold leads; review is excluded.\n\n### Setup steps\n1. Connect Groq and Postgres, and create the leads table.\n2. Connect Telegram and configure the baker’s destination.\n3. Connect the form and chat request sources.\n4. Verify initial, unchanged and genuinely changed requests before enabling customer traffic.",
-        "height": 912,
+        "height": 896,
         "width": 576
       },
       "id": "n0000000-0000-4000-8000-000000000012",
@@ -277,8 +277,8 @@
     {
       "parameters": {
         "content": "## Receive and normalize\nAccept a quote request from the website form or chat assistant and sanitize its fields. Server-side normalization provides a second layer of protection after the website’s input checks.",
-        "height": 588,
-        "width": 444
+        "height": 604,
+        "width": 300
       },
       "id": "n0000000-0000-4000-8000-000000000013",
       "name": "1 · Intake",
@@ -292,8 +292,8 @@
     {
       "parameters": {
         "content": "## Qualify with a safety guard\nGroq scores purchase intent and assigns a hot, warm or cold tier using a structured response. Order lead-time windows are calculated beforehand. A guard preserves unreliable qualification as review so it cannot be mistaken for a valid automatic decision.",
-        "height": 584,
-        "width": 544,
+        "height": 600,
+        "width": 560,
         "color": 6
       },
       "id": "n0000000-0000-4000-8000-000000000014",
@@ -301,15 +301,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        432,
+        288,
         -208
       ]
     },
     {
       "parameters": {
         "content": "## Save, respond and notify\nSave or update the lead, then return its ID and qualification to the website. Send an initial hot-lead alert once. Filter normalized differences before notifying the baker of a genuinely changed request, so rewritten labels or added details do not create duplicate alerts.",
-        "height": 584,
-        "width": 756,
+        "height": 600,
+        "width": 916,
         "color": 5
       },
       "id": "n0000000-0000-4000-8000-000000000015",
@@ -317,7 +317,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        992,
+        864,
         -208
       ]
     },
@@ -334,8 +334,107 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        1552,
-        160
+        1568,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "8897ee14-03d5-474c-b421-e1a51f7f8a6a",
+      "name": "Every 30 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, nome, contato, tipo, quantidade, data_evento, tema, retirada, mensagem, score, tier, tem_imagem, criado_em\nFROM leads_doces\nWHERE tier IN ('warm','cold') AND notified_at IS NULL\nORDER BY CASE tier WHEN 'warm' THEN 0 WHEN 'cold' THEN 1 ELSE 2 END, score DESC NULLS LAST, criado_em ASC;",
+        "options": {}
+      },
+      "id": "3df32a5f-9013-4d2e-938f-431005de4863",
+      "name": "Select Pending Leads",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        464,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all pending warm/cold leads into a single message (table), subdivided by tier.\n// If there are no pending leads, return empty so Telegram does NOT fire.\nconst rows = $input.all().map(i => i.json);\nif (rows.length === 0) return [];\n// Telegram renders this digest with parse_mode HTML, so an & < or > coming from customer data\n// would be read as markup and make the API reject the whole message (project precedent S38).\n// esc() turns those three characters into entities, so every value travels as plain text.\nconst esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst fmt = (r) => `#${esc(r.id)} • <b>${esc(r.nome)}</b> • ${esc(r.contato)}\\n   ${esc(r.tipo||'-')} | ${esc(r.quantidade||'-')} | ${esc(r.tema||'-')} | ${esc(r.data_evento||'-')} | ${esc(r.retirada||'-')}${r.tem_imagem?' | 📎':''}\\n   ⭐ ${esc(r.score ?? '-')}/100`;\nconst warm = rows.filter(r => r.tier === 'warm');\nconst cold = rows.filter(r => r.tier === 'cold');\nlet text = `📋 <b>Digest de leads — morno/frio</b>\\n${rows.length} lead(s) acumulado(s)`;\nif (warm.length) text += `\\n\\n🟡 <b>MORNO (${warm.length})</b>\\n` + warm.map(fmt).join('\\n');\nif (cold.length) text += `\\n\\n🔵 <b>FRIO (${cold.length})</b>\\n` + cold.map(fmt).join('\\n');\nconst ids = rows.map(r => r.id);\nreturn [{ json: { text, ids } }];"
+      },
+      "id": "91200c2f-b1f1-4c50-b3a7-68bc8a7e2d44",
+      "name": "Build Digest Table",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "3c9834a9-58f8-4087-9778-2cf64d65d7e7",
+      "name": "Send Digest (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads_doces SET notified_at = now() WHERE id = ANY($1::bigint[]);",
+        "options": {
+          "queryReplacement": "={{ [$('Build Digest Table').item.json.ids] }}"
+        }
+      },
+      "id": "50c7e83d-2aa5-4872-b7d2-b5beb50b06c9",
+      "name": "Mark Digest Notified",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1424,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Batch pending follow-ups\nEvery 30 minutes, group unnotified warm and cold leads into one Telegram digest, with warm first, then score and creation order. Send nothing when empty. After sending, mark included leads as notified. Review leads are excluded.",
+        "height": 276,
+        "width": 1812,
+        "color": 2
+      },
+      "id": "0cec3b16-b43c-48ee-9fb3-624661559ea9",
+      "name": "4 · Warm/cold digest (every 30 min)",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        416
       ]
     },
     {
@@ -363,13 +462,13 @@
         },
         "options": {}
       },
-      "id": "c1f0a2d4-5b63-4e18-9a77-2f6b84c0d311",
+      "id": "f6e38ac0-af1f-496b-a106-6acbebc826a0",
       "name": "Order changed?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1296,
-        272
+        1360,
+        176
       ]
     },
     {
@@ -381,112 +480,13 @@
           "parse_mode": "HTML"
         }
       },
-      "id": "a7d93e52-0c41-4b8f-8d16-77e5b2a90c48",
+      "id": "371c33ab-f5ec-4bf7-b0cb-bedfb2875040",
       "name": "Alert Baker (Order Changed)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1536,
-        272
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "minutes",
-              "minutesInterval": 30
-            }
-          ]
-        }
-      },
-      "id": "8897ee14-03d5-474c-b421-e1a51f7f8a6a",
-      "name": "Every 30 min",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        144,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT id, nome, contato, tipo, quantidade, data_evento, tema, retirada, mensagem, score, tier, tem_imagem, criado_em\nFROM leads_doces\nWHERE tier IN ('warm','cold') AND notified_at IS NULL\nORDER BY CASE tier WHEN 'warm' THEN 0 WHEN 'cold' THEN 1 ELSE 2 END, score DESC NULLS LAST, criado_em ASC;",
-        "options": {}
-      },
-      "id": "3df32a5f-9013-4d2e-938f-431005de4863",
-      "name": "Select Pending Leads",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
-      "position": [
-        448,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Merge all pending warm/cold leads into a single message (table), subdivided by tier.\n// If there are no pending leads, return empty so Telegram does NOT fire.\nconst rows = $input.all().map(i => i.json);\nif (rows.length === 0) return [];\n// Telegram renders this digest with parse_mode HTML, so an & < or > coming from customer data\n// would be read as markup and make the API reject the whole message (project precedent S38).\n// esc() turns those three characters into entities, so every value travels as plain text.\nconst esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst fmt = (r) => `#${esc(r.id)} • <b>${esc(r.nome)}</b> • ${esc(r.contato)}\\n   ${esc(r.tipo||'-')} | ${esc(r.quantidade||'-')} | ${esc(r.tema||'-')} | ${esc(r.data_evento||'-')} | ${esc(r.retirada||'-')}${r.tem_imagem?' | 📎':''}\\n   ⭐ ${esc(r.score ?? '-')}/100`;\nconst warm = rows.filter(r => r.tier === 'warm');\nconst cold = rows.filter(r => r.tier === 'cold');\nlet text = `📋 <b>Digest de leads — morno/frio</b>\\n${rows.length} lead(s) acumulado(s)`;\nif (warm.length) text += `\\n\\n🟡 <b>MORNO (${warm.length})</b>\\n` + warm.map(fmt).join('\\n');\nif (cold.length) text += `\\n\\n🔵 <b>FRIO (${cold.length})</b>\\n` + cold.map(fmt).join('\\n');\nconst ids = rows.map(r => r.id);\nreturn [{ json: { text, ids } }];"
-      },
-      "id": "91200c2f-b1f1-4c50-b3a7-68bc8a7e2d44",
-      "name": "Build Digest Table",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        784,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{ $json.text }}",
-        "additionalFields": {
-          "appendAttribution": false,
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "3c9834a9-58f8-4087-9778-2cf64d65d7e7",
-      "name": "Send Digest (Telegram)",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1088,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE leads_doces SET notified_at = now() WHERE id = ANY($1::bigint[]);",
-        "options": {
-          "queryReplacement": "={{ [$('Build Digest Table').item.json.ids] }}"
-        }
-      },
-      "id": "50c7e83d-2aa5-4872-b7d2-b5beb50b06c9",
-      "name": "Mark Digest Notified",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.7,
-      "position": [
-        1408,
-        528
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Batch pending follow-ups\nEvery 30 minutes, group unnotified warm and cold leads into one Telegram digest, with warm first, then score and creation order. Send nothing when empty. After sending, mark included leads as notified. Review leads are excluded.",
-        "height": 292,
-        "width": 1780,
-        "color": 2
-      },
-      "id": "0cec3b16-b43c-48ee-9fb3-624661559ea9",
-      "name": "4 · Warm/cold digest (every 30 min)",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -32,
-        416
+        1568,
+        176
       ]
     }
   ],
@@ -597,18 +597,6 @@
         ]
       ]
     },
-    "Order changed?": {
-      "main": [
-        [
-          {
-            "node": "Alert Baker (Order Changed)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
     "Respond to Website": {
       "main": [
         [
@@ -674,6 +662,25 @@
           }
         ]
       ]
+    },
+    "Order changed?": {
+      "main": [
+        [
+          {
+            "node": "Alert Baker (Order Changed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   }
 }

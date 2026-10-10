@@ -14,8 +14,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        400,
-        -32
+        432,
+        -64
       ]
     },
     {
@@ -31,8 +31,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        688,
-        -32
+        720,
+        -64
       ]
     },
     {
@@ -44,8 +44,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        768,
-        144
+        784,
+        128
       ]
     },
     {
@@ -58,8 +58,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1104,
-        -32
+        1120,
+        -64
       ]
     },
     {
@@ -76,7 +76,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -496,
+        -608,
         416
       ]
     },
@@ -94,7 +94,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -224,
+        -304,
         416
       ]
     },
@@ -112,7 +112,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -224,
+        416,
         784
       ]
     },
@@ -128,7 +128,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.4,
       "position": [
-        -128,
+        -208,
         608
       ]
     },
@@ -145,7 +145,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        0,
+        -48,
         608
       ]
     },
@@ -158,7 +158,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        0,
+        -48,
         784
       ]
     },
@@ -173,7 +173,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1072,
+        1088,
         640
       ]
     },
@@ -187,7 +187,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        432,
+        416,
         608
       ]
     },
@@ -221,7 +221,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        752,
+        768,
         640
       ]
     },
@@ -239,29 +239,29 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1072,
+        1088,
         416
       ]
     },
     {
       "parameters": {
         "content": "## Retrieve store information and collect quote requests\n\n### How it works\nTwo POST webhooks serve the sweets shop website.\n\nThe reference-search route uses OpenAI text embeddings and Postgres similarity search to return up to three matching knowledge documents. It does not generate an answer.\n\nThe conversational route uses Groq GPT-OSS 20B with automatic OpenAI fallback. Postgres keeps conversation history, and the assistant searches the store knowledge before giving product facts. It asks for one missing quote detail per turn, checks all seven required facts and flavor quantities, and uses order date windows calculated in São Paulo time.\n\nA separate OpenAI extractor structures the customer’s statements. Guards reject missing facts, placeholders and inconsistent flavor allocations before forwarding a complete quote request to qualification. The website receives the conversational reply.\n\nThis prepares a quote request; it does not confirm an order, reserve a date or take payment.\n\n### Setup steps\n1. Connect Postgres with pgvector for knowledge and conversation history.\n2. Load approved knowledge once through the companion ingestion workflow.\n3. Connect Groq and OpenAI for chat, fallback, extraction and embeddings.\n4. Configure the qualification destination and both website webhook routes.\n5. Verify both routes and a complete request before enabling customer traffic.",
-        "height": 460,
-        "width": 904
+        "height": 524,
+        "width": 1048
       },
       "id": "67017cae-1616-4bcb-b61b-a472cf22a1ef",
       "name": "Overview · Conversational agent + RAG",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -576,
-        -176
+        -688,
+        -240
       ]
     },
     {
       "parameters": {
         "content": "## Receive a store question\nAccept a question from the website through a POST webhook. This route starts a reference search without requiring a customer registration or creating a quote request.",
-        "height": 452,
+        "height": 532,
         "width": 244
       },
       "id": "21f889e4-0b8e-4b6a-aa7b-b0b11816e76b",
@@ -269,15 +269,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        336,
-        -176
+        368,
+        -240
       ]
     },
     {
       "parameters": {
         "content": "## Find matching store information\nOpenAI embeddings represent the question for similarity search in the store knowledge held in Postgres with pgvector. Return up to three matching documents as reference content; this route does not generate a conversational answer.",
-        "height": 452,
-        "width": 424,
+        "height": 532,
+        "width": 408,
         "color": 6
       },
       "id": "2a002859-a57d-4ee3-97c7-e6950ff02422",
@@ -285,15 +285,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        592,
-        -176
+        624,
+        -240
       ]
     },
     {
       "parameters": {
         "content": "## Return reference content\nReturn the retrieved documents to the website in the webhook response. The caller receives search results to display, rather than an answer drafted by a language model.",
-        "height": 452,
-        "width": 248,
+        "height": 532,
+        "width": 264,
         "color": 5
       },
       "id": "862c9b7b-c8d5-4bd6-a627-d2f50876bc4e",
@@ -301,14 +301,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1024,
-        -176
+        1040,
+        -240
       ]
     },
     {
       "parameters": {
         "content": "## Continue the quote conversation\nReceive the customer’s message and session identifier. Stored conversation history lets the assistant retain previously supplied details, answer questions and continue the same quote request.",
-        "height": 624,
+        "height": 608,
         "width": 260
       },
       "id": "15eaba7a-6317-4937-8bf2-d642ae51506d",
@@ -316,15 +316,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -576,
+        -688,
         304
       ]
     },
     {
       "parameters": {
         "content": "## Guide and check the request\nGroq guides the conversation with automatic OpenAI fallback and precomputed São Paulo order windows. A separate OpenAI extractor captures customer facts. Guards require seven complete quote details and consistent flavor quantities, preventing placeholders or incomplete requests from reaching qualification.",
-        "height": 624,
-        "width": 1260,
+        "height": 608,
+        "width": 1372,
         "color": 6
       },
       "id": "4de85c54-d0e7-42bb-af07-a2da6b1771ef",
@@ -332,15 +332,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -304,
+        -416,
         304
       ]
     },
     {
       "parameters": {
         "content": "## Forward the request and reply\nForward a complete, validated quote request to qualification and return the assistant’s reply to the website. Incomplete requests stay in the conversation. The response prepares an enquiry; it does not confirm an order, delivery date or payment.",
-        "height": 624,
-        "width": 320,
+        "height": 608,
+        "width": 352,
         "color": 5
       },
       "id": "6d5a41b2-15eb-4a93-8d8a-267c4a573f81",
@@ -361,7 +361,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        736,
+        768,
         416
       ]
     },
@@ -382,7 +382,7 @@
       "typeVersion": 1.2,
       "position": [
         288,
-        592
+        608
       ]
     },
     {
@@ -404,7 +404,7 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        288,
+        336,
         416
       ]
     },
@@ -421,7 +421,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        96,
+        80,
         416
       ]
     },
@@ -440,13 +440,7 @@
       "position": [
         -352,
         608
-      ],
-      "credentials": {
-        "groqApi": {
-          "id": "",
-          "name": ""
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -467,13 +461,7 @@
       "position": [
         -352,
         784
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "",
-          "name": ""
-        }
-      }
+      ]
     }
   ],
   "connections": {
@@ -682,5 +670,13 @@
         ]
       ]
     }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "binaryMode": "separate"
   }
 }

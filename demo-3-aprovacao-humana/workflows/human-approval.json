@@ -1,12 +1,74 @@
 {
   "name": "Web Demo 3 · Human approval of AI-drafted replies",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
+        "content": "## Approve AI-drafted customer replies\n\n### How it works\nA customer message enters through the app. A free model classifies it, and a paid model drafts a reply. Both outputs must pass validation before the request is saved as pending.\n\nThe app receives the actual request reference while the workflow waits for a human decision. A reviewer can approve, edit or reject the draft. The decision is recorded first. Approved or edited requests then load the final text from the database, send it by email and notify Telegram. Rejected requests record the reason without sending a reply.\n\nA separate scheduled lane checks for overdue pending requests every 15 minutes. It alerts Telegram and postpones the next reminder by 60 minutes. Silence leaves the request pending; it does not automatically reject it.\n\n### Setup steps\n1. Configure Postgres, Groq, OpenAI, Gmail and Telegram credentials.\n2. Match the Wait node’s Header Auth credential with the app backend.\n3. Keep resume URLs on the backend; never expose them to the browser.\n4. Complete a clean end-to-end run before enabling customer traffic.",
+        "height": 428,
+        "width": 2540
+      },
+      "id": "sticky-main",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -656
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Receive the customer message\nAccept the customer’s message from the app. After the pending request is saved, return its actual reference in the same HTTP request, so the reviewer can find the correct item.",
+        "height": 532,
+        "width": 372
+      },
+      "id": "sticky-r1-intake",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Classify and draft safely\nA free model identifies topic, urgency and whether a person is needed. A paid model drafts the reply. Both outputs must pass validation; a failure stops processing before a pending request is created.",
+        "height": 536,
+        "width": 768,
+        "color": 6
+      },
+      "id": "sticky-r1-intelligence",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Save and wait for a decision\nSave the pending request and its resume URL, then wait for a human decision. The app backend uses that URL with Header Auth; the browser never receives it. Without a decision, the request remains pending.",
+        "height": 532,
+        "width": 532,
+        "color": 4
+      },
+      "id": "sticky-r1-hold",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -208
+      ]
+    },
+    {
+      "parameters": {
         "content": "## Record the decision and deliver\nRecord the reviewer’s decision before delivery. Approved or edited requests load final text from the database, send the email and notify Telegram. Rejected requests record the reason without sending a reply.",
-        "height": 436,
-        "width": 948,
+        "height": 532,
+        "width": 836,
         "color": 5
       },
       "id": "sticky-r1-deliver",
@@ -14,8 +76,196 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1888,
+        1632,
         -208
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Remind the reviewer of overdue requests\nRun independently every 15 minutes. Check the database for overdue pending requests, alert Telegram and delay the next reminder by 60 minutes. This checks request age, not whether the waiting execution is still alive.",
+        "height": 316,
+        "width": 2556,
+        "color": 2
+      },
+      "id": "sticky-r2-watchdog",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo3-aprovacao",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Receive customer message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        48,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ itemId: $json.id, status: 'received' }) }}",
+        "options": {}
+      },
+      "id": "node-respond",
+      "name": "Acknowledge to app",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'openai/gpt-oss-20b', temperature: 0, max_completion_tokens: 800, reasoning_effort: 'low', include_reasoning: false, messages: [ { role: 'system', content: 'You are a customer-service triage assistant. Today is ' + $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') + ' (timezone America/Sao_Paulo). Resolve relative time expressions such as \"today\", \"tomorrow\", \"this week\" or \"by Friday\" against that date: a deadline that is already past or is within 48 hours raises urgency; a far-away date does not. Reply with ONE JSON object and nothing else - no prose, no code fences. Schema: {\"subject\": one of \"warranty\"|\"exchange\"|\"delivery\"|\"billing\"|\"product_info\"|\"complaint\"|\"other\", \"urgency\": one of \"low\"|\"medium\"|\"high\", \"needs_human\": boolean, \"summary\": one short sentence in the same language as the customer message}. Never invent facts that are not in the message. If something is unclear, choose \"other\" and set needs_human to true.' }, { role: 'user', content: $('Receive customer message').item.json.body.mensagem } ] }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "8883046f-6b76-4f55-ab9d-04d9de10c811",
+      "name": "Classify message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Le a classificacao que a Groq devolveu e so deixa passar o que da para confiar.\n// Falha FECHADA: valor estranho para o fluxo AQUI, nunca chega na tela de aprovacao.\n// Espelho de tests/parse-classification.js, provado offline (13/13) contra a execucao 5347.\n\n// Dominios aceitos. Valor fora daqui e erro, nao aviso: o banco tem CHECK nessas colunas\n// e a tela de pendentes ordena por urgencia — texto livre quebraria as duas coisas.\nconst ASSUNTOS_ACEITOS = ['warranty', 'exchange', 'delivery', 'billing', 'product_info', 'complaint', 'other'];\nconst URGENCIAS_ACEITAS = ['low', 'medium', 'high'];\n\n// O modelo as vezes embrulha o JSON em prosa ou em crases (```json ... ```).\n// Varre o texto de tras para frente e devolve o ULTIMO bloco {...} com chaves balanceadas.\n// De tras para frente porque, quando o modelo \"pensa alto\", o JSON bom e o ultimo.\nfunction ultimoBlocoBalanceado(texto) {\n  let fim = texto.lastIndexOf('}');\n  while (fim !== -1) {\n    let nivel = 0;\n    for (let i = fim; i >= 0; i--) {\n      if (texto[i] === '}') nivel++;\n      else if (texto[i] === '{') {\n        nivel--;\n        if (nivel === 0) return texto.slice(i, fim + 1);\n      }\n    }\n    fim = texto.lastIndexOf('}', fim - 1);\n  }\n  return null;\n}\n\nconst entrada = $input.first().json;\n\n// 1. O no HTTP foi configurado com neverError+fullResponse, entao erro da Groq NAO explode\n//    o no: chega aqui como statusCode. Traduzimos para uma mensagem que diz o que fazer.\nconst status = entrada.statusCode;\nif (status !== 200) {\n  const motivo = status === 429\n    ? 'limite de uso da Groq atingido (429) — esperar a janela reabrir'\n    : `a Groq respondeu HTTP ${status}`;\n  throw new Error(`Classify message falhou: ${motivo}. Nada segue adiante.`);\n}\n\n// 2. O texto do modelo nunca vem na superficie da resposta: mora em choices[0].message.\n//    Se essa estrutura mudar, preferimos parar a adivinhar onde o texto foi parar.\nconst mensagem = entrada.body && entrada.body.choices && entrada.body.choices[0] && entrada.body.choices[0].message;\nif (!mensagem) {\n  throw new Error('Classify message: resposta da Groq sem choices[0].message — formato inesperado.');\n}\n\n// 3. Armadilha medida neste projeto: modelo com raciocinio as vezes devolve content VAZIO\n//    e deixa o texto em 'reasoning'. Sem este fallback o fluxo quebraria calado.\nlet texto = String(mensagem.content || '').trim();\nlet veioDoReasoning = false;\nif (!texto) {\n  texto = String(mensagem.reasoning || '').trim();\n  veioDoReasoning = texto.length > 0;\n}\nif (!texto) {\n  throw new Error('Classify message: a Groq devolveu content e reasoning vazios — nada para classificar.');\n}\n\n// 4. Extrair o JSON de dentro do texto, seja ele limpo ou embrulhado em prosa/crases.\nconst bruto = ultimoBlocoBalanceado(texto);\nif (!bruto) {\n  throw new Error(`Classify message: nenhum bloco JSON no texto do modelo. Recebido: ${texto.slice(0, 200)}`);\n}\n\nlet dados;\ntry {\n  dados = JSON.parse(bruto);\n} catch (e) {\n  throw new Error(`Classify message: o bloco encontrado nao e JSON valido. Recebido: ${bruto.slice(0, 200)}`);\n}\n\n// 5. Validar campo a campo. Modelo fraco inventa valor fora do dominio quando o schema\n//    e forcado — precedente registrado neste projeto. Aqui o valor invalido vira parada.\nif (!ASSUNTOS_ACEITOS.includes(dados.subject)) {\n  throw new Error(`Classify message: assunto \"${dados.subject}\" fora do dominio aceito.`);\n}\nif (!URGENCIAS_ACEITAS.includes(dados.urgency)) {\n  throw new Error(`Classify message: urgencia \"${dados.urgency}\" fora do dominio aceito.`);\n}\nif (typeof dados.needs_human !== 'boolean') {\n  throw new Error(`Classify message: needs_human precisa ser true/false, veio \"${dados.needs_human}\".`);\n}\nconst resumo = typeof dados.summary === 'string' ? dados.summary.trim() : '';\nif (!resumo) {\n  throw new Error('Classify message: summary vazio — a tela de pendentes ficaria sem descricao.');\n}\n\n// 6. Saida enxuta e previsivel para os proximos nos. Os tokens viajam junto porque o teto\n//    da conta gratuita e por DIA (200.000) — quem grava o pendente registra o consumo.\nconst uso = (entrada.body && entrada.body.usage) || {};\nreturn [{\n  json: {\n    subject: dados.subject,\n    urgency: dados.urgency,\n    needs_human: dados.needs_human,\n    summary: resumo,\n    tokens_usados: uso.total_tokens || 0,\n    veio_do_reasoning: veioDoReasoning,\n  },\n}];\n"
+      },
+      "id": "384fd677-3db7-4985-9dae-d64de6a5b821",
+      "name": "Parse classification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Customer message: {{ $('Receive customer message').item.json.body.mensagem }}\nCustomer name: {{ $('Receive customer message').item.json.body.remetente.nome }}\nTopic: {{ $json.subject }}\nUrgency: {{ $json.urgency }}\nToday: {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }} (timezone America/Sao_Paulo)\n\nWrite a reply to this customer, in the SAME language as the customer message. Be warm, direct and concrete. Use the date above to understand any relative deadline the customer mentions (\"today\", \"tomorrow\", \"by Friday\"), and never contradict it. Never invent order numbers, dates, refund amounts, deadlines or policies that are not in the customer message - if something is missing, ask for it politely. Never promise on the company's behalf: no delivery channel, no callback, no future action, no refund, no replacement, no deadline and no decision that a human has not made yet. You may say the request was received and is being reviewed. Do not add a subject line, a greeting placeholder or a signature. Return only the reply body.",
+        "batching": {}
+      },
+      "id": "acae085b-a835-4e31-8fa9-2d0c3de929ed",
+      "name": "Draft reply",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        608,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 600,
+          "temperature": 0
+        }
+      },
+      "id": "846e00b6-a680-44db-aa32-2598117143c8",
+      "name": "Reply model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Le o rascunho que o modelo escreveu, venha ele no campo que vier.\n// Espelho de tests/parse-draft.js, provado offline (13/13) contra a execucao 5348.\n//\n// Por que este no existe: o Basic LLM Chain nao promete ONDE o texto vem. Na 5348 veio em\n// 'text'; este projeto ja viu 'output' em outro demo. Apostar num campo so significa rascunho\n// vazio chegando na tela de aprovacao — e o humano aprovando o nada.\n\n// Um rascunho menor que isto nao e uma resposta ao cliente, e sobra de geracao.\nconst MINIMO_DE_CARACTERES = 20;\n\n// Os lugares onde o texto ja apareceu, na ordem em que vale a pena procurar. A lista e\n// explicita de proposito: campo novo entra aqui depois de ser MEDIDO, nunca por varredura\n// magica que aceita qualquer coisa.\nconst CAMPOS_CONHECIDOS = ['text', 'output', 'response', 'content'];\n\nfunction extrairTexto(saida) {\n  // 1. O chain pode devolver a propria string, sem embrulho nenhum.\n  if (typeof saida === 'string') return saida;\n  if (!saida || typeof saida !== 'object') return null;\n\n  // 2. Caminho normal: um dos campos conhecidos com a string dentro.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    if (typeof saida[campo] === 'string' && saida[campo].trim()) return saida[campo];\n  }\n\n  // 3. Um nivel de aninhamento: { output: { text: \"...\" } } ja foi visto em versoes do chain.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    const dentro = saida[campo];\n    if (dentro && typeof dentro === 'object') {\n      for (const interno of CAMPOS_CONHECIDOS) {\n        if (typeof dentro[interno] === 'string' && dentro[interno].trim()) return dentro[interno];\n      }\n    }\n  }\n\n  return null;\n}\n\nconst saida = $input.first().json;\n\n// A classificacao nao vem por este fio (o chain so devolve o texto): buscamos no no que a produziu.\nconst classificacao = $('Parse classification').first().json;\n\n// 1. Achar o texto onde quer que ele esteja. Se nao achar, o fluxo para aqui.\nconst bruto = extrairTexto(saida);\nif (bruto === null) {\n  const campos = saida && typeof saida === 'object' ? Object.keys(saida).join(', ') : typeof saida;\n  throw new Error(`Draft reply: nao achei o texto do rascunho. Campos recebidos: ${campos}`);\n}\n\n// 2. Limpar as bordas. Modelo costuma devolver quebra de linha sobrando no inicio e no fim.\nconst texto = String(bruto).trim();\n\n// 3. Falha FECHADA: rascunho vazio ou curto demais nunca chega na tela de aprovacao,\n//    porque o humano aprovaria uma resposta em branco sem perceber.\nif (!texto) {\n  throw new Error('Draft reply: o modelo devolveu um rascunho vazio.');\n}\nif (texto.length < MINIMO_DE_CARACTERES) {\n  throw new Error(`Draft reply: rascunho curto demais (${texto.length} caracteres): \"${texto}\"`);\n}\n\n// 4. O item de aprovacao carrega o rascunho E a classificacao, porque a tela de pendentes\n//    mostra os dois lado a lado e o Sprint 3 grava tudo numa linha so.\nreturn [{\n  json: {\n    subject: classificacao.subject || null,\n    urgency: classificacao.urgency || null,\n    needs_human: typeof classificacao.needs_human === 'boolean' ? classificacao.needs_human : null,\n    summary: classificacao.summary || null,\n    draft: texto,\n    draft_chars: texto.length,\n  },\n}];\n"
+      },
+      "id": "ba714b40-f81f-467d-a180-c16080aa0464",
+      "name": "Parse draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO aprovacoes_pendentes (origem, remetente_nome, remetente_email, mensagem_cliente, recebido_em, assunto, urgencia, rascunho_ia, resume_url, resumo, request_id) VALUES ($1, $2, $3, $4, $5::timestamptz, $6, CASE $7 WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END, $8, $9, $10, $11) ON CONFLICT (request_id) WHERE request_id IS NOT NULL DO UPDATE SET request_id = EXCLUDED.request_id RETURNING id, resume_url, status;",
+        "options": {
+          "queryReplacement": "={{ [$('Receive customer message').first().json.body.origem, $('Receive customer message').first().json.body.remetente.nome, $('Receive customer message').first().json.body.remetente.email, $('Receive customer message').first().json.body.mensagem, $('Receive customer message').first().json.body.recebido_em, $json.subject, $json.urgency, $json.draft, $execution.resumeUrl, $json.summary, $('Receive customer message').first().json.body.request_id || null] }}"
+        }
+      },
+      "id": "node-save-pending",
+      "name": "Save pending item",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1168,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "incomingAuthentication": "headerAuth",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "node-wait-approval",
+      "name": "Wait for approval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE aprovacoes_pendentes SET status = CASE $2::text WHEN 'approved' THEN 'aprovado' WHEN 'adjusted' THEN 'ajustado' WHEN 'rejected' THEN 'recusado' END, texto_final = CASE $2::text WHEN 'approved' THEN rascunho_ia WHEN 'adjusted' THEN $3::text END, motivo_recusa = CASE $2::text WHEN 'rejected' THEN $4::text END, decidido_por = $5::text, decidido_em = now(), houve_correcao = ($2::text = 'adjusted') WHERE id = $1::bigint AND status = 'pendente' RETURNING id, status, houve_correcao, decidido_por;",
+        "options": {
+          "queryReplacement": "={{ [$('Save pending item').first().json.id, $json.body.decision, $json.body.editedText ?? null, $json.body.rejectReason ?? null, $json.body.decidedBy] }}"
+        }
+      },
+      "id": "node-record-decision",
+      "name": "Record decision",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1440,
+        160
       ]
     },
     {
@@ -100,314 +350,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1936,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "=⏰ Respostas esperando além do prazo: {{ $json.total }}\n\n{{ $json.lista }}\n\nAbra a fila de revisão para responder.",
-        "additionalFields": {
-          "appendAttribution": false,
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "062a4dec-c6c2-4e1e-bd56-8f3fc92b2803",
-      "name": "Alert reviewer",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        752,
-        384
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE aprovacoes_pendentes SET status = CASE $2::text WHEN 'approved' THEN 'aprovado' WHEN 'adjusted' THEN 'ajustado' WHEN 'rejected' THEN 'recusado' END, texto_final = CASE $2::text WHEN 'approved' THEN rascunho_ia WHEN 'adjusted' THEN $3::text END, motivo_recusa = CASE $2::text WHEN 'rejected' THEN $4::text END, decidido_por = $5::text, decidido_em = now(), houve_correcao = ($2::text = 'adjusted') WHERE id = $1::bigint AND status = 'pendente' RETURNING id, status, houve_correcao, decidido_por;",
-        "options": {
-          "queryReplacement": "={{ [$('Save pending item').first().json.id, $json.body.decision, $json.body.editedText ?? null, $json.body.rejectReason ?? null, $json.body.decidedBy] }}"
-        }
-      },
-      "id": "node-record-decision",
-      "name": "Record decision",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1712,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.remetente_email }}",
-        "subject": "Resposta à sua mensagem — Central de atendimento",
-        "emailType": "text",
-        "message": "={{ $json.texto_final }}",
-        "options": {
-          "appendAttribution": false,
-          "senderName": "Central de atendimento"
-        }
-      },
-      "id": "node-send-reply",
-      "name": "Send reply",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
-      "position": [
-        2416,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{ (s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'))('✅ Resposta enviada para ' + $('Load final reply').first().json.remetente_nome) }}\n{{ 'Decisão de ' + String($('Load final reply').first().json.decidido_por).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ($('Load final reply').first().json.houve_correcao ? ' (texto ajustado)' : ' (enviado como estava)') }}",
-        "additionalFields": {
-          "appendAttribution": false,
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "node-notify-completion",
-      "name": "Notify completion",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        2624,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Approve AI-drafted customer replies\n\n### How it works\nA customer message enters through the app. A free model classifies it, and a paid model drafts a reply. Both outputs must pass validation before the request is saved as pending.\n\nThe app receives the actual request reference while the workflow waits for a human decision. A reviewer can approve, edit or reject the draft. The decision is recorded first. Approved or edited requests then load the final text from the database, send it by email and notify Telegram. Rejected requests record the reason without sending a reply.\n\nA separate scheduled lane checks for overdue pending requests every 15 minutes. It alerts Telegram and postpones the next reminder by 60 minutes. Silence leaves the request pending; it does not automatically reject it.\n\n### Setup steps\n1. Configure Postgres, Groq, OpenAI, Gmail and Telegram credentials.\n2. Match the Wait node’s Header Auth credential with the app backend.\n3. Keep resume URLs on the backend; never expose them to the browser.\n4. Complete a clean end-to-end run before enabling customer traffic.",
-        "height": 364,
-        "width": 1964
-      },
-      "id": "sticky-main",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -80,
-        -592
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Receive the customer message\nAccept the customer’s message from the app. After the pending request is saved, return its actual reference in the same HTTP request, so the reviewer can find the correct item.",
-        "height": 436,
-        "width": 404
-      },
-      "id": "sticky-r1-intake",
-      "name": "Sticky Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -80,
-        -208
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Classify and draft safely\nA free model identifies topic, urgency and whether a person is needed. A paid model drafts the reply. Both outputs must pass validation; a failure stops processing before a pending request is created.",
-        "height": 440,
-        "width": 912,
-        "color": 6
-      },
-      "id": "sticky-r1-intelligence",
-      "name": "Sticky Note2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        336,
-        -208
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Save and wait for a decision\nSave the pending request and its resume URL, then wait for a human decision. The app backend uses that URL with Header Auth; the browser never receives it. Without a decision, the request remains pending.",
-        "height": 436,
-        "width": 612,
-        "color": 4
-      },
-      "id": "sticky-r1-hold",
-      "name": "Sticky Note3",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1264,
-        -208
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## Remind the reviewer of overdue requests\nRun independently every 15 minutes. Check the database for overdue pending requests, alert Telegram and delay the next reminder by 60 minutes. This checks request age, not whether the waiting execution is still alive.",
-        "height": 300,
-        "width": 1324,
-        "color": 2
-      },
-      "id": "sticky-r2-watchdog",
-      "name": "Sticky Note5",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -80,
-        256
-      ]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "demo3-aprovacao",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "id": "node-webhook",
-      "name": "Receive customer message",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -32,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ itemId: $json.id, status: 'received' }) }}",
-        "options": {}
-      },
-      "id": "node-respond",
-      "name": "Acknowledge to app",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [
-        1424,
-        112
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.groq.com/openai/v1/chat/completions",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "groqApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'openai/gpt-oss-20b', temperature: 0, max_completion_tokens: 800, reasoning_effort: 'low', include_reasoning: false, messages: [ { role: 'system', content: 'You are a customer-service triage assistant. Today is ' + $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') + ' (timezone America/Sao_Paulo). Resolve relative time expressions such as \"today\", \"tomorrow\", \"this week\" or \"by Friday\" against that date: a deadline that is already past or is within 48 hours raises urgency; a far-away date does not. Reply with ONE JSON object and nothing else - no prose, no code fences. Schema: {\"subject\": one of \"warranty\"|\"exchange\"|\"delivery\"|\"billing\"|\"product_info\"|\"complaint\"|\"other\", \"urgency\": one of \"low\"|\"medium\"|\"high\", \"needs_human\": boolean, \"summary\": one short sentence in the same language as the customer message}. Never invent facts that are not in the message. If something is unclear, choose \"other\" and set needs_human to true.' }, { role: 'user', content: $('Receive customer message').item.json.body.mensagem } ] }) }}",
-        "options": {
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true
-            }
-          },
-          "timeout": 60000
-        }
-      },
-      "id": "8883046f-6b76-4f55-ab9d-04d9de10c811",
-      "name": "Classify message",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        400,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Le a classificacao que a Groq devolveu e so deixa passar o que da para confiar.\n// Falha FECHADA: valor estranho para o fluxo AQUI, nunca chega na tela de aprovacao.\n\n// Dominios aceitos. Valor fora daqui e erro, nao aviso: o banco tem CHECK nessas colunas\n// e a tela de pendentes ordena por urgencia — texto livre quebraria as duas coisas.\nconst ASSUNTOS_ACEITOS = ['warranty', 'exchange', 'delivery', 'billing', 'product_info', 'complaint', 'other'];\nconst URGENCIAS_ACEITAS = ['low', 'medium', 'high'];\n\n// O modelo as vezes embrulha o JSON em prosa ou em crases (```json ... ```).\n// Varre o texto de tras para frente e devolve o ULTIMO bloco {...} com chaves balanceadas.\n// De tras para frente porque, quando o modelo \"pensa alto\", o JSON bom e o ultimo.\nfunction ultimoBlocoBalanceado(texto) {\n  let fim = texto.lastIndexOf('}');\n  while (fim !== -1) {\n    let nivel = 0;\n    for (let i = fim; i >= 0; i--) {\n      if (texto[i] === '}') nivel++;\n      else if (texto[i] === '{') {\n        nivel--;\n        if (nivel === 0) return texto.slice(i, fim + 1);\n      }\n    }\n    fim = texto.lastIndexOf('}', fim - 1);\n  }\n  return null;\n}\n\nconst entrada = $input.first().json;\n\n// 1. O no HTTP foi configurado com neverError+fullResponse, entao erro da Groq NAO explode\n//    o no: chega aqui como statusCode. Traduzimos para uma mensagem que diz o que fazer.\nconst status = entrada.statusCode;\nif (status !== 200) {\n  const motivo = status === 429\n    ? 'limite de uso da Groq atingido (429) — esperar a janela reabrir'\n    : `a Groq respondeu HTTP ${status}`;\n  throw new Error(`Classify message falhou: ${motivo}. Nada segue adiante.`);\n}\n\n// 2. O texto do modelo nunca vem na superficie da resposta: mora em choices[0].message.\n//    Se essa estrutura mudar, preferimos parar a adivinhar onde o texto foi parar.\nconst mensagem = entrada.body && entrada.body.choices && entrada.body.choices[0] && entrada.body.choices[0].message;\nif (!mensagem) {\n  throw new Error('Classify message: resposta da Groq sem choices[0].message — formato inesperado.');\n}\n\n// 3. Armadilha conhecida: modelo com raciocinio as vezes devolve content VAZIO\n//    e deixa o texto em 'reasoning'. Sem este fallback o fluxo quebraria calado.\nlet texto = String(mensagem.content || '').trim();\nlet veioDoReasoning = false;\nif (!texto) {\n  texto = String(mensagem.reasoning || '').trim();\n  veioDoReasoning = texto.length > 0;\n}\nif (!texto) {\n  throw new Error('Classify message: a Groq devolveu content e reasoning vazios — nada para classificar.');\n}\n\n// 4. Extrair o JSON de dentro do texto, seja ele limpo ou embrulhado em prosa/crases.\nconst bruto = ultimoBlocoBalanceado(texto);\nif (!bruto) {\n  throw new Error(`Classify message: nenhum bloco JSON no texto do modelo. Recebido: ${texto.slice(0, 200)}`);\n}\n\nlet dados;\ntry {\n  dados = JSON.parse(bruto);\n} catch (e) {\n  throw new Error(`Classify message: o bloco encontrado nao e JSON valido. Recebido: ${bruto.slice(0, 200)}`);\n}\n\n// 5. Validar campo a campo. Modelo fraco inventa valor fora do dominio quando o schema\n//    e forcado — caso conhecido. Aqui o valor invalido vira parada.\nif (!ASSUNTOS_ACEITOS.includes(dados.subject)) {\n  throw new Error(`Classify message: assunto \"${dados.subject}\" fora do dominio aceito.`);\n}\nif (!URGENCIAS_ACEITAS.includes(dados.urgency)) {\n  throw new Error(`Classify message: urgencia \"${dados.urgency}\" fora do dominio aceito.`);\n}\nif (typeof dados.needs_human !== 'boolean') {\n  throw new Error(`Classify message: needs_human precisa ser true/false, veio \"${dados.needs_human}\".`);\n}\nconst resumo = typeof dados.summary === 'string' ? dados.summary.trim() : '';\nif (!resumo) {\n  throw new Error('Classify message: summary vazio — a tela de pendentes ficaria sem descricao.');\n}\n\n// 6. Saida enxuta e previsivel para os proximos nos. Os tokens viajam junto porque o teto\n//    da conta gratuita e por DIA (200.000) — quem grava o pendente registra o consumo.\nconst uso = (entrada.body && entrada.body.usage) || {};\nreturn [{\n  json: {\n    subject: dados.subject,\n    urgency: dados.urgency,\n    needs_human: dados.needs_human,\n    summary: resumo,\n    tokens_usados: uso.total_tokens || 0,\n    veio_do_reasoning: veioDoReasoning,\n  },\n}];\n"
-      },
-      "id": "384fd677-3db7-4985-9dae-d64de6a5b821",
-      "name": "Parse classification",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        592,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Customer message: {{ $('Receive customer message').item.json.body.mensagem }}\nCustomer name: {{ $('Receive customer message').item.json.body.remetente.nome }}\nTopic: {{ $json.subject }}\nUrgency: {{ $json.urgency }}\nToday: {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }} (timezone America/Sao_Paulo)\n\nWrite a reply to this customer, in the SAME language as the customer message. Be warm, direct and concrete. Use the date above to understand any relative deadline the customer mentions (\"today\", \"tomorrow\", \"by Friday\"), and never contradict it. Never invent order numbers, dates, refund amounts, deadlines or policies that are not in the customer message - if something is missing, ask for it politely. Never promise on the company's behalf: no delivery channel, no callback, no future action, no refund, no replacement, no deadline and no decision that a human has not made yet. You may say the request was received and is being reviewed. Do not add a subject line, a greeting placeholder or a signature. Return only the reply body.",
-        "batching": {}
-      },
-      "id": "acae085b-a835-4e31-8fa9-2d0c3de929ed",
-      "name": "Draft reply",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        768,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "id",
-          "value": "gpt-4o-mini"
-        },
-        "responsesApiEnabled": false,
-        "options": {
-          "maxTokens": 600,
-          "temperature": 0
-        }
-      },
-      "id": "846e00b6-a680-44db-aa32-2598117143c8",
-      "name": "Reply model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.3,
-      "position": [
-        768,
-        112
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Le o rascunho que o modelo escreveu, venha ele no campo que vier.\n//\n// Por que este no existe: o Basic LLM Chain nao promete ONDE o texto vem. Ja veio em\n// 'text' e ja veio em 'output'. Apostar num campo so significa rascunho\n// vazio chegando na tela de aprovacao — e o humano aprovando o nada.\n\n// Um rascunho menor que isto nao e uma resposta ao cliente, e sobra de geracao.\nconst MINIMO_DE_CARACTERES = 20;\n\n// Os lugares onde o texto ja apareceu, na ordem em que vale a pena procurar. A lista e\n// explicita de proposito: campo novo entra aqui depois de ser MEDIDO, nunca por varredura\n// magica que aceita qualquer coisa.\nconst CAMPOS_CONHECIDOS = ['text', 'output', 'response', 'content'];\n\nfunction extrairTexto(saida) {\n  // 1. O chain pode devolver a propria string, sem embrulho nenhum.\n  if (typeof saida === 'string') return saida;\n  if (!saida || typeof saida !== 'object') return null;\n\n  // 2. Caminho normal: um dos campos conhecidos com a string dentro.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    if (typeof saida[campo] === 'string' && saida[campo].trim()) return saida[campo];\n  }\n\n  // 3. Um nivel de aninhamento: { output: { text: \"...\" } } ja foi visto em versoes do chain.\n  for (const campo of CAMPOS_CONHECIDOS) {\n    const dentro = saida[campo];\n    if (dentro && typeof dentro === 'object') {\n      for (const interno of CAMPOS_CONHECIDOS) {\n        if (typeof dentro[interno] === 'string' && dentro[interno].trim()) return dentro[interno];\n      }\n    }\n  }\n\n  return null;\n}\n\nconst saida = $input.first().json;\n\n// A classificacao nao vem por este fio (o chain so devolve o texto): buscamos no no que a produziu.\nconst classificacao = $('Parse classification').first().json;\n\n// 1. Achar o texto onde quer que ele esteja. Se nao achar, o fluxo para aqui.\nconst bruto = extrairTexto(saida);\nif (bruto === null) {\n  const campos = saida && typeof saida === 'object' ? Object.keys(saida).join(', ') : typeof saida;\n  throw new Error(`Draft reply: nao achei o texto do rascunho. Campos recebidos: ${campos}`);\n}\n\n// 2. Limpar as bordas. Modelo costuma devolver quebra de linha sobrando no inicio e no fim.\nconst texto = String(bruto).trim();\n\n// 3. Falha FECHADA: rascunho vazio ou curto demais nunca chega na tela de aprovacao,\n//    porque o humano aprovaria uma resposta em branco sem perceber.\nif (!texto) {\n  throw new Error('Draft reply: o modelo devolveu um rascunho vazio.');\n}\nif (texto.length < MINIMO_DE_CARACTERES) {\n  throw new Error(`Draft reply: rascunho curto demais (${texto.length} caracteres): \"${texto}\"`);\n}\n\n// 4. O item de aprovacao carrega o rascunho E a classificacao, porque a tela de pendentes\n//    mostra os dois lado a lado e o no seguinte grava tudo numa linha so.\nreturn [{\n  json: {\n    subject: classificacao.subject || null,\n    urgency: classificacao.urgency || null,\n    needs_human: typeof classificacao.needs_human === 'boolean' ? classificacao.needs_human : null,\n    summary: classificacao.summary || null,\n    draft: texto,\n    draft_chars: texto.length,\n  },\n}];\n"
-      },
-      "id": "ba714b40-f81f-467d-a180-c16080aa0464",
-      "name": "Parse draft",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1072,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "INSERT INTO aprovacoes_pendentes (origem, remetente_nome, remetente_email, mensagem_cliente, recebido_em, assunto, urgencia, rascunho_ia, resume_url, resumo, request_id) VALUES ($1, $2, $3, $4, $5::timestamptz, $6, CASE $7 WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END, $8, $9, $10, $11) ON CONFLICT (request_id) WHERE request_id IS NOT NULL DO UPDATE SET request_id = EXCLUDED.request_id RETURNING id, resume_url, status;",
-        "options": {
-          "queryReplacement": "={{ [$('Receive customer message').first().json.body.origem, $('Receive customer message').first().json.body.remetente.nome, $('Receive customer message').first().json.body.remetente.email, $('Receive customer message').first().json.body.mensagem, $('Receive customer message').first().json.body.recebido_em, $json.subject, $json.urgency, $json.draft, $execution.resumeUrl, $json.summary, $('Receive customer message').first().json.body.request_id || null] }}"
-        }
-      },
-      "id": "node-save-pending",
-      "name": "Save pending item",
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1328,
-        -48
-      ]
-    },
-    {
-      "parameters": {
-        "resume": "webhook",
-        "incomingAuthentication": "headerAuth",
-        "httpMethod": "POST",
-        "options": {}
-      },
-      "id": "node-wait-approval",
-      "name": "Wait for approval",
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        1520,
-        -48
+        1696,
+        16
       ]
     },
     {
@@ -426,8 +370,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        48,
-        384
+        144,
+        480
       ]
     },
     {
@@ -441,8 +385,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        272,
-        384
+        592,
+        480
       ]
     },
     {
@@ -474,8 +418,26 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        496,
-        384
+        1040,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=⏰ Respostas esperando além do prazo: {{ $json.total }}\n\n{{ $json.lista }}\n\nAbra a fila de revisão para responder.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "062a4dec-c6c2-4e1e-bd56-8f3fc92b2803",
+      "name": "Alert reviewer",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        464
       ]
     },
     {
@@ -489,8 +451,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        992,
-        384
+        2112,
+        464
       ]
     },
     {
@@ -536,8 +498,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2192,
-        64
+        1904,
+        160
       ]
     },
     {
@@ -553,34 +515,50 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2192,
+        1904,
         -96
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.remetente_email }}",
+        "subject": "Resposta à sua mensagem — Central de atendimento",
+        "emailType": "text",
+        "message": "={{ $json.texto_final }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Central de atendimento"
+        }
+      },
+      "id": "node-send-reply",
+      "name": "Send reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2080,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ (s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'))('✅ Resposta enviada para ' + $('Load final reply').first().json.remetente_nome) }}\n{{ 'Decisão de ' + String($('Load final reply').first().json.decidido_por).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + ($('Load final reply').first().json.houve_correcao ? ' (texto ajustado)' : ' (enviado como estava)') }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "node-notify-completion",
+      "name": "Notify completion",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2272,
+        16
       ]
     }
   ],
   "connections": {
-    "Receive customer message": {
-      "main": [
-        [
-          {
-            "node": "Classify message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Acknowledge to app": {
-      "main": [
-        [
-          {
-            "node": "Wait for approval",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Classify message": {
       "main": [
         [
@@ -630,17 +608,6 @@
         [
           {
             "node": "Save pending item",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save pending item": {
-      "main": [
-        [
-          {
-            "node": "Acknowledge to app",
             "type": "main",
             "index": 0
           }
@@ -759,9 +726,48 @@
           }
         ]
       ]
+    },
+    "Receive customer message": {
+      "main": [
+        [
+          {
+            "node": "Classify message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save pending item": {
+      "main": [
+        [
+          {
+            "node": "Acknowledge to app",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acknowledge to app": {
+      "main": [
+        [
+          {
+            "node": "Wait for approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "timezone": "America/Sao_Paulo"
   }
 }

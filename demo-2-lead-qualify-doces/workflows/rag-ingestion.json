@@ -72,22 +72,22 @@
     {
       "parameters": {
         "content": "## Load the store knowledge for similarity search\n\n### How it works\nRun manually to read curated knowledge sections embedded in the workflow. Their readable companion is the fictional-business dossier in the repository. A document loader reads each section, and OpenAI text-embedding-3-small represents its text as a vector for similarity search.\n\nPostgres with pgvector stores these documents in the shared store-knowledge table. Both the conversational assistant and the reference-search route use that knowledge.\n\nInsert mode adds rows; it does not replace existing content. A direct rerun can duplicate sections and leave outdated information available.\n\n### Setup steps\n1. Connect Postgres with pgvector and OpenAI embeddings.\n2. Review the curated sections and align their readable companion.\n3. Before the initial load, check whether the intended content is already present.\n4. Before reloading, back up and review the existing content, then arrange controlled removal of the previous ingestion from the specific knowledge table.\n5. Run manually once and verify the stored knowledge and retrieval results.",
-        "height": 456,
-        "width": 504
+        "height": 472,
+        "width": 632
       },
       "id": "b0000000-0000-4000-8000-0000000000b6",
       "name": "Overview · RAG ingestion",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -768,
+        -896,
         -64
       ]
     },
     {
       "parameters": {
         "content": "## Prepare searchable documents\nRead the curated section text as documents and generate OpenAI embeddings, which represent text for similarity matching. Keep the sections aligned with their readable companion so the store search uses the intended facts.",
-        "height": 444,
+        "height": 460,
         "width": 452,
         "color": 6
       },
@@ -103,7 +103,7 @@
     {
       "parameters": {
         "content": "## Add documents to store knowledge\nInsert documents and embeddings into the shared store-knowledge table. This operation adds rows rather than replacing them. Before reloading, back up the existing knowledge and arrange controlled removal of the previous ingestion from this specific table.",
-        "height": 444,
+        "height": 460,
         "width": 424,
         "color": 4
       },
@@ -119,7 +119,7 @@
     {
       "parameters": {
         "content": "## Start a controlled knowledge load\nRun manually once after checking existing content. Review any knowledge change before starting another load. Repeating the trigger directly adds another ingestion and can duplicate sections.",
-        "height": 448,
+        "height": 464,
         "width": 288
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -177,5 +177,13 @@
         ]
       ]
     }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   }
 }
