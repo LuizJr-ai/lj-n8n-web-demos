@@ -5,7 +5,7 @@
     {
       "parameters": {
         "content": "## Approve AI-drafted customer replies\n\n### How it works\nA customer message enters through the app. A free model classifies it, and a paid model drafts a reply. Both outputs must pass validation before the request is saved as pending.\n\nThe app receives the actual request reference while the workflow waits for a human decision. A reviewer can approve, edit or reject the draft. The decision is recorded first. Approved or edited requests then load the final text from the database, send it by email and notify Telegram. Rejected requests record the reason without sending a reply.\n\nA separate scheduled lane checks for overdue pending requests every 15 minutes. It alerts Telegram and postpones the next reminder by 60 minutes. Silence leaves the request pending; it does not automatically reject it.\n\n### Setup steps\n1. Configure Postgres, Groq, OpenAI, Gmail and Telegram credentials.\n2. Match the Wait node’s Header Auth credential with the app backend.\n3. Keep resume URLs on the backend; never expose them to the browser.\n4. Complete a clean end-to-end run before enabling customer traffic.",
-        "height": 428,
+        "height": 444,
         "width": 2540
       },
       "id": "sticky-main",
@@ -14,7 +14,7 @@
       "typeVersion": 1,
       "position": [
         -80,
-        -656
+        -672
       ]
     },
     {

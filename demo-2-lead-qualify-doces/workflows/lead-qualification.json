@@ -16,7 +16,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        64,
+        32,
         -32
       ]
     },
@@ -93,7 +93,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        80,
+        48,
         176
       ]
     },
@@ -176,7 +176,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        928,
+        944,
         -32
       ]
     },
@@ -189,7 +189,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        928,
+        944,
         176
       ]
     },
@@ -222,7 +222,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1152,
+        1184,
         176
       ]
     },
@@ -237,7 +237,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1152,
+        1184,
         -32
       ]
     },
@@ -255,7 +255,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1376,
+        1424,
         -32
       ]
     },
@@ -263,7 +263,7 @@
       "parameters": {
         "content": "## Qualify sweets-order quote requests and notify the baker\n\n### How it works\nReceive requests from the website form or conversational assistant and sanitize their fields. Groq scores purchase intent from 0 to 100 and classifies each request as hot, warm or cold. A guard preserves invalid or unavailable qualification as review. Today and the order lead-time windows arrive already calculated in São Paulo time.\n\nSave each request before any notification. Conversation submissions update the same lead; form submissions without a session remain independent. Return the lead ID, tier and score to the website before notification routing.\n\nSend the initial hot-lead alert only when it has not already been notified. For later updates, normalize the database differences and alert on real contradictions, such as changed units, date, flavor or delivery choice. Capitalization, accents and added details on incomplete fields do not create change alerts.\n\nEvery 30 minutes, send one digest of unnotified warm and cold leads; review is excluded.\n\n### Setup steps\n1. Connect Groq and Postgres, and create the leads table.\n2. Connect Telegram and configure the baker’s destination.\n3. Connect the form and chat request sources.\n4. Verify initial, unchanged and genuinely changed requests before enabling customer traffic.",
         "height": 896,
-        "width": 576
+        "width": 528
       },
       "id": "n0000000-0000-4000-8000-000000000012",
       "name": "Overview · Qualify custom-cake leads",
@@ -278,14 +278,14 @@
       "parameters": {
         "content": "## Receive and normalize\nAccept a quote request from the website form or chat assistant and sanitize its fields. Server-side normalization provides a second layer of protection after the website’s input checks.",
         "height": 604,
-        "width": 300
+        "width": 348
       },
       "id": "n0000000-0000-4000-8000-000000000013",
       "name": "1 · Intake",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -32,
+        -80,
         -208
       ]
     },
@@ -309,7 +309,7 @@
       "parameters": {
         "content": "## Save, respond and notify\nSave or update the lead, then return its ID and qualification to the website. Send an initial hot-lead alert once. Filter normalized differences before notifying the baker of a genuinely changed request, so rewritten labels or added details do not create duplicate alerts.",
         "height": 600,
-        "width": 916,
+        "width": 948,
         "color": 5
       },
       "id": "n0000000-0000-4000-8000-000000000015",
@@ -334,7 +334,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.7,
       "position": [
-        1568,
+        1616,
         -32
       ]
     },
@@ -425,7 +425,7 @@
       "parameters": {
         "content": "## Batch pending follow-ups\nEvery 30 minutes, group unnotified warm and cold leads into one Telegram digest, with warm first, then score and creation order. Send nothing when empty. After sending, mark included leads as notified. Review leads are excluded.",
         "height": 276,
-        "width": 1812,
+        "width": 1892,
         "color": 2
       },
       "id": "0cec3b16-b43c-48ee-9fb3-624661559ea9",
@@ -433,7 +433,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -32,
+        -80,
         416
       ]
     },
@@ -467,7 +467,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1360,
+        1424,
         176
       ]
     },
@@ -485,7 +485,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1568,
+        1616,
         176
       ]
     }

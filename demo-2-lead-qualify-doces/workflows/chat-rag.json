@@ -1,6 +1,6 @@
 {
   "name": "Web Demo 2 · Store chat assistant",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -14,7 +14,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        432,
+        128,
         -64
       ]
     },
@@ -31,7 +31,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        720,
+        448,
         -64
       ]
     },
@@ -44,7 +44,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        784,
+        528,
         128
       ]
     },
@@ -58,7 +58,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1120,
+        896,
         -64
       ]
     },
@@ -76,26 +76,26 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -608,
-        416
+        -864,
+        608
       ]
     },
     {
       "parameters": {
         "promptType": "define",
         "text": "={{ $json.body.message }}",
+        "needsFallback": true,
         "options": {
           "systemMessage": "=# Role — Aurora, the Doce Aurora bakery attendant\n\nSpeak ONLY Brazilian Portuguese to customers. Be warm, brief and natural. Do not expose internal models, tools, database, scoring or technical processes. Answer in short paragraphs separated by a blank line.\n\n## Current calendar — calculated by the workflow\nToday is {{ $now.setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy') }}.\nDo NOT calculate elapsed days mentally. Events from {{ $now.setZone('America/Sao_Paulo').plus({days:5}).toFormat('dd/MM/yyyy') }} through {{ $now.setZone('America/Sao_Paulo').plus({days:7}).toFormat('dd/MM/yyyy') }} are EXPRESS orders: add the 20% urgency fee before suggesting premium flavors and state the base amount, fee and total. Events before {{ $now.setZone('America/Sao_Paulo').plus({days:5}).toFormat('dd/MM/yyyy') }} require availability confirmation. Events from {{ $now.setZone('America/Sao_Paulo').plus({days:15}).toFormat('dd/MM/yyyy') }} onward have the ideal notice period and no urgency fee. Do not ask the customer to postpone a date already supplied.\n\n## Reliable facts and prices\nConsult KB Search BEFORE every answer about price, minimum order, notice, delivery, shipping, payment or policy, even if you remember it. Use its exact facts. Answer every customer question covered by the retrieved facts BEFORE asking the next order question.\nIf retrieval does not cover a fact, say the bakery will confirm it in the quote; never invent a number or promise. Delivery in São Paulo and Greater São Paulo is quoted by region: never give a shipping price, range or estimate.\nOne cento means 100 units. 100=1 cento, 200=2 centos, 300=3 centos. For 120 use 1 cento plus 20 units; for 150 use 1 cento plus 50 units. Never count 100 units as two centos. Apply the catalog's actual price rules.\n\n## Conversation progression — check EVERY turn\nInformational questions can be answered without collecting personal details. Once the customer expresses an order or quote intent, actively complete the request on EVERY subsequent turn, even if the customer does not ask what is missing.\nSilently review the ENTIRE conversation and keep seven facts explicitly supplied by the CUSTOMER: name; contact (phone/WhatsApp or email); selected product/flavor; total units; event date; theme/colors; pickup or delivery (with neighborhood/region for delivery).\nNever replace a fact already provided with a guess, ask it again, or collect a list in one message.\nAfter answering the current question, ask exactly ONE next missing fact. Use the seven-fact order above; flavor allocations belong to the product fact and take precedence once multiple flavors are selected.\nDo not end an incomplete-order turn with only an offer like \"Se precisar, estou à disposição\". End with a concrete question for the next missing fact.\nA question such as \"Vocês entregam no Tatuapé?\" is NOT the customer's choice of delivery. Ask for that choice when it is the next missing fact.\n\n## Flavor allocations — required before closing\nIf two or more flavors/products are selected, ask how many units of EACH unless the customer already gave an allocation. Ask this as ONE question: \"Dos 120 docinhos, quantos você quer de brigadeiro belga e quantos de pistache?\"\nAn explicit \"meio a meio\" for exactly two flavors is an allocation already supplied: for 120 units it means 60 and 60. Confirm that split rather than asking it again. For any unclear or inconsistent split, ask one clarification; do not invent it.\nDo not declare an order complete until all seven facts AND the allocations are supplied and the units add to the total.\n\n## Greetings and closing\nGreet ONLY on the FIRST assistant turn of this session. If conversation memory contains a previous assistant reply, do not start with \"Oi\", \"Olá\", \"Bom dia\", \"Boa tarde\" or \"Boa noite\", even when the customer greets again.\nOn later turns use a short, varied acknowledgement when useful: \"Perfeito\", \"Anotei\", \"Certo\". Avoid repeating the same acknowledgement mechanically.\nWhile anything is missing, never say \"anotei tudo\", \"está tudo certo\" or \"já tenho o que preciso\".\nWhen everything is complete, briefly confirm the seven facts and flavor allocations and say Doce Aurora will return to arrange details and payment.\nNever promise a response time or channel, production, a reservation, payment confirmation or availability on the bakery's behalf. Do not output JSON or a form to the customer."
-        },
-        "needsFallback": true
+        }
       },
       "id": "5957c844-63b1-4872-a2a3-a805c3eb618b",
       "name": "Doce Aurora Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        -304,
-        416
+        -512,
+        432
       ]
     },
     {
@@ -112,8 +112,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        416,
-        784
+        208,
+        800
       ]
     },
     {
@@ -128,8 +128,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.4,
       "position": [
-        -208,
-        608
+        -416,
+        624
       ]
     },
     {
@@ -145,8 +145,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
       "typeVersion": 1.3,
       "position": [
-        -48,
-        608
+        -256,
+        624
       ]
     },
     {
@@ -158,8 +158,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -48,
-        784
+        -256,
+        800
       ]
     },
     {
@@ -173,8 +173,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1088,
-        640
+        912,
+        784
       ]
     },
     {
@@ -187,8 +187,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        416,
-        608
+        208,
+        624
       ]
     },
     {
@@ -221,8 +221,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        768,
-        640
+        560,
+        656
       ]
     },
     {
@@ -239,44 +239,44 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1088,
-        416
+        912,
+        560
       ]
     },
     {
       "parameters": {
         "content": "## Retrieve store information and collect quote requests\n\n### How it works\nTwo POST webhooks serve the sweets shop website.\n\nThe reference-search route uses OpenAI text embeddings and Postgres similarity search to return up to three matching knowledge documents. It does not generate an answer.\n\nThe conversational route uses Groq GPT-OSS 20B with automatic OpenAI fallback. Postgres keeps conversation history, and the assistant searches the store knowledge before giving product facts. It asks for one missing quote detail per turn, checks all seven required facts and flavor quantities, and uses order date windows calculated in São Paulo time.\n\nA separate OpenAI extractor structures the customer’s statements. Guards reject missing facts, placeholders and inconsistent flavor allocations before forwarding a complete quote request to qualification. The website receives the conversational reply.\n\nThis prepares a quote request; it does not confirm an order, reserve a date or take payment.\n\n### Setup steps\n1. Connect Postgres with pgvector for knowledge and conversation history.\n2. Load approved knowledge once through the companion ingestion workflow.\n3. Connect Groq and OpenAI for chat, fallback, extraction and embeddings.\n4. Configure the qualification destination and both website webhook routes.\n5. Verify both routes and a complete request before enabling customer traffic.",
-        "height": 524,
-        "width": 1048
+        "height": 636,
+        "width": 968
       },
       "id": "67017cae-1616-4bcb-b61b-a472cf22a1ef",
       "name": "Overview · Conversational agent + RAG",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -688,
-        -240
+        -960,
+        -352
       ]
     },
     {
       "parameters": {
         "content": "## Receive a store question\nAccept a question from the website through a POST webhook. This route starts a reference search without requiring a customer registration or creating a quote request.",
-        "height": 532,
-        "width": 244
+        "height": 644,
+        "width": 324
       },
       "id": "21f889e4-0b8e-4b6a-aa7b-b0b11816e76b",
       "name": "A · Acquisition",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        368,
-        -240
+        16,
+        -352
       ]
     },
     {
       "parameters": {
         "content": "## Find matching store information\nOpenAI embeddings represent the question for similarity search in the store knowledge held in Postgres with pgvector. Return up to three matching documents as reference content; this route does not generate a conversational answer.",
-        "height": 532,
+        "height": 644,
         "width": 408,
         "color": 6
       },
@@ -285,15 +285,15 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        624,
-        -240
+        352,
+        -352
       ]
     },
     {
       "parameters": {
         "content": "## Return reference content\nReturn the retrieved documents to the website in the webhook response. The caller receives search results to display, rather than an answer drafted by a language model.",
-        "height": 532,
-        "width": 264,
+        "height": 644,
+        "width": 344,
         "color": 5
       },
       "id": "862c9b7b-c8d5-4bd6-a627-d2f50876bc4e",
@@ -301,30 +301,30 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1040,
-        -240
+        768,
+        -352
       ]
     },
     {
       "parameters": {
         "content": "## Continue the quote conversation\nReceive the customer’s message and session identifier. Stored conversation history lets the assistant retain previously supplied details, answer questions and continue the same quote request.",
-        "height": 608,
-        "width": 260
+        "height": 656,
+        "width": 308
       },
       "id": "15eaba7a-6317-4937-8bf2-d642ae51506d",
       "name": "B · Acquisition",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -688,
+        -960,
         304
       ]
     },
     {
       "parameters": {
         "content": "## Guide and check the request\nGroq guides the conversation with automatic OpenAI fallback and precomputed São Paulo order windows. A separate OpenAI extractor captures customer facts. Guards require seven complete quote details and consistent flavor quantities, preventing placeholders or incomplete requests from reaching qualification.",
-        "height": 608,
-        "width": 1372,
+        "height": 656,
+        "width": 1404,
         "color": 6
       },
       "id": "4de85c54-d0e7-42bb-af07-a2da6b1771ef",
@@ -332,14 +332,14 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -416,
+        -640,
         304
       ]
     },
     {
       "parameters": {
         "content": "## Forward the request and reply\nForward a complete, validated quote request to qualification and return the assistant’s reply to the website. Incomplete requests stay in the conversation. The response prepares an enquiry; it does not confirm an order, delivery date or payment.",
-        "height": 608,
+        "height": 656,
         "width": 352,
         "color": 5
       },
@@ -348,7 +348,7 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        960,
+        768,
         304
       ]
     },
@@ -361,8 +361,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        768,
-        416
+        560,
+        432
       ]
     },
     {
@@ -381,8 +381,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        288,
-        608
+        80,
+        624
       ]
     },
     {
@@ -404,8 +404,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        336,
-        416
+        128,
+        432
       ]
     },
     {
@@ -416,13 +416,13 @@
           "queryReplacement": "={{ $('Chat In (POST)').item.json.body.sessionId }}"
         }
       },
-      "id": "load-conversation-0001",
+      "id": "afec207e-1717-4491-bc1a-950c7b343721",
       "name": "Load conversation",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        80,
-        416
+        -128,
+        432
       ]
     },
     {
@@ -438,8 +438,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -352,
-        608
+        -560,
+        624
       ]
     },
     {
@@ -449,9 +449,10 @@
           "mode": "list",
           "value": "gpt-4o-mini"
         },
+        "builtInTools": {},
         "options": {
-          "temperature": 0.2,
-          "maxTokens": 4096
+          "maxTokens": 4096,
+          "temperature": 0.2
         }
       },
       "id": "35380e91-5976-4759-960e-1feee64e02b2",
@@ -459,8 +460,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -352,
-        784
+        -560,
+        800
       ]
     }
   ],
@@ -615,6 +616,17 @@
         ]
       ]
     },
+    "Extract lead details": {
+      "main": [
+        [
+          {
+            "node": "Guard lead fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Doce Aurora Agent": {
       "main": [
         [
@@ -631,17 +643,6 @@
         [
           {
             "node": "Extract lead details",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract lead details": {
-      "main": [
-        [
-          {
-            "node": "Guard lead fields",
             "type": "main",
             "index": 0
           }
@@ -673,10 +674,10 @@
   },
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
     "saveManualExecutions": true,
-    "saveExecutionProgress": true,
-    "binaryMode": "separate"
+    "saveExecutionProgress": true
   }
 }
